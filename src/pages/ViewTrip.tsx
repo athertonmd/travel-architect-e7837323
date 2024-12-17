@@ -25,7 +25,7 @@ const ViewTrip = () => {
     handleNodeSelect,
     handleDetailsChange,
     setNodes
-  } = useNodeManagement();
+  } = useNodeManagement([]);  // Initialize with empty array, we'll set nodes after fetching
 
   const { data: trip } = useQuery({
     queryKey: ['trip', id],
