@@ -5,7 +5,7 @@ import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
 import { FlowEditor } from "@/components/trip/FlowEditor";
 import { TripSaveButton } from "@/components/trip/TripSaveButton";
 import { TravelersSelect } from "@/components/trip/TravelersSelect";
-import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
 
@@ -37,12 +37,14 @@ const CreateTrip = () => {
               <SegmentPalette />
             </div>
           </ResizablePanel>
+          <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50} minSize={30}>
             <FlowEditor 
               onNodesChange={handleNodesChange} 
               onNodeSelect={handleNodeSelect}
             />
           </ResizablePanel>
+          <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={20}>
             <SegmentDetails 
               selectedNode={selectedNode}
