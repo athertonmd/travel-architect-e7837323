@@ -61,7 +61,7 @@ const ViewTrip = () => {
       
       // Convert segments data to nodes if segments exist
       if (data.segments && Array.isArray(data.segments)) {
-        const initialNodes: Node<SegmentNodeData>[] = data.segments.map((segment: SegmentData, index: number) => ({
+        const initialNodes: Node<SegmentNodeData>[] = (data.segments as SegmentData[]).map((segment, index) => ({
           id: `${segment.type}-${index + 1}`,
           type: 'segment',
           position: segment.position || { x: 0, y: index * 100 }, // Fallback position if none exists
@@ -82,6 +82,16 @@ const ViewTrip = () => {
       return data;
     },
   });
+
+  if (!trip) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+          <div className="animate-pulse">Loading trip...</div>
+        </div>
+      </Layout>
+    );
+  }
 
   const handleSave = async () => {
     if (!trip || !id) return;
@@ -109,16 +119,6 @@ const ViewTrip = () => {
       console.error("Save error:", error);
     }
   };
-
-  if (!trip) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
-          <div className="animate-pulse">Loading trip...</div>
-        </div>
-      </Layout>
-    );
-  }
 
   return (
     <Layout>
