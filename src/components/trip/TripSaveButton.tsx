@@ -8,22 +8,19 @@ import { Node } from "@xyflow/react";
 interface TripSaveButtonProps {
   title: string;
   nodes: Node[];
+  travelers: number;
 }
 
 type SegmentData = {
   type: string;
-  details: {
-    time?: string;
-    location?: string;
-    notes?: string;
-  };
+  details: Record<string, unknown>;
   position: {
     x: number;
     y: number;
   };
 };
 
-export const TripSaveButton = ({ title, nodes }: TripSaveButtonProps) => {
+export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps) => {
   const navigate = useNavigate();
   const user = useUser();
 
@@ -50,14 +47,16 @@ export const TripSaveButton = ({ title, nodes }: TripSaveButtonProps) => {
         position: node.position
       }));
 
-      const firstSegmentLocation = nodes[0]?.data?.details?.location || "Unknown";
+      const firstSegmentDetails = nodes[0]?.data?.details as Record<string, unknown> | undefined;
+      const firstSegmentLocation = firstSegmentDetails?.location as string | undefined;
 
       const { error } = await supabase
         .from('trips')
         .insert({
           user_id: profile.id,
           title: title,
-          destination: firstSegmentLocation,
+          destination: firstSegmentLocation || "Unknown",
+          travelers: travelers,
           segments: segments
         });
 
