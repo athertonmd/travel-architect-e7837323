@@ -1,8 +1,8 @@
 import { Layout } from "@/components/Layout";
 import { FlowEditor } from "@/components/trip/FlowEditor";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
+import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { SegmentPalette } from "@/components/SegmentPalette";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useState } from "react";
@@ -13,7 +13,6 @@ import { TripHeader } from "@/components/trip/TripHeader";
 
 const ViewTrip = () => {
   const { id } = useParams();
-  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const {
     nodes,
@@ -70,6 +69,7 @@ const ViewTrip = () => {
               <SegmentPalette />
             </div>
           </ResizablePanel>
+          <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50} minSize={30}>
             <FlowEditor 
               onNodesChange={handleNodesChange}
@@ -77,6 +77,7 @@ const ViewTrip = () => {
               initialNodes={nodes}
             />
           </ResizablePanel>
+          <ResizableHandle withHandle />
           <ResizablePanel defaultSize={30} minSize={20}>
             <SegmentDetails 
               selectedNode={selectedNode}
