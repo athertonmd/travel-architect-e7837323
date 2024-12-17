@@ -4,13 +4,12 @@ import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Node } from "@xyflow/react";
-import { SegmentNodeData } from "@/types/segment";
+import { SegmentNodeData, SegmentData } from "@/types/segment";
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
 import { SegmentPalette } from "@/components/SegmentPalette";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useState } from "react";
 import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
-import { TripSaveButton } from "@/components/trip/TripSaveButton";
 import { toast } from "sonner";
 
 const ViewTrip = () => {
@@ -31,30 +30,30 @@ const ViewTrip = () => {
       if (error) throw error;
       return data;
     },
-    onSuccess: (data) => {
-      setTitle(data.title);
-      const segments = data.segments as Array<{
-        type: string;
-        details: Record<string, unknown>;
-        position: { x: number; y: number };
-      }>;
-
-      const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
-        id: `${segment.type}-${index + 1}`,
-        type: 'segment',
-        position: segment.position,
-        data: {
-          label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
-          icon: segmentIcons[segment.type as keyof typeof segmentIcons],
-          details: segment.details,
-          onSelect: (id: string) => {
-            const node = nodes.find(n => n.id === id);
-            setSelectedNode(node || null);
-          }
-        },
-        dragHandle: '.drag-handle',
-      }));
-      setNodes(initialNodes);
+    meta: {
+      onSuccess: (data) => {
+        setTitle(data.title);
+        const segments = data.segments as SegmentData[];
+        
+        if (segments) {
+          const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
+            id: `${segment.type}-${index + 1}`,
+            type: 'segment',
+            position: segment.position,
+            data: {
+              label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
+              icon: segmentIcons[segment.type as keyof typeof segmentIcons],
+              details: segment.details,
+              onSelect: (id: string) => {
+                const node = nodes.find(n => n.id === id);
+                setSelectedNode(node || null);
+              }
+            },
+            dragHandle: '.drag-handle',
+          }));
+          setNodes(initialNodes);
+        }
+      }
     }
   });
 
