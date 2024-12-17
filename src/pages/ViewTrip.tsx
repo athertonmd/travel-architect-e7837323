@@ -40,15 +40,13 @@ const ViewTrip = () => {
         .from('trips')
         .select('*')
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          navigate('/');
-          toast.error('Trip not found');
-          return null;
-        }
-        throw error;
+        console.error('Error fetching trip:', error);
+        navigate('/');
+        toast.error('Error loading trip');
+        return null;
       }
 
       if (!data) {
@@ -61,10 +59,10 @@ const ViewTrip = () => {
       
       // Convert segments data to nodes if segments exist
       if (data.segments && Array.isArray(data.segments)) {
-        const initialNodes: Node<SegmentNodeData>[] = (data.segments as SegmentData[]).map((segment, index) => ({
+        const initialNodes: Node<SegmentNodeData>[] = (data.segments as unknown as SegmentData[]).map((segment, index) => ({
           id: `${segment.type}-${index + 1}`,
           type: 'segment',
-          position: segment.position || { x: 0, y: index * 100 }, // Fallback position if none exists
+          position: segment.position || { x: 0, y: index * 100 },
           data: {
             label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
             icon: segmentIcons[segment.type as keyof typeof segmentIcons],
