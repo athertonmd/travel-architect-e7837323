@@ -1,4 +1,4 @@
-import { ReactFlow, Connection, Edge, useNodesState, useEdgesState, addEdge, Node } from "@xyflow/react";
+import { ReactFlow, Connection, Edge, useNodesState, useEdgesState, addEdge, Node, Background, Controls } from "@xyflow/react";
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback } from "react";
 import { SegmentNodeData } from "@/types/segment";
@@ -97,8 +97,8 @@ export const FlowEditor = ({
         fitView
       >
         <FlowConfig>
-        <Background />
-        <Controls />
+          <Background />
+          <Controls />
         </FlowConfig>
       </ReactFlow>
     </div>
