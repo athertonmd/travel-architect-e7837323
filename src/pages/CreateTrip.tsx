@@ -5,34 +5,20 @@ import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
 import { FlowEditor } from "@/components/trip/FlowEditor";
 import { TripSaveButton } from "@/components/trip/TripSaveButton";
 import { TravelersSelect } from "@/components/trip/TravelersSelect";
-import { Node } from "@xyflow/react";
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
-import { SegmentNodeData } from "@/types/segment";
+import { useNodeManagement } from "@/hooks/useNodeManagement";
 
 const CreateTrip = () => {
   const [tripTitle, setTripTitle] = useState("Create New Trip");
   const [travelers, setTravelers] = useState(1);
-  const [nodes, setNodes] = useState<Node<SegmentNodeData>[]>([]);
-  const [selectedNode, setSelectedNode] = useState<Node<SegmentNodeData> | null>(null);
-
-  const handleNodesChange = (newNodes: Node<SegmentNodeData>[]) => {
-    setNodes(newNodes);
-  };
-
-  const handleNodeSelect = (node: Node<SegmentNodeData> | null) => {
-    setSelectedNode(node);
-  };
-
-  const handleDetailsChange = (nodeId: string, details: Record<string, unknown>) => {
-    setNodes(currentNodes => 
-      currentNodes.map(node => 
-        node.id === nodeId 
-          ? { ...node, data: { ...node.data, details } }
-          : node
-      )
-    );
-  };
+  const {
+    nodes,
+    selectedNode,
+    handleNodesChange,
+    handleNodeSelect,
+    handleDetailsChange
+  } = useNodeManagement();
 
   return (
     <Layout>

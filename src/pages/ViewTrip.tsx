@@ -3,20 +3,28 @@ import { FlowEditor } from "@/components/trip/FlowEditor";
 import { useParams } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { Node } from "@xyflow/react";
-import { SegmentNodeData, SegmentData } from "@/types/segment";
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
 import { SegmentPalette } from "@/components/SegmentPalette";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useState } from "react";
 import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
 import { toast } from "sonner";
+import { useNodeManagement } from "@/hooks/useNodeManagement";
+import { segmentIcons } from "@/utils/segmentIcons";
+import { Node } from "@xyflow/react";
+import { SegmentNodeData, SegmentData } from "@/types/segment";
 
 const ViewTrip = () => {
   const { id } = useParams();
-  const [selectedNode, setSelectedNode] = useState<Node<SegmentNodeData> | null>(null);
-  const [nodes, setNodes] = useState<Node<SegmentNodeData>[]>([]);
   const [title, setTitle] = useState("");
+  const {
+    nodes,
+    selectedNode,
+    handleNodesChange,
+    handleNodeSelect,
+    handleDetailsChange,
+    setNodes
+  } = useNodeManagement();
 
   const { data: trip, isLoading } = useQuery({
     queryKey: ['trip', id],
@@ -48,7 +56,7 @@ const ViewTrip = () => {
               details: segment.details,
               onSelect: (id: string) => {
                 const node = nodes.find(n => n.id === id);
-                setSelectedNode(node || null);
+                handleNodeSelect(node || null);
               }
             },
             dragHandle: '.drag-handle',
@@ -58,24 +66,6 @@ const ViewTrip = () => {
       }
     }
   });
-
-  const handleNodesChange = (newNodes: Node<SegmentNodeData>[]) => {
-    setNodes(newNodes);
-  };
-
-  const handleNodeSelect = (node: Node<SegmentNodeData> | null) => {
-    setSelectedNode(node);
-  };
-
-  const handleDetailsChange = (nodeId: string, details: Record<string, unknown>) => {
-    setNodes(currentNodes => 
-      currentNodes.map(node => 
-        node.id === nodeId 
-          ? { ...node, data: { ...node.data, details } }
-          : node
-      )
-    );
-  };
 
   const handleSave = async () => {
     if (!trip) return;
@@ -160,16 +150,5 @@ const ViewTrip = () => {
     </Layout>
   );
 };
-
-const segmentIcons = {
-  flight: "✈️",
-  hotel: "🏨",
-  limo: "🚙",
-  car: "🚗",
-  restaurant: "🍽️",
-  activity: "🎯",
-  transfer: "🚕",
-  vip: "👑",
-} as const;
 
 export default ViewTrip;
