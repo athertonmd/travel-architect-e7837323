@@ -27,7 +27,7 @@ const ViewTrip = () => {
     setNodes
   } = useNodeManagement();
 
-  const { data: trip, isLoading, error } = useQuery({
+  const { data: trip } = useQuery({
     queryKey: ['trip', id],
     queryFn: async () => {
       if (!id) {
@@ -36,25 +36,13 @@ const ViewTrip = () => {
         return null;
       }
 
-      try {
-        const { data, error } = await supabase
-          .from('trips')
-          .select('*')
-          .eq('id', id)
-          .single();
+      const { data, error } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-        if (error) {
-          throw error;
-        }
-
-        if (!data) {
-          navigate('/');
-          toast.error('Trip not found');
-          return null;
-        }
-
-        return data;
-      } catch (error: any) {
+      if (error) {
         if (error.code === 'PGRST116') {
           navigate('/');
           toast.error('Trip not found');
@@ -62,12 +50,21 @@ const ViewTrip = () => {
         }
         throw error;
       }
+
+      if (!data) {
+        navigate('/');
+        toast.error('Trip not found');
+        return null;
+      }
+
+      // Set the title state when we get the data
+      setTitle(data.title);
+      return data;
     },
     meta: {
       onSuccess: (data) => {
         if (!data) return;
         
-        setTitle(data.title);
         const segments = data.segments as SegmentData[] || [];
         
         if (segments && segments.length > 0) {
@@ -119,13 +116,7 @@ const ViewTrip = () => {
     }
   };
 
-  if (error) {
-    navigate('/');
-    toast.error('Error loading trip');
-    return null;
-  }
-
-  if (isLoading) {
+  if (!trip) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
@@ -133,10 +124,6 @@ const ViewTrip = () => {
         </div>
       </Layout>
     );
-  }
-
-  if (!trip) {
-    return null;
   }
 
   return (
