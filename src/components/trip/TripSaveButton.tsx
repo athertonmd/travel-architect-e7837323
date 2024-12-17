@@ -57,7 +57,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
           title: title,
           destination: firstSegmentLocation || "Unknown",
           travelers: travelers,
-          segments: segments
+          segments: segments as any // Type assertion needed due to Supabase types
         });
 
       if (error) throw error;

@@ -1,4 +1,4 @@
-import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge, Node, XYPosition } from "@xyflow/react";
+import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge, Node, XYPosition, OnNodesChange } from "@xyflow/react";
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback, useEffect } from "react";
 import "@xyflow/react/dist/style.css";
@@ -25,13 +25,13 @@ const defaultEdgeOptions = {
   animated: false,
 };
 
-export const FlowEditor = ({ onNodesChange }: FlowEditorProps) => {
+export const FlowEditor = ({ onNodesChange: onNodesUpdate }: FlowEditorProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
   useEffect(() => {
-    onNodesChange?.(nodes);
-  }, [nodes, onNodesChange]);
+    onNodesUpdate?.(nodes);
+  }, [nodes, onNodesUpdate]);
 
   const onConnect = useCallback(
     (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
