@@ -54,8 +54,9 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent navigation when clicking the delete button
-    if ((e.target as HTMLElement).closest('.delete-button')) {
+    // Prevent navigation when clicking any part of the AlertDialog
+    if ((e.target as HTMLElement).closest('[role="dialog"]') || 
+        (e.target as HTMLElement).closest('.delete-button')) {
       e.stopPropagation();
       return;
     }
@@ -95,7 +96,7 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleDelete}
                     className="bg-red-500 hover:bg-red-600"
