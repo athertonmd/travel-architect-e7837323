@@ -36,7 +36,7 @@ const Auth = () => {
   return (
     <Layout>
       <div 
-        className="fixed inset-0 w-full h-full bg-cover bg-center"
+        className="fixed inset-0 w-full h-full bg-cover bg-center bg-no-repeat"
         style={{ 
           backgroundImage: 'url("/lovable-uploads/eb177364-44a0-454d-b4ec-3575366e5749.png")',
         }}
@@ -60,9 +60,6 @@ const Auth = () => {
               }}
               providers={[]}
               theme="light"
-              onError={(error) => {
-                toast.error(error.message);
-              }}
             />
           </div>
         </div>

@@ -4,33 +4,13 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Node } from "@xyflow/react";
-
-interface SegmentDetails {
-  time?: string;
-  location?: string;
-  notes?: string;
-}
-
-type SegmentNodeData = {
-  label: string;
-  icon: string;
-  details: SegmentDetails;
-};
+import { SegmentNodeData, SegmentData } from "@/types/segment";
 
 interface TripSaveButtonProps {
   title: string;
   nodes: Node<SegmentNodeData>[];
   travelers: number;
 }
-
-type SegmentData = {
-  type: string;
-  details: SegmentDetails;
-  position: {
-    x: number;
-    y: number;
-  };
-};
 
 export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps) => {
   const navigate = useNavigate();
@@ -53,7 +33,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
         return;
       }
 
-      const segments: SegmentData[] = nodes.map(node => ({
+      const segments = nodes.map(node => ({
         type: String(node.data.label).toLowerCase(),
         details: node.data.details,
         position: node.position
@@ -68,7 +48,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
           title: title,
           destination: firstSegmentLocation || "Unknown",
           travelers: travelers,
-          segments: segments
+          segments: segments as any // Type assertion needed due to Supabase types
         });
 
       if (error) throw error;

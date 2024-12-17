@@ -8,14 +8,15 @@ import { TravelersSelect } from "@/components/trip/TravelersSelect";
 import { Node } from "@xyflow/react";
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
+import { SegmentNodeData } from "@/types/segment";
 
 const CreateTrip = () => {
   const [tripTitle, setTripTitle] = useState("Create New Trip");
   const [travelers, setTravelers] = useState(1);
-  const [nodes, setNodes] = useState<Node[]>([]);
-  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
+  const [nodes, setNodes] = useState<Node<SegmentNodeData>[]>([]);
+  const [selectedNode, setSelectedNode] = useState<Node<SegmentNodeData> | null>(null);
 
-  const handleNodesChange = (newNodes: Node[]) => {
+  const handleNodesChange = (newNodes: Node<SegmentNodeData>[]) => {
     setNodes(newNodes);
   };
 
