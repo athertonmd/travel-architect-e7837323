@@ -14,6 +14,9 @@ import { segmentIcons } from "@/utils/segmentIcons";
 import { Node } from "@xyflow/react";
 import { SegmentNodeData, SegmentData } from "@/types/segment";
 
+const CANVAS_CENTER = 400;
+const VERTICAL_SPACING = 100;
+
 const ViewTrip = () => {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -57,20 +60,20 @@ const ViewTrip = () => {
 
       setTitle(data.title);
       
-      // Convert segments data to nodes if segments exist
       if (data.segments && Array.isArray(data.segments)) {
-        console.log('Segments data:', data.segments); // Debug log
+        console.log('Processing segments:', data.segments);
         
         const initialNodes: Node<SegmentNodeData>[] = (data.segments as unknown as SegmentData[]).map((segment, index) => {
-          console.log('Processing segment:', segment); // Debug log
-          
+          // Ensure we have valid position data or use calculated defaults
+          const position = {
+            x: CANVAS_CENTER - 100,
+            y: TOP_MARGIN + (index * VERTICAL_SPACING)
+          };
+
           return {
             id: `${segment.type}-${index + 1}`,
             type: 'segment',
-            position: {
-              x: segment.position?.x || 400 - 100,
-              y: segment.position?.y || index * 100
-            },
+            position,
             data: {
               label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
               icon: segmentIcons[segment.type as keyof typeof segmentIcons],
@@ -84,7 +87,7 @@ const ViewTrip = () => {
           };
         });
         
-        console.log('Created nodes:', initialNodes); // Debug log
+        console.log('Setting nodes:', initialNodes);
         setNodes(initialNodes);
       }
 
