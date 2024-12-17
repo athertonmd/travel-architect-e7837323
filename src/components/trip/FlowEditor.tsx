@@ -5,10 +5,20 @@ import "@xyflow/react/dist/style.css";
 
 const CANVAS_WIDTH = 800;
 const CANVAS_CENTER = CANVAS_WIDTH / 2;
-const VERTICAL_PADDING = 100;
+const VERTICAL_PADDING = 60; // Reduced from 100 to 60 for tighter spacing
 
 const nodeTypes = {
   segment: SegmentNode,
+};
+
+// Custom edge style
+const defaultEdgeOptions = {
+  style: {
+    strokeWidth: 2,
+    stroke: '#b1b1b7',
+  },
+  type: 'smoothstep',
+  animated: false,
 };
 
 export const FlowEditor = () => {
@@ -75,9 +85,22 @@ export const FlowEditor = () => {
         },
       };
 
+      // Add edge to previous node if it exists
+      const newEdges = [...edges];
+      if (prevNode) {
+        newEdges.push({
+          id: `e${prevNode.id}-${newNode.id}`,
+          source: prevNode.id,
+          target: newNode.id,
+          type: 'smoothstep',
+          style: defaultEdgeOptions.style,
+        });
+      }
+
       setNodes((nds) => nds.concat(newNode));
+      setEdges(newEdges);
     },
-    [nodes, setNodes]
+    [nodes, edges, setNodes, setEdges]
   );
 
   return (
@@ -91,6 +114,7 @@ export const FlowEditor = () => {
         onDragOver={onDragOver}
         onDrop={onDrop}
         nodeTypes={nodeTypes}
+        defaultEdgeOptions={defaultEdgeOptions}
         fitView
       >
         <Background />
