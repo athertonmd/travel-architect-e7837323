@@ -1,6 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { FlowEditor } from "@/components/trip/FlowEditor";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { SegmentPalette } from "@/components/SegmentPalette";
@@ -13,6 +13,7 @@ import { TripHeader } from "@/components/trip/TripHeader";
 
 const ViewTrip = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const {
     nodes,
@@ -47,6 +48,7 @@ const ViewTrip = () => {
       if (error) throw error;
 
       toast.success("Changes saved successfully!");
+      navigate('/'); // Navigate back to dashboard after successful save
     } catch (error: any) {
       toast.error("Failed to save changes");
       console.error("Save error:", error);
