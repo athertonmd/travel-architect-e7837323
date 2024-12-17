@@ -6,6 +6,7 @@ import { SegmentNode } from "@/components/SegmentNode";
 import { Pencil } from "lucide-react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import {
   ReactFlow,
   Background,
@@ -31,8 +32,10 @@ const segmentIcons: Record<string, string> = {
 
 const CANVAS_WIDTH = 800;
 const CANVAS_CENTER = CANVAS_WIDTH / 2;
+const VERTICAL_PADDING = 100; // Spacing between nodes
 
 const CreateTrip = () => {
+  const navigate = useNavigate();
   const [isEditing, setIsEditing] = useState(false);
   const [tripTitle, setTripTitle] = useState("Create New Trip");
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -64,53 +67,79 @@ const CreateTrip = () => {
         ?.getBoundingClientRect();
       if (!reactFlowBounds) return;
 
-      // Calculate vertical position based on drop location
+      // Calculate drop position
       const y = event.clientY - reactFlowBounds.top;
 
-      // Create new node at the center x position
+      // Sort existing nodes by vertical position
+      const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+      
+      // Find the insertion point
+      let insertY = y;
+      let prevNode = null;
+      let nextNode = null;
+
+      for (let i = 0; i < sortedNodes.length; i++) {
+        if (sortedNodes[i].position.y > y) {
+          nextNode = sortedNodes[i];
+          prevNode = i > 0 ? sortedNodes[i - 1] : null;
+          break;
+        }
+      }
+
+      if (!nextNode) {
+        prevNode = sortedNodes[sortedNodes.length - 1];
+      }
+
+      // Calculate new Y position with padding
+      if (prevNode && nextNode) {
+        insertY = prevNode.position.y + (nextNode.position.y - prevNode.position.y) / 2;
+      } else if (prevNode) {
+        insertY = prevNode.position.y + VERTICAL_PADDING;
+      } else if (nextNode) {
+        insertY = nextNode.position.y - VERTICAL_PADDING;
+      }
+
       const newNode = {
         id: `${type}-${nodes.length + 1}`,
         type: "segment",
-        position: { x: CANVAS_CENTER - 100, y }, // Center horizontally, keep vertical position
+        position: { x: CANVAS_CENTER - 100, y: insertY },
         data: { 
           label: type.charAt(0).toUpperCase() + type.slice(1), 
           icon: segmentIcons[type],
-          details: {} // Initialize empty details object
+          details: {}
         },
       };
 
-      setNodes((nds) => {
-        const newNodes = nds.concat(newNode);
-        // Sort nodes by vertical position
-        return newNodes.sort((a, b) => a.position.y - b.position.y);
-      });
+      setNodes((nds) => nds.concat(newNode));
     },
     [nodes, setNodes]
   );
 
   const handleSaveTrip = () => {
-    // Here you would typically save to your backend
-    console.log("Saving trip:", {
+    // Get the current trips from localStorage or initialize empty array
+    const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
+    
+    const newTrip = {
       title: tripTitle,
+      destination: nodes.find(node => node.type === "segment")?.data?.details?.location || "Unknown",
+      startDate: new Date().toISOString().split('T')[0],
+      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      travelers: 1,
+      status: "draft" as const,
       segments: nodes.map(node => ({
         type: node.data.label.toLowerCase(),
-        position: node.position,
-        details: node.data.details
+        details: node.data.details,
+        position: node.position
       }))
-    });
+    };
+    
+    // Add new trip to existing trips
+    existingTrips.push(newTrip);
+    localStorage.setItem('trips', JSON.stringify(existingTrips));
     
     toast.success("Trip saved successfully!");
+    navigate('/');
   };
-
-  const updateNodeDetails = useCallback((nodeId: string, details: any) => {
-    setNodes(nodes => 
-      nodes.map(node => 
-        node.id === nodeId 
-          ? { ...node, data: { ...node.data, details } }
-          : node
-      )
-    );
-  }, [setNodes]);
 
   const nodeTypes = {
     segment: SegmentNode,

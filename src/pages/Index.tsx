@@ -3,37 +3,17 @@ import { TripCard } from "@/components/TripCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-// Temporary mock data
-const trips = [
-  {
-    title: "Luxury Mediterranean Cruise",
-    destination: "Mediterranean Sea",
-    startDate: "2024-06-15",
-    endDate: "2024-06-30",
-    travelers: 4,
-    status: "confirmed" as const,
-  },
-  {
-    title: "Safari Adventure",
-    destination: "Kenya",
-    startDate: "2024-07-10",
-    endDate: "2024-07-20",
-    travelers: 2,
-    status: "draft" as const,
-  },
-  {
-    title: "Tokyo Business Trip",
-    destination: "Japan",
-    startDate: "2024-05-01",
-    endDate: "2024-05-07",
-    travelers: 1,
-    status: "in-progress" as const,
-  },
-];
+import { useEffect, useState } from "react";
 
 const Index = () => {
   const navigate = useNavigate();
+  const [trips, setTrips] = useState([]);
+
+  useEffect(() => {
+    // Load trips from localStorage
+    const savedTrips = JSON.parse(localStorage.getItem('trips') || '[]');
+    setTrips(savedTrips);
+  }, []);
 
   return (
     <Layout>
