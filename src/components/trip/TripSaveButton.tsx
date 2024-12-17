@@ -48,7 +48,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
           title: title,
           destination: firstSegmentLocation || "Unknown",
           travelers: travelers,
-          segments: segments
+          segments: segments as any
         });
 
       if (error) throw error;
