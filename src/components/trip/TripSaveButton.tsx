@@ -5,15 +5,27 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Node } from "@xyflow/react";
 
+interface SegmentDetails {
+  time?: string;
+  location?: string;
+  notes?: string;
+}
+
+type SegmentNodeData = {
+  label: string;
+  icon: string;
+  details: SegmentDetails;
+};
+
 interface TripSaveButtonProps {
   title: string;
-  nodes: Node[];
+  nodes: Node<SegmentNodeData>[];
   travelers: number;
 }
 
 type SegmentData = {
   type: string;
-  details: Record<string, unknown>;
+  details: SegmentDetails;
   position: {
     x: number;
     y: number;
@@ -43,12 +55,11 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
 
       const segments: SegmentData[] = nodes.map(node => ({
         type: String(node.data.label).toLowerCase(),
-        details: node.data.details || {},
+        details: node.data.details,
         position: node.position
       }));
 
-      const firstSegmentDetails = nodes[0]?.data?.details as Record<string, unknown> | undefined;
-      const firstSegmentLocation = firstSegmentDetails?.location as string | undefined;
+      const firstSegmentLocation = nodes[0]?.data?.details?.location;
 
       const { error } = await supabase
         .from('trips')
@@ -57,7 +68,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
           title: title,
           destination: firstSegmentLocation || "Unknown",
           travelers: travelers,
-          segments: segments as any // Type assertion needed due to Supabase types
+          segments: segments
         });
 
       if (error) throw error;

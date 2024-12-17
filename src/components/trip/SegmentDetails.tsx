@@ -1,11 +1,22 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
 import { Node } from "@xyflow/react";
 
+interface SegmentDetails {
+  time?: string;
+  location?: string;
+  notes?: string;
+}
+
+type SegmentNodeData = {
+  label: string;
+  icon: string;
+  details: SegmentDetails;
+};
+
 type SegmentDetailsProps = {
-  selectedNode: Node | null;
-  onDetailsChange: (nodeId: string, details: Record<string, unknown>) => void;
+  selectedNode: (Node<SegmentNodeData> | null);
+  onDetailsChange: (nodeId: string, details: SegmentDetails) => void;
 };
 
 export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetailsProps) {
@@ -19,7 +30,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   const details = selectedNode.data.details || {};
 
-  const handleChange = (field: string, value: string) => {
+  const handleChange = (field: keyof SegmentDetails, value: string) => {
     onDetailsChange(selectedNode.id, {
       ...details,
       [field]: value,
