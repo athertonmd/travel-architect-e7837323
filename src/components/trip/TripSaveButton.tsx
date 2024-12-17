@@ -10,6 +10,19 @@ interface TripSaveButtonProps {
   nodes: Node[];
 }
 
+type SegmentData = {
+  type: string;
+  details: {
+    time?: string;
+    location?: string;
+    notes?: string;
+  };
+  position: {
+    x: number;
+    y: number;
+  };
+};
+
 export const TripSaveButton = ({ title, nodes }: TripSaveButtonProps) => {
   const navigate = useNavigate();
   const user = useUser();
@@ -31,17 +44,21 @@ export const TripSaveButton = ({ title, nodes }: TripSaveButtonProps) => {
         return;
       }
 
+      const segments: SegmentData[] = nodes.map(node => ({
+        type: node.data.label.toLowerCase(),
+        details: node.data.details || {},
+        position: node.position
+      }));
+
+      const firstSegmentLocation = nodes[0]?.data?.details?.location || "Unknown";
+
       const { error } = await supabase
         .from('trips')
         .insert({
           user_id: profile.id,
           title: title,
-          destination: nodes.find(node => node.type === "segment")?.data?.details?.location || "Unknown",
-          segments: nodes.map(node => ({
-            type: node.data.label.toLowerCase(),
-            details: node.data.details,
-            position: node.position
-          }))
+          destination: firstSegmentLocation,
+          segments: segments
         });
 
       if (error) throw error;
