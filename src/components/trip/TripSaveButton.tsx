@@ -45,7 +45,7 @@ export const TripSaveButton = ({ title, nodes }: TripSaveButtonProps) => {
       }
 
       const segments: SegmentData[] = nodes.map(node => ({
-        type: node.data.label.toLowerCase(),
+        type: String(node.data.label).toLowerCase(),
         details: node.data.details || {},
         position: node.position
       }));
