@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Node } from "@xyflow/react";
 import { SegmentNodeData } from "@/types/segment";
 
@@ -6,15 +6,17 @@ export function useNodeManagement(initialNodes: Node<SegmentNodeData>[] = []) {
   const [nodes, setNodes] = useState<Node<SegmentNodeData>[]>(initialNodes);
   const [selectedNode, setSelectedNode] = useState<Node<SegmentNodeData> | null>(null);
 
-  const handleNodesChange = (newNodes: Node<SegmentNodeData>[]) => {
+  const handleNodesChange = useCallback((newNodes: Node<SegmentNodeData>[]) => {
+    console.log('Nodes changed:', newNodes); // Add this for debugging
     setNodes(newNodes);
-  };
+  }, []);
 
-  const handleNodeSelect = (node: Node<SegmentNodeData> | null) => {
+  const handleNodeSelect = useCallback((node: Node<SegmentNodeData> | null) => {
+    console.log('Node selected:', node); // Add this for debugging
     setSelectedNode(node);
-  };
+  }, []);
 
-  const handleDetailsChange = (nodeId: string, details: Record<string, unknown>) => {
+  const handleDetailsChange = useCallback((nodeId: string, details: Record<string, unknown>) => {
     setNodes(currentNodes => 
       currentNodes.map(node => 
         node.id === nodeId 
@@ -22,7 +24,7 @@ export function useNodeManagement(initialNodes: Node<SegmentNodeData>[] = []) {
           : node
       )
     );
-  };
+  }, []);
 
   return {
     nodes,

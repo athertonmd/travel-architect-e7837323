@@ -37,12 +37,12 @@ export const FlowEditor = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
 
-  const handleNodeSelect = useCallback((id: string) => {
-    const selectedNode = nodes.find(node => node.id === id);
-    if (onNodeSelect && selectedNode) {
-      onNodeSelect(selectedNode);
+  const handleNodeSelect = useCallback((nodes: Node<SegmentNodeData>[]) => {
+    console.log('Selection changed:', nodes); // Add this for debugging
+    if (onNodeSelect) {
+      onNodeSelect(nodes[0] || null);
     }
-  }, [nodes, onNodeSelect]);
+  }, [onNodeSelect]);
 
   const { onDragOver, onDrop } = useFlowDragDrop({ 
     nodes, 
@@ -51,6 +51,9 @@ export const FlowEditor = ({
       const updatedNodes = reorganizeNodes(newNodes);
       setNodes(updatedNodes);
       setEdges(updateEdges(updatedNodes));
+      if (onNodesUpdate) {
+        onNodesUpdate(updatedNodes);
+      }
     },
     onNodeSelect: handleNodeSelect
   });
@@ -84,10 +87,9 @@ export const FlowEditor = ({
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
   const onSelectionChange = useCallback(({ nodes: selectedNodes }) => {
-    if (onNodeSelect) {
-      onNodeSelect(selectedNodes?.[0] || null);
-    }
-  }, [onNodeSelect]);
+    console.log('Selection change event:', selectedNodes); // Add this for debugging
+    handleNodeSelect(selectedNodes);
+  }, [handleNodeSelect]);
 
   return (
     <div className="h-full bg-white">

@@ -8,6 +8,8 @@ import { TravelersSelect } from "@/components/trip/TravelersSelect";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
+import { Node } from "@xyflow/react";
+import { SegmentNodeData } from "@/types/segment";
 
 const CreateTrip = () => {
   const [tripTitle, setTripTitle] = useState("Create New Trip");
@@ -17,8 +19,11 @@ const CreateTrip = () => {
     selectedNode,
     handleNodesChange,
     handleNodeSelect,
-    handleDetailsChange
+    handleDetailsChange,
+    setNodes
   } = useNodeManagement();
+
+  console.log('Selected Node:', selectedNode); // Add this for debugging
 
   return (
     <Layout>
@@ -40,8 +45,9 @@ const CreateTrip = () => {
           <ResizableHandle withHandle />
           <ResizablePanel defaultSize={50} minSize={30}>
             <FlowEditor 
-              onNodesChange={handleNodesChange} 
+              onNodesChange={handleNodesChange}
               onNodeSelect={handleNodeSelect}
+              initialNodes={nodes}
             />
           </ResizablePanel>
           <ResizableHandle withHandle />
