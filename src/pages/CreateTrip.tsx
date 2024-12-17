@@ -7,6 +7,8 @@ import { Pencil } from "lucide-react";
 import { useState, useCallback } from "react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useUser } from '@supabase/auth-helpers-react';
+import { supabase } from "@/integrations/supabase/client";
 import {
   ReactFlow,
   Background,
@@ -32,10 +34,11 @@ const segmentIcons: Record<string, string> = {
 
 const CANVAS_WIDTH = 800;
 const CANVAS_CENTER = CANVAS_WIDTH / 2;
-const VERTICAL_PADDING = 100; // Spacing between nodes
+const VERTICAL_PADDING = 100;
 
 const CreateTrip = () => {
   const navigate = useNavigate();
+  const user = useUser();
   const [isEditing, setIsEditing] = useState(false);
   const [tripTitle, setTripTitle] = useState("Create New Trip");
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -67,13 +70,9 @@ const CreateTrip = () => {
         ?.getBoundingClientRect();
       if (!reactFlowBounds) return;
 
-      // Calculate drop position
       const y = event.clientY - reactFlowBounds.top;
-
-      // Sort existing nodes by vertical position
       const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
       
-      // Find the insertion point
       let insertY = y;
       let prevNode = null;
       let nextNode = null;
@@ -90,7 +89,6 @@ const CreateTrip = () => {
         prevNode = sortedNodes[sortedNodes.length - 1];
       }
 
-      // Calculate new Y position with padding
       if (prevNode && nextNode) {
         insertY = prevNode.position.y + (nextNode.position.y - prevNode.position.y) / 2;
       } else if (prevNode) {
@@ -115,30 +113,43 @@ const CreateTrip = () => {
     [nodes, setNodes]
   );
 
-  const handleSaveTrip = () => {
-    // Get the current trips from localStorage or initialize empty array
-    const existingTrips = JSON.parse(localStorage.getItem('trips') || '[]');
-    
-    const newTrip = {
-      title: tripTitle,
-      destination: nodes.find(node => node.type === "segment")?.data?.details?.location || "Unknown",
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      travelers: 1,
-      status: "draft" as const,
-      segments: nodes.map(node => ({
-        type: node.data.label.toLowerCase(),
-        details: node.data.details,
-        position: node.position
-      }))
-    };
-    
-    // Add new trip to existing trips
-    existingTrips.push(newTrip);
-    localStorage.setItem('trips', JSON.stringify(existingTrips));
-    
-    toast.success("Trip saved successfully!");
-    navigate('/');
+  const handleSaveTrip = async () => {
+    if (!user) {
+      toast.error("You must be logged in to save a trip");
+      return;
+    }
+
+    try {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .single();
+
+      if (!profile) {
+        toast.error("Profile not found");
+        return;
+      }
+
+      const { error } = await supabase
+        .from('trips')
+        .insert({
+          user_id: profile.id,
+          title: tripTitle,
+          destination: nodes.find(node => node.type === "segment")?.data?.details?.location || "Unknown",
+          segments: nodes.map(node => ({
+            type: node.data.label.toLowerCase(),
+            details: node.data.details,
+            position: node.position
+          }))
+        });
+
+      if (error) throw error;
+
+      toast.success("Trip saved successfully!");
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.message);
+    }
   };
 
   const nodeTypes = {
