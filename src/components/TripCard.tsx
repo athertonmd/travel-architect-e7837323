@@ -1,7 +1,20 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, MapPin, Users } from "lucide-react";
+import { CalendarDays, MapPin, Users, Trash2 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface TripCardProps {
   id: string;
@@ -23,10 +36,36 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
     completed: "bg-purple-100 text-purple-800",
   };
 
+  const handleDelete = async () => {
+    try {
+      const { error } = await supabase
+        .from('trips')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast.success("Trip deleted successfully");
+      // Force a page refresh to update the trips list
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleCardClick = (e: React.MouseEvent) => {
+    // Prevent navigation when clicking the delete button
+    if ((e.target as HTMLElement).closest('.delete-button')) {
+      e.stopPropagation();
+      return;
+    }
+    navigate(`/trips/${id}`);
+  };
+
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow cursor-pointer" 
-      onClick={() => navigate(`/trips/${id}`)}
+      className="hover:shadow-lg transition-shadow cursor-pointer relative" 
+      onClick={handleCardClick}
     >
       <CardHeader>
         <div className="flex justify-between items-start">
@@ -37,7 +76,36 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
               {destination}
             </CardDescription>
           </div>
-          <Badge className={statusColors[status]}>{status}</Badge>
+          <div className="flex items-center gap-2">
+            <Badge className={statusColors[status]}>{status}</Badge>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <button 
+                  className="delete-button p-2 hover:bg-gray-100 rounded-full transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500" />
+                </button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your trip.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction 
+                    onClick={handleDelete}
+                    className="bg-red-500 hover:bg-red-600"
+                  >
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
         </div>
       </CardHeader>
       <CardContent>
