@@ -33,7 +33,7 @@ export function SegmentNode({ data, id }: { data: { label: string; icon: string;
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="min-w-40 justify-start gap-2 bg-white"
+            className="min-w-40 justify-start gap-2 bg-white drag-handle cursor-move"
           >
             <span>{data.icon}</span>
             {data.label}

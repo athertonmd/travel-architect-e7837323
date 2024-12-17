@@ -1,17 +1,17 @@
-import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge } from "@xyflow/react";
+import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge, Node } from "@xyflow/react";
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback } from "react";
 import "@xyflow/react/dist/style.css";
 
 const CANVAS_WIDTH = 800;
 const CANVAS_CENTER = CANVAS_WIDTH / 2;
-const VERTICAL_PADDING = 60; // Reduced from 100 to 60 for tighter spacing
+const VERTICAL_PADDING = 60;
+const TOP_MARGIN = 20; // New constant for top margin
 
 const nodeTypes = {
   segment: SegmentNode,
 };
 
-// Custom edge style
 const defaultEdgeOptions = {
   style: {
     strokeWidth: 2,
@@ -51,27 +51,33 @@ export const FlowEditor = () => {
       const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
       
       let insertY = y;
-      let prevNode = null;
-      let nextNode = null;
 
-      for (let i = 0; i < sortedNodes.length; i++) {
-        if (sortedNodes[i].position.y > y) {
-          nextNode = sortedNodes[i];
-          prevNode = i > 0 ? sortedNodes[i - 1] : null;
-          break;
+      // If this is the first node, snap it to the top
+      if (sortedNodes.length === 0) {
+        insertY = TOP_MARGIN;
+      } else {
+        let prevNode = null;
+        let nextNode = null;
+
+        for (let i = 0; i < sortedNodes.length; i++) {
+          if (sortedNodes[i].position.y > y) {
+            nextNode = sortedNodes[i];
+            prevNode = i > 0 ? sortedNodes[i - 1] : null;
+            break;
+          }
         }
-      }
 
-      if (!nextNode) {
-        prevNode = sortedNodes[sortedNodes.length - 1];
-      }
+        if (!nextNode) {
+          prevNode = sortedNodes[sortedNodes.length - 1];
+        }
 
-      if (prevNode && nextNode) {
-        insertY = prevNode.position.y + (nextNode.position.y - prevNode.position.y) / 2;
-      } else if (prevNode) {
-        insertY = prevNode.position.y + VERTICAL_PADDING;
-      } else if (nextNode) {
-        insertY = nextNode.position.y - VERTICAL_PADDING;
+        if (prevNode && nextNode) {
+          insertY = prevNode.position.y + (nextNode.position.y - prevNode.position.y) / 2;
+        } else if (prevNode) {
+          insertY = prevNode.position.y + VERTICAL_PADDING;
+        } else if (nextNode) {
+          insertY = nextNode.position.y - VERTICAL_PADDING;
+        }
       }
 
       const newNode = {
@@ -80,17 +86,19 @@ export const FlowEditor = () => {
         position: { x: CANVAS_CENTER - 100, y: insertY },
         data: { 
           label: type.charAt(0).toUpperCase() + type.slice(1), 
-          icon: segmentIcons[type],
+          icon: segmentIcons[type as keyof typeof segmentIcons],
           details: {}
         },
+        dragHandle: '.drag-handle', // Enable dragging only from specific area
       };
 
       // Add edge to previous node if it exists
       const newEdges = [...edges];
-      if (prevNode) {
+      if (sortedNodes.length > 0) {
+        const lastNode = sortedNodes[sortedNodes.length - 1];
         newEdges.push({
-          id: `e${prevNode.id}-${newNode.id}`,
-          source: prevNode.id,
+          id: `e${lastNode.id}-${newNode.id}`,
+          source: lastNode.id,
           target: newNode.id,
           type: 'smoothstep',
           style: defaultEdgeOptions.style,
@@ -103,6 +111,20 @@ export const FlowEditor = () => {
     [nodes, edges, setNodes, setEdges]
   );
 
+  // Automatically reorganize nodes when they're moved
+  const onNodeDragStop = useCallback(() => {
+    setNodes((nds) => {
+      const sortedNodes = [...nds].sort((a, b) => a.position.y - b.position.y);
+      return sortedNodes.map((node, index) => ({
+        ...node,
+        position: {
+          x: node.position.x,
+          y: index === 0 ? TOP_MARGIN : sortedNodes[index - 1].position.y + VERTICAL_PADDING
+        }
+      }));
+    });
+  }, [setNodes]);
+
   return (
     <div className="flex-1 bg-white rounded-lg shadow-lg" style={{ height: "600px" }}>
       <ReactFlow
@@ -113,8 +135,11 @@ export const FlowEditor = () => {
         onConnect={onConnect}
         onDragOver={onDragOver}
         onDrop={onDrop}
+        onNodeDragStop={onNodeDragStop}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
+        selectNodesOnDrag={true}
+        multiSelectionKeyCode="Shift"
         fitView
       >
         <Background />
@@ -124,7 +149,7 @@ export const FlowEditor = () => {
   );
 };
 
-const segmentIcons: Record<string, string> = {
+const segmentIcons = {
   flight: "✈️",
   hotel: "🏨",
   limo: "🚙",
@@ -133,4 +158,4 @@ const segmentIcons: Record<string, string> = {
   activity: "🎯",
   transfer: "🚕",
   vip: "👑",
-};
+} as const;
