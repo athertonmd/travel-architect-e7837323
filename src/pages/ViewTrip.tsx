@@ -1,21 +1,15 @@
 import { Layout } from "@/components/Layout";
 import { FlowEditor } from "@/components/trip/FlowEditor";
 import { useParams, useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
 import { SegmentPalette } from "@/components/SegmentPalette";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useState } from "react";
-import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
 import { toast } from "sonner";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
-import { segmentIcons } from "@/utils/segmentIcons";
-import { Node } from "@xyflow/react";
-import { SegmentNodeData, SegmentData } from "@/types/segment";
-
-const CANVAS_CENTER = 400;
-const VERTICAL_SPACING = 100;
+import { useTripData } from "@/hooks/useTripData";
+import { TripHeader } from "@/components/trip/TripHeader";
 
 const ViewTrip = () => {
   const { id } = useParams();
@@ -30,71 +24,7 @@ const ViewTrip = () => {
     setNodes
   } = useNodeManagement([]);
 
-  const { data: trip } = useQuery({
-    queryKey: ['trip', id],
-    queryFn: async () => {
-      if (!id) {
-        navigate('/');
-        toast.error('Invalid trip ID');
-        return null;
-      }
-
-      const { data, error } = await supabase
-        .from('trips')
-        .select('*')
-        .eq('id', id)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching trip:', error);
-        navigate('/');
-        toast.error('Error loading trip');
-        return null;
-      }
-
-      if (!data) {
-        navigate('/');
-        toast.error('Trip not found');
-        return null;
-      }
-
-      setTitle(data.title);
-      
-      if (data.segments && Array.isArray(data.segments)) {
-        console.log('Processing segments:', data.segments);
-        
-        const initialNodes: Node<SegmentNodeData>[] = (data.segments as unknown as SegmentData[]).map((segment, index) => {
-          // Ensure we have valid position data or use calculated defaults
-          const position = {
-            x: CANVAS_CENTER - 100,
-            y: TOP_MARGIN + (index * VERTICAL_SPACING)
-          };
-
-          return {
-            id: `${segment.type}-${index + 1}`,
-            type: 'segment',
-            position,
-            data: {
-              label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
-              icon: segmentIcons[segment.type as keyof typeof segmentIcons],
-              details: segment.details || {},
-              onSelect: (id: string) => {
-                const node = nodes.find(n => n.id === id);
-                handleNodeSelect(node || null);
-              }
-            },
-            dragHandle: '.drag-handle',
-          };
-        });
-        
-        console.log('Setting nodes:', initialNodes);
-        setNodes(initialNodes);
-      }
-
-      return data;
-    },
-    refetchOnWindowFocus: false,
-  });
+  const { data: trip } = useTripData(id, setNodes, setTitle);
 
   const handleSave = async () => {
     if (!trip || !id) return;
@@ -127,20 +57,12 @@ const ViewTrip = () => {
   return (
     <Layout>
       <div className="h-[calc(100vh-8rem)] flex flex-col space-y-8">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-4">
-            <TripTitleHeader title={title} onTitleChange={setTitle} />
-            <div className="text-sm text-muted-foreground">
-              {trip?.travelers} {trip?.travelers === 1 ? 'traveler' : 'travelers'}
-            </div>
-          </div>
-          <button
-            onClick={handleSave}
-            className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
-          >
-            Save Changes
-          </button>
-        </div>
+        <TripHeader 
+          title={title}
+          onTitleChange={setTitle}
+          travelers={trip?.travelers}
+          onSave={handleSave}
+        />
 
         <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-lg border">
           <ResizablePanel defaultSize={20} minSize={15}>
