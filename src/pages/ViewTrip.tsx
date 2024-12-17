@@ -92,6 +92,33 @@ const ViewTrip = () => {
     }
   });
 
+  const handleSave = async () => {
+    if (!trip || !id) return;
+
+    const segments = nodes.map(node => ({
+      type: String(node.data.label).toLowerCase(),
+      details: node.data.details,
+      position: node.position
+    }));
+
+    try {
+      const { error } = await supabase
+        .from('trips')
+        .update({
+          title,
+          segments: segments as any,
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast.success("Changes saved successfully!");
+    } catch (error: any) {
+      toast.error("Failed to save changes");
+      console.error("Save error:", error);
+    }
+  };
+
   if (error) {
     navigate('/');
     toast.error('Error loading trip');
