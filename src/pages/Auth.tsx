@@ -4,14 +4,29 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
+import { toast } from "sonner";
 
 const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check if there's already a session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate('/');
+      }
+    });
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
+        toast.success('Successfully signed in!');
         navigate('/');
+      }
+      if (event === 'SIGNED_OUT') {
+        toast.success('Signed out successfully');
+      }
+      if (event === 'USER_UPDATED') {
+        toast.success('Profile updated successfully');
       }
     });
 
@@ -45,6 +60,9 @@ const Auth = () => {
               }}
               providers={[]}
               theme="light"
+              onError={(error) => {
+                toast.error(error.message);
+              }}
             />
           </div>
         </div>
