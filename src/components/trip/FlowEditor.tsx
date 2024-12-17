@@ -1,0 +1,112 @@
+import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge } from "@xyflow/react";
+import { SegmentNode } from "@/components/SegmentNode";
+import { useCallback } from "react";
+import "@xyflow/react/dist/style.css";
+
+const CANVAS_WIDTH = 800;
+const CANVAS_CENTER = CANVAS_WIDTH / 2;
+const VERTICAL_PADDING = 100;
+
+const nodeTypes = {
+  segment: SegmentNode,
+};
+
+export const FlowEditor = () => {
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  const onConnect = useCallback(
+    (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
+    [setEdges]
+  );
+
+  const onDragOver = useCallback((event: React.DragEvent) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+  }, []);
+
+  const onDrop = useCallback(
+    (event: React.DragEvent) => {
+      event.preventDefault();
+
+      const type = event.dataTransfer.getData("application/reactflow");
+      if (!type) return;
+
+      const reactFlowBounds = document
+        .querySelector(".react-flow")
+        ?.getBoundingClientRect();
+      if (!reactFlowBounds) return;
+
+      const y = event.clientY - reactFlowBounds.top;
+      const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
+      
+      let insertY = y;
+      let prevNode = null;
+      let nextNode = null;
+
+      for (let i = 0; i < sortedNodes.length; i++) {
+        if (sortedNodes[i].position.y > y) {
+          nextNode = sortedNodes[i];
+          prevNode = i > 0 ? sortedNodes[i - 1] : null;
+          break;
+        }
+      }
+
+      if (!nextNode) {
+        prevNode = sortedNodes[sortedNodes.length - 1];
+      }
+
+      if (prevNode && nextNode) {
+        insertY = prevNode.position.y + (nextNode.position.y - prevNode.position.y) / 2;
+      } else if (prevNode) {
+        insertY = prevNode.position.y + VERTICAL_PADDING;
+      } else if (nextNode) {
+        insertY = nextNode.position.y - VERTICAL_PADDING;
+      }
+
+      const newNode = {
+        id: `${type}-${nodes.length + 1}`,
+        type: "segment",
+        position: { x: CANVAS_CENTER - 100, y: insertY },
+        data: { 
+          label: type.charAt(0).toUpperCase() + type.slice(1), 
+          icon: segmentIcons[type],
+          details: {}
+        },
+      };
+
+      setNodes((nds) => nds.concat(newNode));
+    },
+    [nodes, setNodes]
+  );
+
+  return (
+    <div className="flex-1 bg-white rounded-lg shadow-lg" style={{ height: "600px" }}>
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
+        onDragOver={onDragOver}
+        onDrop={onDrop}
+        nodeTypes={nodeTypes}
+        fitView
+      >
+        <Background />
+        <Controls />
+      </ReactFlow>
+    </div>
+  );
+};
+
+const segmentIcons: Record<string, string> = {
+  flight: "✈️",
+  hotel: "🏨",
+  limo: "🚙",
+  car: "🚗",
+  restaurant: "🍽️",
+  activity: "🎯",
+  transfer: "🚕",
+  vip: "👑",
+};
