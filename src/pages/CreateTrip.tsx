@@ -5,6 +5,7 @@ import { SegmentPalette } from "@/components/SegmentPalette";
 import { SegmentNode } from "@/components/SegmentNode";
 import { Pencil } from "lucide-react";
 import { useState, useCallback } from "react";
+import { toast } from "sonner";
 import {
   ReactFlow,
   Background,
@@ -27,6 +28,9 @@ const segmentIcons: Record<string, string> = {
   transfer: "🚕",
   vip: "👑",
 };
+
+const CANVAS_WIDTH = 800;
+const CANVAS_CENTER = CANVAS_WIDTH / 2;
 
 const CreateTrip = () => {
   const [isEditing, setIsEditing] = useState(false);
@@ -55,28 +59,58 @@ const CreateTrip = () => {
       const type = event.dataTransfer.getData("application/reactflow");
       if (!type) return;
 
-      // Get the position of the drop relative to the flow container
       const reactFlowBounds = document
         .querySelector(".react-flow")
         ?.getBoundingClientRect();
       if (!reactFlowBounds) return;
 
-      const position = {
-        x: event.clientX - reactFlowBounds.left - 20,
-        y: event.clientY - reactFlowBounds.top - 20,
-      };
+      // Calculate vertical position based on drop location
+      const y = event.clientY - reactFlowBounds.top;
 
+      // Create new node at the center x position
       const newNode = {
         id: `${type}-${nodes.length + 1}`,
         type: "segment",
-        position,
-        data: { label: type.charAt(0).toUpperCase() + type.slice(1), icon: segmentIcons[type] },
+        position: { x: CANVAS_CENTER - 100, y }, // Center horizontally, keep vertical position
+        data: { 
+          label: type.charAt(0).toUpperCase() + type.slice(1), 
+          icon: segmentIcons[type],
+          details: {} // Initialize empty details object
+        },
       };
 
-      setNodes((nds) => nds.concat(newNode));
+      setNodes((nds) => {
+        const newNodes = nds.concat(newNode);
+        // Sort nodes by vertical position
+        return newNodes.sort((a, b) => a.position.y - b.position.y);
+      });
     },
     [nodes, setNodes]
   );
+
+  const handleSaveTrip = () => {
+    // Here you would typically save to your backend
+    console.log("Saving trip:", {
+      title: tripTitle,
+      segments: nodes.map(node => ({
+        type: node.data.label.toLowerCase(),
+        position: node.position,
+        details: node.data.details
+      }))
+    });
+    
+    toast.success("Trip saved successfully!");
+  };
+
+  const updateNodeDetails = useCallback((nodeId: string, details: any) => {
+    setNodes(nodes => 
+      nodes.map(node => 
+        node.id === nodeId 
+          ? { ...node, data: { ...node.data, details } }
+          : node
+      )
+    );
+  }, [setNodes]);
 
   const nodeTypes = {
     segment: SegmentNode,
@@ -85,7 +119,7 @@ const CreateTrip = () => {
   return (
     <Layout>
       <div className="space-y-8">
-        <div>
+        <div className="flex justify-between items-center">
           <div className="flex items-center gap-2">
             {isEditing ? (
               <form
@@ -120,7 +154,9 @@ const CreateTrip = () => {
               </>
             )}
           </div>
-          <p className="text-gray-600 mt-1">Build a new luxury travel itinerary</p>
+          <Button onClick={handleSaveTrip} className="bg-primary">
+            Save Trip
+          </Button>
         </div>
 
         <div className="flex gap-8">
