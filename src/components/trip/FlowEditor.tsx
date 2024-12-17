@@ -123,7 +123,7 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate }: FlowEditorProps) =>
   }, [setNodes, setEdges, reorganizeNodes, updateEdges]);
 
   return (
-    <div className="flex-1 bg-white rounded-lg shadow-lg" style={{ height: "600px" }}>
+    <div className="h-full bg-white">
       <ReactFlow
         nodes={nodes}
         edges={edges}

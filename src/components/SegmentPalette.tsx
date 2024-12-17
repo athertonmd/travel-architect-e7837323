@@ -26,10 +26,10 @@ export function SegmentPalette() {
   };
 
   return (
-    <div className="w-64 bg-white rounded-lg shadow-lg p-4">
+    <div className="h-full flex flex-col">
       <h3 className="font-semibold mb-4">Segment Types</h3>
-      <ScrollArea className="h-[400px]">
-        <div className="space-y-2">
+      <ScrollArea className="flex-1">
+        <div className="space-y-2 pr-4">
           {segmentTypes.map((segment) => (
             <Button
               key={segment.id}
