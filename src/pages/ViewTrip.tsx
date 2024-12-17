@@ -32,10 +32,12 @@ const ViewTrip = () => {
     },
     meta: {
       onSuccess: (data) => {
-        setTitle(data.title);
-        const segments = data.segments as SegmentData[];
+        if (!data) return;
         
-        if (segments) {
+        setTitle(data.title);
+        const segments = data.segments as SegmentData[] || [];
+        
+        if (segments && segments.length > 0) {
           const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
             id: `${segment.type}-${index + 1}`,
             type: 'segment',
