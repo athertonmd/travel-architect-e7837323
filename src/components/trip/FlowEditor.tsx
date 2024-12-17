@@ -1,6 +1,6 @@
-import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge, Node, XYPosition, OnNodesChange } from "@xyflow/react";
+import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge, Node } from "@xyflow/react";
 import { SegmentNode } from "@/components/SegmentNode";
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import "@xyflow/react/dist/style.css";
 
 const CANVAS_WIDTH = 800;
@@ -10,6 +10,7 @@ const TOP_MARGIN = 20;
 
 interface FlowEditorProps {
   onNodesChange?: (nodes: Node[]) => void;
+  onNodeSelect?: (node: Node | null) => void;
 }
 
 const nodeTypes = {
@@ -25,9 +26,10 @@ const defaultEdgeOptions = {
   animated: false,
 };
 
-export const FlowEditor = ({ onNodesChange: onNodesUpdate }: FlowEditorProps) => {
+export const FlowEditor = ({ onNodesChange: onNodesUpdate, onNodeSelect }: FlowEditorProps) => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
   useEffect(() => {
     onNodesUpdate?.(nodes);
@@ -89,7 +91,12 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate }: FlowEditorProps) =>
         data: { 
           label: type.charAt(0).toUpperCase() + type.slice(1), 
           icon: segmentIcons[type as keyof typeof segmentIcons],
-          details: {}
+          details: {},
+          onSelect: (id: string) => {
+            setSelectedNodeId(id);
+            const node = nodes.find(n => n.id === id);
+            onNodeSelect?.(node || null);
+          }
         },
         dragHandle: '.drag-handle',
       };
@@ -100,7 +107,7 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate }: FlowEditorProps) =>
       setNodes(updatedNodes);
       setEdges(updatedEdges);
     },
-    [nodes, setNodes, setEdges, reorganizeNodes, updateEdges]
+    [nodes, setNodes, setEdges, reorganizeNodes, updateEdges, onNodeSelect]
   );
 
   const onNodeDragStop = useCallback(() => {
@@ -125,7 +132,10 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate }: FlowEditorProps) =>
   return (
     <div className="h-full bg-white">
       <ReactFlow
-        nodes={nodes}
+        nodes={nodes.map(node => ({
+          ...node,
+          selected: node.id === selectedNodeId
+        }))}
         edges={edges}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

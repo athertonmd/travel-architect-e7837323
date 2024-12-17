@@ -7,14 +7,26 @@ import { TripSaveButton } from "@/components/trip/TripSaveButton";
 import { TravelersSelect } from "@/components/trip/TravelersSelect";
 import { Node } from "@xyflow/react";
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
+import { SegmentDetails } from "@/components/trip/SegmentDetails";
 
 const CreateTrip = () => {
   const [tripTitle, setTripTitle] = useState("Create New Trip");
   const [travelers, setTravelers] = useState(1);
   const [nodes, setNodes] = useState<Node[]>([]);
+  const [selectedNode, setSelectedNode] = useState<Node | null>(null);
 
   const handleNodesChange = (newNodes: Node[]) => {
     setNodes(newNodes);
+  };
+
+  const handleDetailsChange = (nodeId: string, details: Record<string, unknown>) => {
+    setNodes(currentNodes => 
+      currentNodes.map(node => 
+        node.id === nodeId 
+          ? { ...node, data: { ...node.data, details } }
+          : node
+      )
+    );
   };
 
   return (
@@ -35,13 +47,16 @@ const CreateTrip = () => {
             </div>
           </ResizablePanel>
           <ResizablePanel defaultSize={50} minSize={30}>
-            <FlowEditor onNodesChange={handleNodesChange} />
+            <FlowEditor 
+              onNodesChange={handleNodesChange} 
+              onNodeSelect={setSelectedNode}
+            />
           </ResizablePanel>
           <ResizablePanel defaultSize={30} minSize={20}>
-            <div className="h-full p-4 bg-white">
-              <h3 className="font-semibold mb-4">Segment Details</h3>
-              <p className="text-muted-foreground">Select a segment to view and edit its details</p>
-            </div>
+            <SegmentDetails 
+              selectedNode={selectedNode}
+              onDetailsChange={handleDetailsChange}
+            />
           </ResizablePanel>
         </ResizablePanelGroup>
       </div>
