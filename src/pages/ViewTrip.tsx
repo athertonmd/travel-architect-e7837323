@@ -62,7 +62,7 @@ const ViewTrip = () => {
         const initialNodes: Node<SegmentNodeData>[] = (data.segments as unknown as SegmentData[]).map((segment, index) => ({
           id: `${segment.type}-${index + 1}`,
           type: 'segment',
-          position: segment.position || { x: 0, y: index * 100 },
+          position: segment.position,
           data: {
             label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
             icon: segmentIcons[segment.type as keyof typeof segmentIcons],
@@ -79,17 +79,8 @@ const ViewTrip = () => {
 
       return data;
     },
+    refetchOnWindowFocus: false,
   });
-
-  if (!trip) {
-    return (
-      <Layout>
-        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
-          <div className="animate-pulse">Loading trip...</div>
-        </div>
-      </Layout>
-    );
-  }
 
   const handleSave = async () => {
     if (!trip || !id) return;
@@ -106,6 +97,7 @@ const ViewTrip = () => {
         .update({
           title,
           segments: segments as any,
+          updated_at: new Date().toISOString(),
         })
         .eq('id', id);
 
@@ -125,7 +117,7 @@ const ViewTrip = () => {
           <div className="flex items-center gap-4">
             <TripTitleHeader title={title} onTitleChange={setTitle} />
             <div className="text-sm text-muted-foreground">
-              {trip.travelers} {trip.travelers === 1 ? 'traveler' : 'travelers'}
+              {trip?.travelers} {trip?.travelers === 1 ? 'traveler' : 'travelers'}
             </div>
           </div>
           <button
