@@ -2,6 +2,7 @@ import { Layout } from "@/components/Layout";
 import { TripCard } from "@/components/TripCard";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 // Temporary mock data
 const trips = [
@@ -32,6 +33,8 @@ const trips = [
 ];
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <Layout>
       <div className="space-y-8">
@@ -40,7 +43,10 @@ const Index = () => {
             <h1 className="text-3xl font-bold text-navy">Travel Dashboard</h1>
             <p className="text-gray-600 mt-1">Manage your luxury travel itineraries</p>
           </div>
-          <Button className="bg-navy hover:bg-navy-light">
+          <Button 
+            className="bg-navy hover:bg-navy-light"
+            onClick={() => navigate("/trips/create")}
+          >
             <Plus className="h-4 w-4 mr-2" />
             Create New Trip
           </Button>
