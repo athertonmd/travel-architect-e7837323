@@ -36,6 +36,14 @@ export const FlowEditor = ({
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<SegmentNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
+
+  const handleNodeSelect = useCallback((id: string) => {
+    const selectedNode = nodes.find(node => node.id === id);
+    if (onNodeSelect && selectedNode) {
+      onNodeSelect(selectedNode);
+    }
+  }, [nodes, onNodeSelect]);
+
   const { onDragOver, onDrop } = useFlowDragDrop({ 
     nodes, 
     readOnly, 
@@ -43,7 +51,8 @@ export const FlowEditor = ({
       const updatedNodes = reorganizeNodes(newNodes);
       setNodes(updatedNodes);
       setEdges(updateEdges(updatedNodes));
-    }
+    },
+    onNodeSelect: handleNodeSelect
   });
 
   const onConnect = useCallback(

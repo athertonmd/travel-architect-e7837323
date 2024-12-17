@@ -9,9 +9,10 @@ interface FlowDragDropProps {
   nodes: Node<SegmentNodeData>[];
   readOnly?: boolean;
   onNodesChange: (nodes: Node<SegmentNodeData>[]) => void;
+  onNodeSelect?: (id: string) => void;
 }
 
-export function useFlowDragDrop({ nodes, readOnly, onNodesChange }: FlowDragDropProps) {
+export function useFlowDragDrop({ nodes, readOnly, onNodesChange, onNodeSelect }: FlowDragDropProps) {
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
@@ -41,13 +42,14 @@ export function useFlowDragDrop({ nodes, readOnly, onNodesChange }: FlowDragDrop
           label: type.charAt(0).toUpperCase() + type.slice(1), 
           icon: segmentIcons[type as keyof typeof segmentIcons],
           details: {},
+          onSelect: onNodeSelect,
         },
         dragHandle: '.drag-handle',
       };
 
       onNodesChange([...nodes, newNode]);
     },
-    [nodes, onNodesChange, readOnly]
+    [nodes, onNodesChange, readOnly, onNodeSelect]
   );
 
   return {
