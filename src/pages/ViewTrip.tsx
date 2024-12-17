@@ -63,6 +63,10 @@ const ViewTrip = () => {
     setNodes(newNodes);
   };
 
+  const handleNodeSelect = (node: Node<SegmentNodeData> | null) => {
+    setSelectedNode(node);
+  };
+
   const handleDetailsChange = (nodeId: string, details: Record<string, unknown>) => {
     setNodes(currentNodes => 
       currentNodes.map(node => 
@@ -141,7 +145,7 @@ const ViewTrip = () => {
           <ResizablePanel defaultSize={50} minSize={30}>
             <FlowEditor 
               onNodesChange={handleNodesChange}
-              onNodeSelect={setSelectedNode}
+              onNodeSelect={handleNodeSelect}
               initialNodes={nodes}
             />
           </ResizablePanel>
