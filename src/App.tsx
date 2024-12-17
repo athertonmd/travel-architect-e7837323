@@ -3,7 +3,6 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
-import { createClient } from '@supabase/supabase-js';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import Index from "./pages/Index";
 import CreateTrip from "./pages/CreateTrip";
@@ -42,6 +41,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CreateTrip />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips/upload"
+              element={
+                <ProtectedRoute>
+                  <div className="p-4">Upload Trips Page (Coming Soon)</div>
                 </ProtectedRoute>
               }
             />

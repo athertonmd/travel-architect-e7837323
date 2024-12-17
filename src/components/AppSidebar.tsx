@@ -1,4 +1,4 @@
-import { CalendarDays, Home, PlaneTakeoff, Plus, Hotel, Car, Utensils, Dumbbell, Bus, Crown } from "lucide-react";
+import { CalendarDays, Home, Plus, Upload, LogOut } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -8,25 +8,32 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarFooter,
 } from "@/components/ui/sidebar";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/" },
   { title: "All Trips", icon: CalendarDays, url: "/trips" },
   { title: "Create Trip", icon: Plus, url: "/trips/create" },
-];
-
-const segmentItems = [
-  { title: "Flights", icon: PlaneTakeoff, url: "/segments/flights" },
-  { title: "Hotels", icon: Hotel, url: "/segments/hotels" },
-  { title: "Transport", icon: Car, url: "/segments/transport" },
-  { title: "Dining", icon: Utensils, url: "/segments/dining" },
-  { title: "Activities", icon: Dumbbell, url: "/segments/activities" },
-  { title: "Transfers", icon: Bus, url: "/segments/transfers" },
-  { title: "VIP Services", icon: Crown, url: "/segments/vip" },
+  { title: "Upload Trips", icon: Upload, url: "/trips/upload" },
 ];
 
 export function AppSidebar() {
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success("Logged out successfully");
+      navigate("/auth");
+    } catch (error) {
+      toast.error("Error logging out");
+    }
+  };
+
   return (
     <Sidebar>
       <SidebarContent>
@@ -47,24 +54,16 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
-        <SidebarGroup>
-          <SidebarGroupLabel>Segments</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {segmentItems.map((item) => (
-                <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <a href={item.url} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
-                      <span>{item.title}</span>
-                    </a>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
       </SidebarContent>
+      <SidebarFooter className="mt-auto p-4">
+        <SidebarMenuButton
+          onClick={handleLogout}
+          className="flex w-full items-center gap-2 text-destructive hover:text-destructive"
+        >
+          <LogOut className="h-4 w-4" />
+          <span>Log Out</span>
+        </SidebarMenuButton>
+      </SidebarFooter>
     </Sidebar>
   );
 }
