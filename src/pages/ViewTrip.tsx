@@ -25,7 +25,7 @@ const ViewTrip = () => {
     handleNodeSelect,
     handleDetailsChange,
     setNodes
-  } = useNodeManagement([]);  // Initialize with empty array, we'll set nodes after fetching
+  } = useNodeManagement([]);
 
   const { data: trip } = useQuery({
     queryKey: ['trip', id],
@@ -59,21 +59,32 @@ const ViewTrip = () => {
       
       // Convert segments data to nodes if segments exist
       if (data.segments && Array.isArray(data.segments)) {
-        const initialNodes: Node<SegmentNodeData>[] = (data.segments as unknown as SegmentData[]).map((segment, index) => ({
-          id: `${segment.type}-${index + 1}`,
-          type: 'segment',
-          position: segment.position,
-          data: {
-            label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
-            icon: segmentIcons[segment.type as keyof typeof segmentIcons],
-            details: segment.details || {},
-            onSelect: (id: string) => {
-              const node = nodes.find(n => n.id === id);
-              handleNodeSelect(node || null);
-            }
-          },
-          dragHandle: '.drag-handle',
-        }));
+        console.log('Segments data:', data.segments); // Debug log
+        
+        const initialNodes: Node<SegmentNodeData>[] = (data.segments as unknown as SegmentData[]).map((segment, index) => {
+          console.log('Processing segment:', segment); // Debug log
+          
+          return {
+            id: `${segment.type}-${index + 1}`,
+            type: 'segment',
+            position: {
+              x: segment.position?.x || 400 - 100,
+              y: segment.position?.y || index * 100
+            },
+            data: {
+              label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
+              icon: segmentIcons[segment.type as keyof typeof segmentIcons],
+              details: segment.details || {},
+              onSelect: (id: string) => {
+                const node = nodes.find(n => n.id === id);
+                handleNodeSelect(node || null);
+              }
+            },
+            dragHandle: '.drag-handle',
+          };
+        });
+        
+        console.log('Created nodes:', initialNodes); // Debug log
         setNodes(initialNodes);
       }
 
