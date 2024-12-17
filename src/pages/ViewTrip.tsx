@@ -27,18 +27,34 @@ const ViewTrip = () => {
     setNodes
   } = useNodeManagement();
 
-  const { data: trip, isLoading } = useQuery({
+  const { data: trip, isLoading, error } = useQuery({
     queryKey: ['trip', id],
     queryFn: async () => {
-      if (!id) throw new Error('Trip ID is required');
+      if (!id) {
+        navigate('/');
+        toast.error('Invalid trip ID');
+        return null;
+      }
 
-      const { data, error } = await supabase
-        .from('trips')
-        .select('*')
-        .eq('id', id)
-        .single();
+      try {
+        const { data, error } = await supabase
+          .from('trips')
+          .select('*')
+          .eq('id', id)
+          .single();
 
-      if (error) {
+        if (error) {
+          throw error;
+        }
+
+        if (!data) {
+          navigate('/');
+          toast.error('Trip not found');
+          return null;
+        }
+
+        return data;
+      } catch (error: any) {
         if (error.code === 'PGRST116') {
           navigate('/');
           toast.error('Trip not found');
@@ -46,8 +62,6 @@ const ViewTrip = () => {
         }
         throw error;
       }
-
-      return data;
     },
     meta: {
       onSuccess: (data) => {
@@ -78,45 +92,24 @@ const ViewTrip = () => {
     }
   });
 
-  const handleSave = async () => {
-    if (!trip) return;
-
-    const segments = nodes.map(node => ({
-      type: String(node.data.label).toLowerCase(),
-      details: node.data.details,
-      position: node.position
-    }));
-
-    const { error } = await supabase
-      .from('trips')
-      .update({
-        title,
-        segments: segments as any,
-      })
-      .eq('id', id);
-
-    if (error) {
-      toast.error("Failed to save changes");
-      return;
-    }
-
-    toast.success("Changes saved successfully!");
-  };
+  if (error) {
+    navigate('/');
+    toast.error('Error loading trip');
+    return null;
+  }
 
   if (isLoading) {
     return (
       <Layout>
-        <div>Loading...</div>
+        <div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+          <div className="animate-pulse">Loading trip...</div>
+        </div>
       </Layout>
     );
   }
 
   if (!trip) {
-    return (
-      <Layout>
-        <div>Trip not found</div>
-      </Layout>
-    );
+    return null;
   }
 
   return (
