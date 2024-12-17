@@ -1,6 +1,7 @@
 import { ReactFlow, Background, Controls, Connection, Edge, useNodesState, useEdgesState, addEdge, Node } from "@xyflow/react";
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback, useEffect, useState } from "react";
+import { SegmentNodeData } from "@/types/segment";
 import "@xyflow/react/dist/style.css";
 
 const CANVAS_WIDTH = 800;
@@ -9,9 +10,9 @@ const VERTICAL_PADDING = 60;
 const TOP_MARGIN = 20;
 
 interface FlowEditorProps {
-  onNodesChange?: (nodes: Node[]) => void;
-  onNodeSelect?: (node: Node | null) => void;
-  initialNodes?: Node[];
+  onNodesChange?: (nodes: Node<SegmentNodeData>[]) => void;
+  onNodeSelect?: (node: Node<SegmentNodeData> | null) => void;
+  initialNodes?: Node<SegmentNodeData>[];
   readOnly?: boolean;
 }
 
@@ -34,7 +35,7 @@ export const FlowEditor = ({
   initialNodes = [],
   readOnly = false 
 }: FlowEditorProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node<SegmentNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
@@ -54,7 +55,7 @@ export const FlowEditor = ({
     [setEdges]
   );
 
-  const reorganizeNodes = useCallback((nodes: Node[]) => {
+  const reorganizeNodes = useCallback((nodes: Node<SegmentNodeData>[]) => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
     return sortedNodes.map((node, index) => ({
       ...node,
@@ -65,7 +66,7 @@ export const FlowEditor = ({
     }));
   }, []);
 
-  const updateEdges = useCallback((nodes: Node[]) => {
+  const updateEdges = useCallback((nodes: Node<SegmentNodeData>[]) => {
     const newEdges: Edge[] = [];
     for (let i = 0; i < nodes.length - 1; i++) {
       newEdges.push({
@@ -100,7 +101,7 @@ export const FlowEditor = ({
 
       const y = event.clientY - reactFlowBounds.top;
 
-      const newNode = {
+      const newNode: Node<SegmentNodeData> = {
         id: `${type}-${nodes.length + 1}`,
         type: "segment",
         position: { x: CANVAS_CENTER - 100, y },
@@ -136,7 +137,7 @@ export const FlowEditor = ({
     });
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
-  const onNodesDelete = useCallback((nodesToDelete: Node[]) => {
+  const onNodesDelete = useCallback((nodesToDelete: Node<SegmentNodeData>[]) => {
     if (readOnly) return;
 
     setNodes((nds) => {
