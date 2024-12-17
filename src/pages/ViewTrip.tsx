@@ -57,36 +57,30 @@ const ViewTrip = () => {
         return null;
       }
 
-      // Set the title state when we get the data
       setTitle(data.title);
+      
+      // Convert segments data to nodes if segments exist
+      if (data.segments && Array.isArray(data.segments)) {
+        const initialNodes: Node<SegmentNodeData>[] = data.segments.map((segment: SegmentData, index: number) => ({
+          id: `${segment.type}-${index + 1}`,
+          type: 'segment',
+          position: segment.position || { x: 0, y: index * 100 }, // Fallback position if none exists
+          data: {
+            label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
+            icon: segmentIcons[segment.type as keyof typeof segmentIcons],
+            details: segment.details || {},
+            onSelect: (id: string) => {
+              const node = nodes.find(n => n.id === id);
+              handleNodeSelect(node || null);
+            }
+          },
+          dragHandle: '.drag-handle',
+        }));
+        setNodes(initialNodes);
+      }
+
       return data;
     },
-    meta: {
-      onSuccess: (data) => {
-        if (!data) return;
-        
-        const segments = data.segments as SegmentData[] || [];
-        
-        if (segments && segments.length > 0) {
-          const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
-            id: `${segment.type}-${index + 1}`,
-            type: 'segment',
-            position: segment.position,
-            data: {
-              label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
-              icon: segmentIcons[segment.type as keyof typeof segmentIcons],
-              details: segment.details,
-              onSelect: (id: string) => {
-                const node = nodes.find(n => n.id === id);
-                handleNodeSelect(node || null);
-              }
-            },
-            dragHandle: '.drag-handle',
-          }));
-          setNodes(initialNodes);
-        }
-      }
-    }
   });
 
   const handleSave = async () => {
