@@ -11,6 +11,8 @@ const TOP_MARGIN = 20;
 interface FlowEditorProps {
   onNodesChange?: (nodes: Node[]) => void;
   onNodeSelect?: (node: Node | null) => void;
+  initialNodes?: Node[];
+  readOnly?: boolean;
 }
 
 const nodeTypes = {
@@ -26,10 +28,22 @@ const defaultEdgeOptions = {
   animated: false,
 };
 
-export const FlowEditor = ({ onNodesChange: onNodesUpdate, onNodeSelect }: FlowEditorProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+export const FlowEditor = ({ 
+  onNodesChange: onNodesUpdate, 
+  onNodeSelect,
+  initialNodes = [],
+  readOnly = false 
+}: FlowEditorProps) => {
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (initialNodes.length > 0) {
+      setNodes(initialNodes);
+      setEdges(updateEdges(initialNodes));
+    }
+  }, [initialNodes, setNodes, setEdges]);
 
   useEffect(() => {
     onNodesUpdate?.(nodes);
@@ -72,6 +86,8 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate, onNodeSelect }: FlowE
 
   const onDrop = useCallback(
     (event: React.DragEvent) => {
+      if (readOnly) return;
+
       event.preventDefault();
 
       const type = event.dataTransfer.getData("application/reactflow");
@@ -107,18 +123,22 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate, onNodeSelect }: FlowE
       setNodes(updatedNodes);
       setEdges(updatedEdges);
     },
-    [nodes, setNodes, setEdges, reorganizeNodes, updateEdges, onNodeSelect]
+    [nodes, setNodes, setEdges, reorganizeNodes, updateEdges, onNodeSelect, readOnly]
   );
 
   const onNodeDragStop = useCallback(() => {
+    if (readOnly) return;
+    
     setNodes((nds) => {
       const updatedNodes = reorganizeNodes(nds);
       setEdges(updateEdges(updatedNodes));
       return updatedNodes;
     });
-  }, [setNodes, setEdges, reorganizeNodes, updateEdges]);
+  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
   const onNodesDelete = useCallback((nodesToDelete: Node[]) => {
+    if (readOnly) return;
+
     setNodes((nds) => {
       const remainingNodes = nds.filter(
         (node) => !nodesToDelete.find((n) => n.id === node.id)
@@ -127,7 +147,7 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate, onNodeSelect }: FlowE
       setEdges(updateEdges(updatedNodes));
       return updatedNodes;
     });
-  }, [setNodes, setEdges, reorganizeNodes, updateEdges]);
+  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
   return (
     <div className="h-full bg-white">
@@ -137,18 +157,21 @@ export const FlowEditor = ({ onNodesChange: onNodesUpdate, onNodeSelect }: FlowE
           selected: node.id === selectedNodeId
         }))}
         edges={edges}
-        onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
-        onConnect={onConnect}
+        onNodesChange={readOnly ? undefined : onNodesChange}
+        onEdgesChange={readOnly ? undefined : onEdgesChange}
+        onConnect={readOnly ? undefined : onConnect}
         onDragOver={onDragOver}
         onDrop={onDrop}
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
-        deleteKeyCode="Delete"
-        multiSelectionKeyCode="Shift"
-        selectionOnDrag
+        deleteKeyCode={readOnly ? null : "Delete"}
+        multiSelectionKeyCode={readOnly ? null : "Shift"}
+        selectionOnDrag={!readOnly}
+        nodesDraggable={!readOnly}
+        nodesConnectable={!readOnly}
+        elementsSelectable={!readOnly}
         fitView
       >
         <Background />

@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import Index from "./pages/Index";
 import CreateTrip from "./pages/CreateTrip";
+import ViewTrip from "./pages/ViewTrip";
 import Auth from "./pages/Auth";
 import { supabase } from "./integrations/supabase/client";
 
@@ -41,6 +42,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <CreateTrip />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/trips/:id"
+              element={
+                <ProtectedRoute>
+                  <ViewTrip />
                 </ProtectedRoute>
               }
             />

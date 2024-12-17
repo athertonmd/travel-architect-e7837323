@@ -1,8 +1,10 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CalendarDays, MapPin, Users } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface TripCardProps {
+  id: string;
   title: string;
   destination: string;
   startDate: string;
@@ -11,7 +13,9 @@ interface TripCardProps {
   status: "draft" | "confirmed" | "in-progress" | "completed";
 }
 
-export function TripCard({ title, destination, startDate, endDate, travelers, status }: TripCardProps) {
+export function TripCard({ id, title, destination, startDate, endDate, travelers, status }: TripCardProps) {
+  const navigate = useNavigate();
+  
   const statusColors = {
     draft: "bg-gray-200 text-gray-800",
     confirmed: "bg-green-100 text-green-800",
@@ -20,7 +24,10 @@ export function TripCard({ title, destination, startDate, endDate, travelers, st
   };
 
   return (
-    <Card className="hover:shadow-lg transition-shadow">
+    <Card 
+      className="hover:shadow-lg transition-shadow cursor-pointer" 
+      onClick={() => navigate(`/trips/${id}`)}
+    >
       <CardHeader>
         <div className="flex justify-between items-start">
           <div>
