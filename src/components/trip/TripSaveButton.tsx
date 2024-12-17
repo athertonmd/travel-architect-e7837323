@@ -4,7 +4,7 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Node } from "@xyflow/react";
-import { SegmentNodeData, SegmentData } from "@/types/segment";
+import { SegmentNodeData } from "@/types/segment";
 
 interface TripSaveButtonProps {
   title: string;
@@ -48,7 +48,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
           title: title,
           destination: firstSegmentLocation || "Unknown",
           travelers: travelers,
-          segments: segments as any // Type assertion needed due to Supabase types
+          segments: segments
         });
 
       if (error) throw error;

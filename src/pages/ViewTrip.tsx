@@ -39,7 +39,13 @@ const ViewTrip = () => {
     );
   }
 
-  const nodes: Node<SegmentNodeData>[] = trip.segments.map((segment: any, index: number) => ({
+  const segments = trip.segments as Array<{
+    type: string;
+    details: Record<string, unknown>;
+    position: { x: number; y: number };
+  }>;
+
+  const nodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
     id: `${segment.type}-${index + 1}`,
     type: 'segment',
     position: segment.position,

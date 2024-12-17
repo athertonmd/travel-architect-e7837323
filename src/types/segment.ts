@@ -4,7 +4,7 @@ export interface SegmentDetails {
   notes?: string;
 }
 
-export interface SegmentNodeData {
+export interface SegmentNodeData extends Record<string, unknown> {
   label: string;
   icon: string;
   details: SegmentDetails;
@@ -13,7 +13,7 @@ export interface SegmentNodeData {
 
 export interface SegmentData {
   type: string;
-  details: Record<string, unknown>;
+  details: SegmentDetails;
   position: {
     x: number;
     y: number;
