@@ -74,6 +74,12 @@ export const FlowEditor = ({
     });
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
+  const onSelectionChange = useCallback(({ nodes: selectedNodes }) => {
+    if (onNodeSelect) {
+      onNodeSelect(selectedNodes?.[0] || null);
+    }
+  }, [onNodeSelect]);
+
   return (
     <div className="h-full bg-white">
       <ReactFlow
@@ -86,6 +92,7 @@ export const FlowEditor = ({
         onDrop={onDrop}
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}
+        onSelectionChange={onSelectionChange}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         deleteKeyCode={readOnly ? null : "Delete"}

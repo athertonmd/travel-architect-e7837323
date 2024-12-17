@@ -9,7 +9,9 @@ type SegmentDetails = {
 };
 
 export function SegmentNode({ data, id, selected }: { data: { label: string; icon: string; details?: SegmentDetails; onSelect?: (id: string) => void }; id: string; selected?: boolean }) {
-  const handleClick = useCallback(() => {
+  const handleClick = useCallback((event: React.MouseEvent) => {
+    // Stop propagation to prevent the flow from deselecting the node
+    event.stopPropagation();
     data.onSelect?.(id);
   }, [id, data]);
 
