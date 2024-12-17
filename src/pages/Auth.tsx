@@ -21,14 +21,13 @@ const Auth = () => {
   return (
     <Layout>
       <div 
-        className="min-h-screen flex items-center justify-center bg-cover bg-center"
+        className="min-h-screen flex items-center justify-center bg-cover bg-center relative"
         style={{ 
-          backgroundImage: 'url("/lovable-uploads/7c64f633-610e-49b9-b94d-3ccb799add5d.png")',
-          backgroundColor: 'rgba(0, 0, 0, 0.5)',
-          backgroundBlendMode: 'overlay'
+          backgroundImage: 'url("/lovable-uploads/eb177364-44a0-454d-b4ec-3575366e5749.png")',
         }}
       >
-        <div className="max-w-md w-full mx-4 p-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-xl">
+        <div className="absolute inset-0 bg-black/40" /> {/* Dark overlay */}
+        <div className="max-w-md w-full mx-4 p-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-xl relative z-10">
           <h1 className="text-2xl font-bold text-center mb-6 text-navy">Welcome to TripBuilder</h1>
           <SupabaseAuth 
             supabaseClient={supabase}
