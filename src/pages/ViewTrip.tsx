@@ -1,6 +1,6 @@
 import { Layout } from "@/components/Layout";
 import { FlowEditor } from "@/components/trip/FlowEditor";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ResizablePanelGroup, ResizablePanel } from "@/components/ui/resizable";
@@ -16,6 +16,7 @@ import { SegmentNodeData, SegmentData } from "@/types/segment";
 
 const ViewTrip = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [title, setTitle] = useState("");
   const {
     nodes,
@@ -29,13 +30,23 @@ const ViewTrip = () => {
   const { data: trip, isLoading } = useQuery({
     queryKey: ['trip', id],
     queryFn: async () => {
+      if (!id) throw new Error('Trip ID is required');
+
       const { data, error } = await supabase
         .from('trips')
         .select('*')
         .eq('id', id)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        if (error.code === 'PGRST116') {
+          navigate('/');
+          toast.error('Trip not found');
+          return null;
+        }
+        throw error;
+      }
+
       return data;
     },
     meta: {
