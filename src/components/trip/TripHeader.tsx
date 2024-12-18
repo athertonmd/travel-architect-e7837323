@@ -1,4 +1,5 @@
 import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
+import { Button } from "@/components/ui/button";
 
 interface TripHeaderProps {
   title: string;
@@ -16,12 +17,12 @@ export function TripHeader({ title, onTitleChange, travelers, onSave }: TripHead
           {travelers} {travelers === 1 ? 'traveler' : 'travelers'}
         </div>
       </div>
-      <button
+      <Button
         onClick={onSave}
-        className="bg-primary text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50"
+        className="bg-primary text-primary-foreground hover:bg-primary/90"
       >
         Save Changes
-      </button>
+      </Button>
     </div>
   );
 }

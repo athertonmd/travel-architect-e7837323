@@ -1,15 +1,12 @@
 export interface SegmentDetails {
-  time?: string;
   location?: string;
+  time?: string;
+  date?: string;
   notes?: string;
-  // Flight specific fields
-  departureDate?: string;
-  returnDate?: string;
-  isOneWay?: boolean;
-  departureAirport?: string;
-  destinationAirport?: string;
+  airline?: string;
   flightNumber?: string;
-  cabinClass?: string;
+  terminal?: string;
+  gate?: string;
   seatNumber?: string;
 }
 
@@ -17,13 +14,5 @@ export interface SegmentNodeData extends Record<string, unknown> {
   label: string;
   icon: string;
   details?: SegmentDetails;
-}
-
-export interface SegmentData {
-  type: string;
-  details: SegmentDetails;
-  position: {
-    x: number;
-    y: number;
-  };
+  onSelect?: (id: string) => void;
 }

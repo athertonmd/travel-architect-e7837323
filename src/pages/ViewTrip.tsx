@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
 import { useTripData } from "@/hooks/useTripData";
 import { TripHeader } from "@/components/trip/TripHeader";
+import { Node } from "@xyflow/react";
+import { SegmentNodeData } from "@/types/segment";
 
 const ViewTrip = () => {
   const { id } = useParams();
@@ -27,30 +29,58 @@ const ViewTrip = () => {
   const { data: trip } = useTripData(id, setNodes, setTitle);
 
   const handleSave = async () => {
-    if (!trip || !id) return;
-
-    const segments = nodes.map(node => ({
-      type: String(node.data.label).toLowerCase(),
-      details: node.data.details,
-      position: node.position
-    }));
-
     try {
-      const { error } = await supabase
-        .from('trips')
-        .update({
-          title,
-          segments: segments as any,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', id);
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('id')
+        .single();
 
-      if (error) throw error;
+      if (!profile) {
+        toast.error("Profile not found");
+        return;
+      }
 
-      toast.success("Changes saved successfully!");
-      navigate('/'); // Navigate back to dashboard after successful save
+      const segments = nodes.map((node: Node<SegmentNodeData>) => ({
+        type: String(node.data.label).toLowerCase(),
+        details: node.data.details,
+        position: node.position
+      }));
+
+      const firstSegmentLocation = nodes[0]?.data?.details?.location;
+
+      if (id) {
+        // Update existing trip
+        const { error } = await supabase
+          .from('trips')
+          .update({
+            title,
+            destination: firstSegmentLocation || "Unknown",
+            segments: segments,
+            updated_at: new Date().toISOString(),
+          })
+          .eq('id', id);
+
+        if (error) throw error;
+        toast.success("Trip updated successfully!");
+      } else {
+        // Create new trip
+        const { error } = await supabase
+          .from('trips')
+          .insert({
+            user_id: profile.id,
+            title: title,
+            destination: firstSegmentLocation || "Unknown",
+            travelers: trip?.travelers || 1,
+            segments: segments
+          });
+
+        if (error) throw error;
+        toast.success("Trip created successfully!");
+      }
+      
+      navigate('/');
     } catch (error: any) {
-      toast.error("Failed to save changes");
+      toast.error(error.message);
       console.error("Save error:", error);
     }
   };
