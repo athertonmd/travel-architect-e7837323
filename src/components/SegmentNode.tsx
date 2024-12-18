@@ -1,27 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { Handle, Position } from "@xyflow/react";
-import { useCallback } from "react";
+import { SegmentNodeData } from "@/types/segment";
 
-type SegmentDetails = {
-  notes?: string;
-  time?: string;
-  location?: string;
-};
-
-export function SegmentNode({ data, id, selected }: { data: { label: string; icon: string; details?: SegmentDetails; onSelect?: (id: string) => void }; id: string; selected?: boolean }) {
-  const handleClick = useCallback((event: React.MouseEvent) => {
-    // Stop propagation to prevent the flow from deselecting the node
-    event.stopPropagation();
-    data.onSelect?.(id);
-  }, [id, data]);
-
+export function SegmentNode({ data, id, selected }: { 
+  data: SegmentNodeData; 
+  id: string; 
+  selected?: boolean 
+}) {
   return (
     <>
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
         className={`min-w-40 justify-start gap-2 bg-white drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
-        onClick={handleClick}
       >
         <span>{data.icon}</span>
         {data.label}

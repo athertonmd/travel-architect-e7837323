@@ -13,11 +13,10 @@ export interface SegmentDetails {
   seatNumber?: string;
 }
 
-export interface SegmentNodeData extends Record<string, unknown> {
+export interface SegmentNodeData {
   label: string;
   icon: string;
-  details: SegmentDetails;
-  onSelect?: (id: string) => void;
+  details?: SegmentDetails;
 }
 
 export interface SegmentData {

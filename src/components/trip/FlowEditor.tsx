@@ -38,7 +38,6 @@ export const FlowEditor = ({
   const { reorganizeNodes, updateEdges } = useFlowManagement();
 
   const handleNodeSelect = useCallback((nodes: Node<SegmentNodeData>[]) => {
-    console.log('Selection changed:', nodes); // Add this for debugging
     if (onNodeSelect) {
       onNodeSelect(nodes[0] || null);
     }
@@ -54,8 +53,7 @@ export const FlowEditor = ({
       if (onNodesUpdate) {
         onNodesUpdate(updatedNodes);
       }
-    },
-    onNodeSelect: handleNodeSelect
+    }
   });
 
   const onConnect = useCallback(
@@ -86,11 +84,6 @@ export const FlowEditor = ({
     });
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
-  const onSelectionChange = useCallback(({ nodes: selectedNodes }) => {
-    console.log('Selection change event:', selectedNodes); // Add this for debugging
-    handleNodeSelect(selectedNodes);
-  }, [handleNodeSelect]);
-
   return (
     <div className="h-full bg-white">
       <ReactFlow
@@ -103,7 +96,7 @@ export const FlowEditor = ({
         onDrop={onDrop}
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}
-        onSelectionChange={onSelectionChange}
+        onSelectionChange={({ nodes }) => handleNodeSelect(nodes)}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         deleteKeyCode={readOnly ? null : "Delete"}

@@ -2,16 +2,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Node } from "@xyflow/react";
 import { FlightSegmentForm } from "./segments/FlightSegmentForm";
-import { SegmentDetails as ISegmentDetails } from "@/types/segment";
-
-type SegmentNodeData = {
-  label: string;
-  icon: string;
-  details?: ISegmentDetails;
-};
+import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segment";
 
 type SegmentDetailsProps = {
-  selectedNode: (Node<SegmentNodeData> | null);
+  selectedNode: Node<SegmentNodeData> | null;
   onDetailsChange: (nodeId: string, details: ISegmentDetails) => void;
 };
 

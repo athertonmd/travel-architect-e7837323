@@ -9,10 +9,9 @@ interface FlowDragDropProps {
   nodes: Node<SegmentNodeData>[];
   readOnly?: boolean;
   onNodesChange: (nodes: Node<SegmentNodeData>[]) => void;
-  onNodeSelect?: (nodes: Node<SegmentNodeData>[]) => void;
 }
 
-export function useFlowDragDrop({ nodes, readOnly, onNodesChange, onNodeSelect }: FlowDragDropProps) {
+export function useFlowDragDrop({ nodes, readOnly, onNodesChange }: FlowDragDropProps) {
   const onDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = "move";
