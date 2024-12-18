@@ -35,7 +35,7 @@ export function useTripData(id: string | undefined, setNodes: (nodes: Node<Segme
       setTitle(data.title);
       
       if (data.segments) {
-        const segments = data.segments as TripSegments;
+        const segments = data.segments as unknown as TripSegments;
         console.log('Processing segments:', segments);
         
         const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({

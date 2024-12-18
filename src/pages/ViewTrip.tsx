@@ -51,7 +51,7 @@ const ViewTrip = () => {
         .update({
           title,
           destination: firstSegmentLocation,
-          segments,
+          segments: segments as any,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
