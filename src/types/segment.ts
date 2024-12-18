@@ -32,7 +32,6 @@ export type SegmentData = {
 
 export type TripSegments = SegmentData[];
 
-// Helper type for Supabase JSON compatibility
 export type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
 
 export type SupabaseJsonSegment = {

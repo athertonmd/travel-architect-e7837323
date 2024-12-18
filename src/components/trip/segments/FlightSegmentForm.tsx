@@ -10,10 +10,12 @@ interface FlightSegmentFormProps {
 
 export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFormProps) {
   const handleChange = (field: keyof SegmentDetails, value: string | boolean) => {
-    onDetailsChange({
+    const updatedDetails = {
       ...details,
       [field]: value,
-    });
+    };
+    console.log('Updating flight details:', updatedDetails);
+    onDetailsChange(updatedDetails);
   };
 
   return (
@@ -31,8 +33,8 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
       <div className="flex items-center space-x-2">
         <Checkbox
           id="isOneWay"
-          checked={details.isOneWay || false}
-          onCheckedChange={(checked) => handleChange("isOneWay", checked)}
+          checked={details.isOneWay as boolean || false}
+          onCheckedChange={(checked) => handleChange("isOneWay", checked as boolean)}
         />
         <Label htmlFor="isOneWay">One Way Flight</Label>
       </div>
