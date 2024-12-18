@@ -25,7 +25,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Input
           id="departureDate"
           type="datetime-local"
-          value={details.departureDate || ""}
+          value={details.departureDate as string || ""}
           onChange={(e) => handleChange("departureDate", e.target.value)}
         />
       </div>
@@ -45,7 +45,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
           <Input
             id="returnDate"
             type="datetime-local"
-            value={details.returnDate || ""}
+            value={details.returnDate as string || ""}
             onChange={(e) => handleChange("returnDate", e.target.value)}
           />
         </div>
@@ -55,7 +55,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="departureAirport">Departure Airport</Label>
         <Input
           id="departureAirport"
-          value={details.departureAirport || ""}
+          value={details.departureAirport as string || ""}
           onChange={(e) => handleChange("departureAirport", e.target.value)}
           placeholder="e.g., LAX"
         />
@@ -65,7 +65,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="destinationAirport">Destination Airport</Label>
         <Input
           id="destinationAirport"
-          value={details.destinationAirport || ""}
+          value={details.destinationAirport as string || ""}
           onChange={(e) => handleChange("destinationAirport", e.target.value)}
           placeholder="e.g., JFK"
         />
@@ -75,7 +75,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="flightNumber">Flight Number</Label>
         <Input
           id="flightNumber"
-          value={details.flightNumber || ""}
+          value={details.flightNumber as string || ""}
           onChange={(e) => handleChange("flightNumber", e.target.value)}
           placeholder="e.g., AA123"
         />
@@ -85,7 +85,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="cabinClass">Cabin Class</Label>
         <Input
           id="cabinClass"
-          value={details.cabinClass || ""}
+          value={details.cabinClass as string || ""}
           onChange={(e) => handleChange("cabinClass", e.target.value)}
           placeholder="e.g., Business"
         />
@@ -95,7 +95,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="seatNumber">Seat Number</Label>
         <Input
           id="seatNumber"
-          value={details.seatNumber || ""}
+          value={details.seatNumber as string || ""}
           onChange={(e) => handleChange("seatNumber", e.target.value)}
           placeholder="e.g., 12A"
         />
