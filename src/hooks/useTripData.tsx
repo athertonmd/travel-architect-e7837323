@@ -2,11 +2,15 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Node } from "@xyflow/react";
-import { SegmentNodeData, SegmentData, TripSegments } from "@/types/segment";
+import { SegmentNodeData, SegmentData, TripSegments, SupabaseSegment } from "@/types/segment";
 import { segmentIcons } from "@/utils/segmentIcons";
 import { CANVAS_CENTER, VERTICAL_SPACING, TOP_MARGIN } from "@/constants/layout";
 
-export function useTripData(id: string | undefined, setNodes: (nodes: Node<SegmentNodeData>[]) => void, setTitle: (title: string) => void) {
+export function useTripData(
+  id: string | undefined, 
+  setNodes: (nodes: Node<SegmentNodeData>[]) => void, 
+  setTitle: (title: string) => void
+) {
   return useQuery({
     queryKey: ['trip', id],
     queryFn: async () => {
@@ -35,7 +39,7 @@ export function useTripData(id: string | undefined, setNodes: (nodes: Node<Segme
       setTitle(data.title);
       
       if (data.segments && Array.isArray(data.segments)) {
-        const segments = data.segments as TripSegments;
+        const segments = data.segments as SupabaseSegment[];
         console.log('Processing segments:', segments);
         
         const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
@@ -48,7 +52,7 @@ export function useTripData(id: string | undefined, setNodes: (nodes: Node<Segme
           data: {
             label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
             icon: segmentIcons[segment.type as keyof typeof segmentIcons],
-            details: segment.details || {},
+            details: segment.details as SegmentDetails,
           },
           dragHandle: '.drag-handle',
         }));
