@@ -1,4 +1,4 @@
-export interface SegmentDetails {
+export interface SegmentDetails extends Record<string, unknown> {
   location?: string;
   time?: string;
   notes?: string;
@@ -15,7 +15,7 @@ export interface SegmentDetails {
   cabinClass?: string;
 }
 
-export interface SegmentNodeData {
+export interface SegmentNodeData extends Record<string, unknown> {
   label: string;
   icon: string;
   details?: SegmentDetails;
@@ -32,9 +32,9 @@ export interface SegmentData {
 
 export type TripSegments = SegmentData[];
 
-export interface SupabaseSegment {
+export interface SupabaseSegment extends Record<string, unknown> {
   type: string;
-  details: Record<string, unknown>;
+  details: SegmentDetails;
   position: {
     x: number;
     y: number;
