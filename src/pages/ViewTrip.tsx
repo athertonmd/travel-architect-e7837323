@@ -38,10 +38,7 @@ const ViewTrip = () => {
       const segments: SupabaseJsonSegment[] = nodes.map((node) => ({
         type: String(node.data.label).toLowerCase(),
         details: node.data.details || {},
-        position: {
-          x: node.position.x,
-          y: node.position.y
-        }
+        position: node.position
       }));
 
       const firstSegmentLocation = nodes[0]?.data?.details?.location || "Unknown";

@@ -58,7 +58,7 @@ export function useTripData(
         }
         
         const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => {
-          const node = {
+          const node: Node<SegmentNodeData> = {
             id: `${segment.type}-${index + 1}`,
             type: 'segment',
             position: segment.position || {
