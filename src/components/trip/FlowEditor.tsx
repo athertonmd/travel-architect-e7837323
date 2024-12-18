@@ -10,8 +10,15 @@ import {
   Controls,
   MiniMap,
   Panel,
-  BackgroundVariant
-} from "@xyflow/react";
+  BackgroundVariant,
+  NodeTypes,
+  EdgeTypes,
+  OnNodesChange,
+  OnEdgesChange,
+  OnConnect,
+  NodeDragHandler,
+  NodeMouseHandler
+} from '@xyflow/react';
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback } from "react";
 import { SegmentNodeData } from "@/types/segment";
@@ -28,11 +35,11 @@ interface FlowEditorProps {
   readOnly?: boolean;
 }
 
-const nodeTypes = {
+const nodeTypes: NodeTypes = {
   segment: SegmentNode,
 };
 
-const defaultEdgeOptions = {
+const defaultEdgeOptions: EdgeTypes = {
   style: {
     strokeWidth: 2,
     stroke: '#b1b1b7',
@@ -56,7 +63,7 @@ export const FlowEditor = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
 
-  const handleNodeSelect = useCallback((nodes: Node<SegmentNodeData>[]) => {
+  const handleNodeSelect: NodeMouseHandler = useCallback((_, nodes) => {
     if (onNodeSelect) {
       onNodeSelect(nodes[0] || null);
     }
@@ -75,12 +82,12 @@ export const FlowEditor = ({
     }
   });
 
-  const onConnect = useCallback(
-    (params: Connection | Edge) => setEdges((eds) => addEdge(params, eds)),
+  const onConnect: OnConnect = useCallback(
+    (params) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
 
-  const onNodeDragStop = useCallback(() => {
+  const onNodeDragStop: NodeDragHandler = useCallback(() => {
     if (readOnly) return;
     
     setNodes((nds) => {
@@ -122,7 +129,7 @@ export const FlowEditor = ({
         onDrop={onDrop}
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}
-        onSelectionChange={({ nodes }) => handleNodeSelect(nodes)}
+        onSelectionChange={({ nodes }) => handleNodeSelect(null, nodes)}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         deleteKeyCode={readOnly ? null : "Delete"}
