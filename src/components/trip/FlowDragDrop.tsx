@@ -9,7 +9,7 @@ interface FlowDragDropProps {
   nodes: Node<SegmentNodeData>[];
   readOnly?: boolean;
   onNodesChange: (nodes: Node<SegmentNodeData>[]) => void;
-  onNodeSelect?: (id: string) => void;
+  onNodeSelect?: (nodes: Node<SegmentNodeData>[]) => void;
 }
 
 export function useFlowDragDrop({ nodes, readOnly, onNodesChange, onNodeSelect }: FlowDragDropProps) {
@@ -42,14 +42,13 @@ export function useFlowDragDrop({ nodes, readOnly, onNodesChange, onNodeSelect }
           label: type.charAt(0).toUpperCase() + type.slice(1), 
           icon: segmentIcons[type as keyof typeof segmentIcons],
           details: {},
-          onSelect: onNodeSelect,
         },
         dragHandle: '.drag-handle',
       };
 
       onNodesChange([...nodes, newNode]);
     },
-    [nodes, onNodesChange, readOnly, onNodeSelect]
+    [nodes, onNodesChange, readOnly]
   );
 
   return {

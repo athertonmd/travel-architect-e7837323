@@ -7,7 +7,7 @@ import { SegmentDetails as ISegmentDetails } from "@/types/segment";
 type SegmentNodeData = {
   label: string;
   icon: string;
-  details: ISegmentDetails;
+  details?: ISegmentDetails;
 };
 
 type SegmentDetailsProps = {
