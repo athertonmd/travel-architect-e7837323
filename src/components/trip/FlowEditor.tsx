@@ -61,9 +61,10 @@ export const FlowEditor = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
 
-  const handleNodeSelect: NodeMouseHandler = useCallback((_, nodes) => {
+  const handleNodeSelect: NodeMouseHandler = useCallback((_, selectedNodes) => {
     if (onNodeSelect) {
-      onNodeSelect(nodes[0] || null);
+      const selectedNode = selectedNodes[0] as Node<SegmentNodeData> | undefined;
+      onNodeSelect(selectedNode || null);
     }
   }, [onNodeSelect]);
 
@@ -127,7 +128,7 @@ export const FlowEditor = ({
         onDrop={onDrop}
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}
-        onSelectionChange={({ nodes }) => handleNodeSelect(null, nodes)}
+        onSelectionChange={handleNodeSelect}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         deleteKeyCode={readOnly ? null : "Delete"}

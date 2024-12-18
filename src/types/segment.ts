@@ -18,7 +18,7 @@ export interface SegmentDetails extends Record<string, unknown> {
 export interface SegmentNodeData extends Record<string, unknown> {
   label: string;
   icon: string;
-  details?: SegmentDetails;
+  details: SegmentDetails;
 }
 
 export type SegmentData = {
