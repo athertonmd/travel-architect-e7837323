@@ -20,7 +20,6 @@ export interface SegmentNodeData extends Record<string, unknown> {
   label: string;
   icon: string;
   details?: SegmentDetails;
-  onSelect?: (id: string) => void;
 }
 
 export interface SegmentData {
@@ -31,3 +30,5 @@ export interface SegmentData {
     y: number;
   };
 }
+
+export type TripSegments = SegmentData[];

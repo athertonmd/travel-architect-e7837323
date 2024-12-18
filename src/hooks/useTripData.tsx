@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Node } from "@xyflow/react";
-import { SegmentNodeData, SegmentData } from "@/types/segment";
+import { SegmentNodeData, SegmentData, TripSegments } from "@/types/segment";
 import { segmentIcons } from "@/utils/segmentIcons";
 import { CANVAS_CENTER, VERTICAL_SPACING, TOP_MARGIN } from "@/constants/layout";
 
@@ -34,8 +34,8 @@ export function useTripData(id: string | undefined, setNodes: (nodes: Node<Segme
 
       setTitle(data.title);
       
-      if (data.segments && Array.isArray(data.segments)) {
-        const segments = data.segments as SegmentData[];
+      if (data.segments) {
+        const segments = data.segments as TripSegments;
         console.log('Processing segments:', segments);
         
         const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
