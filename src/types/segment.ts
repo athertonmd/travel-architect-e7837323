@@ -15,7 +15,7 @@ export interface SegmentDetails extends Record<string, unknown> {
   cabinClass?: string;
 }
 
-export interface SegmentNodeData extends Record<string, unknown> {
+export interface SegmentNodeData {
   label: string;
   icon: string;
   details: SegmentDetails;

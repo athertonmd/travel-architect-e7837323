@@ -15,7 +15,7 @@ import {
   OnNodesChange,
   OnEdgesChange,
   OnConnect,
-  NodeMouseHandler
+  OnSelectionChangeParams
 } from '@xyflow/react';
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback } from "react";
@@ -61,8 +61,8 @@ export const FlowEditor = ({
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
 
-  const handleNodeSelect: NodeMouseHandler = useCallback((_, selectedNodes) => {
-    if (onNodeSelect) {
+  const handleSelectionChange = useCallback(({ nodes: selectedNodes }: OnSelectionChangeParams) => {
+    if (onNodeSelect && selectedNodes) {
       const selectedNode = selectedNodes[0] as Node<SegmentNodeData> | undefined;
       onNodeSelect(selectedNode || null);
     }
@@ -128,7 +128,7 @@ export const FlowEditor = ({
         onDrop={onDrop}
         onNodeDragStop={onNodeDragStop}
         onNodesDelete={onNodesDelete}
-        onSelectionChange={handleNodeSelect}
+        onSelectionChange={handleSelectionChange}
         nodeTypes={nodeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
         deleteKeyCode={readOnly ? null : "Delete"}
