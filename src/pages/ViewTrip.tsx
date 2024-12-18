@@ -51,7 +51,7 @@ const ViewTrip = () => {
         .update({
           title,
           destination: firstSegmentLocation,
-          segments: JSON.stringify(segments),
+          segments, // Remove JSON.stringify here since Supabase will handle the conversion
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
