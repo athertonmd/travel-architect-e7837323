@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { Node } from "@xyflow/react";
-import { SegmentNodeData, SupabaseSegment } from "@/types/segment";
+import { SegmentNodeData, SupabaseJsonSegment } from "@/types/segment";
 import { segmentIcons } from "@/utils/segmentIcons";
 
 const CANVAS_CENTER = 400;
@@ -45,7 +45,7 @@ export function useTripData(
       setTitle(data.title);
       
       if (data.segments) {
-        let segments: SupabaseSegment[];
+        let segments: SupabaseJsonSegment[];
         try {
           segments = typeof data.segments === 'string' 
             ? JSON.parse(data.segments) 

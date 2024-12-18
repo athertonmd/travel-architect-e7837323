@@ -1,4 +1,4 @@
-export interface SegmentDetails extends Record<string, unknown> {
+export interface SegmentDetails {
   location?: string;
   time?: string;
   notes?: string;
@@ -15,13 +15,13 @@ export interface SegmentDetails extends Record<string, unknown> {
   cabinClass?: string;
 }
 
-export interface SegmentNodeData extends Record<string, unknown> {
+export interface SegmentNodeData {
   label: string;
   icon: string;
   details?: SegmentDetails;
 }
 
-export interface SegmentData {
+export type SegmentData = {
   type: string;
   details: SegmentDetails;
   position: {
@@ -34,7 +34,19 @@ export type TripSegments = SegmentData[];
 
 export type SupabaseSegment = {
   type: string;
-  details: Record<string, unknown>;
+  details: SegmentDetails;
+  position: {
+    x: number;
+    y: number;
+  };
+}
+
+// Helper type for Supabase JSON compatibility
+export type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
+
+export type SupabaseJsonSegment = {
+  type: string;
+  details: { [key: string]: JsonValue };
   position: {
     x: number;
     y: number;

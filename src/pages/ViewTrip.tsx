@@ -11,8 +11,7 @@ import { useNodeManagement } from "@/hooks/useNodeManagement";
 import { useTripData } from "@/hooks/useTripData";
 import { TripHeader } from "@/components/trip/TripHeader";
 import { Node } from "@xyflow/react";
-import { SegmentNodeData, SupabaseSegment } from "@/types/segment";
-import { segmentIcons } from "@/utils/segmentIcons";
+import { SegmentNodeData, SupabaseJsonSegment } from "@/types/segment";
 
 const ViewTrip = () => {
   const { id } = useParams();
@@ -36,7 +35,7 @@ const ViewTrip = () => {
         return;
       }
 
-      const segments: SupabaseSegment[] = nodes.map((node) => ({
+      const segments: SupabaseJsonSegment[] = nodes.map((node) => ({
         type: String(node.data.label).toLowerCase(),
         details: node.data.details || {},
         position: {
