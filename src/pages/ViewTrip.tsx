@@ -30,54 +30,35 @@ const ViewTrip = () => {
 
   const handleSave = async () => {
     try {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .single();
-
-      if (!profile) {
-        toast.error("Profile not found");
+      if (!id) {
+        toast.error("Invalid trip ID");
         return;
       }
 
       const segments = nodes.map((node: Node<SegmentNodeData>) => ({
         type: String(node.data.label).toLowerCase(),
-        details: node.data.details,
-        position: node.position
+        details: node.data.details || {},
+        position: {
+          x: node.position.x,
+          y: node.position.y
+        }
       }));
 
-      const firstSegmentLocation = nodes[0]?.data?.details?.location;
+      const firstSegmentLocation = nodes[0]?.data?.details?.location || "Unknown";
 
-      if (id) {
-        // Update existing trip
-        const { error } = await supabase
-          .from('trips')
-          .update({
-            title,
-            destination: firstSegmentLocation || "Unknown",
-            segments: segments,
-            updated_at: new Date().toISOString(),
-          })
-          .eq('id', id);
+      const { error } = await supabase
+        .from('trips')
+        .update({
+          title,
+          destination: firstSegmentLocation,
+          segments: segments,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', id);
 
-        if (error) throw error;
-        toast.success("Trip updated successfully!");
-      } else {
-        // Create new trip
-        const { error } = await supabase
-          .from('trips')
-          .insert({
-            user_id: profile.id,
-            title: title,
-            destination: firstSegmentLocation || "Unknown",
-            travelers: trip?.travelers || 1,
-            segments: segments
-          });
-
-        if (error) throw error;
-        toast.success("Trip created successfully!");
-      }
+      if (error) throw error;
       
+      toast.success("Trip updated successfully!");
       navigate('/');
     } catch (error: any) {
       toast.error(error.message);

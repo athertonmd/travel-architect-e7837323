@@ -1,4 +1,4 @@
-export interface SegmentDetails {
+export interface SegmentDetails extends Record<string, unknown> {
   location?: string;
   time?: string;
   date?: string;
@@ -8,6 +8,12 @@ export interface SegmentDetails {
   terminal?: string;
   gate?: string;
   seatNumber?: string;
+  departureDate?: string;
+  returnDate?: string;
+  isOneWay?: boolean;
+  departureAirport?: string;
+  destinationAirport?: string;
+  cabinClass?: string;
 }
 
 export interface SegmentNodeData extends Record<string, unknown> {
@@ -15,4 +21,13 @@ export interface SegmentNodeData extends Record<string, unknown> {
   icon: string;
   details?: SegmentDetails;
   onSelect?: (id: string) => void;
+}
+
+export interface SegmentData {
+  type: string;
+  details: SegmentDetails;
+  position: {
+    x: number;
+    y: number;
+  };
 }

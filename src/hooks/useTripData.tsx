@@ -35,12 +35,13 @@ export function useTripData(id: string | undefined, setNodes: (nodes: Node<Segme
       setTitle(data.title);
       
       if (data.segments && Array.isArray(data.segments)) {
-        console.log('Processing segments:', data.segments);
+        const segments = data.segments as SegmentData[];
+        console.log('Processing segments:', segments);
         
-        const initialNodes: Node<SegmentNodeData>[] = (data.segments as unknown as SegmentData[]).map((segment, index) => ({
+        const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => ({
           id: `${segment.type}-${index + 1}`,
           type: 'segment',
-          position: {
+          position: segment.position || {
             x: CANVAS_CENTER - 100,
             y: TOP_MARGIN + (index * VERTICAL_SPACING)
           },
@@ -48,10 +49,6 @@ export function useTripData(id: string | undefined, setNodes: (nodes: Node<Segme
             label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
             icon: segmentIcons[segment.type as keyof typeof segmentIcons],
             details: segment.details || {},
-            onSelect: (id: string) => {
-              const node = initialNodes.find(n => n.id === id);
-              // Note: handleNodeSelect will be passed through props
-            }
           },
           dragHandle: '.drag-handle',
         }));
