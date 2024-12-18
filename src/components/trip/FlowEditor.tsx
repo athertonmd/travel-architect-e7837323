@@ -1,10 +1,24 @@
-import { ReactFlow, Connection, Edge, useNodesState, useEdgesState, addEdge, Node, Background, Controls } from "@xyflow/react";
+import { 
+  ReactFlow, 
+  Connection, 
+  Edge, 
+  useNodesState, 
+  useEdgesState, 
+  addEdge, 
+  Node, 
+  Background, 
+  Controls,
+  MiniMap,
+  Panel,
+  BackgroundVariant
+} from "@xyflow/react";
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback } from "react";
 import { SegmentNodeData } from "@/types/segment";
 import { FlowConfig } from "./FlowConfig";
 import { useFlowDragDrop } from "./FlowDragDrop";
 import { useFlowManagement } from "@/hooks/useFlowManagement";
+import { Button } from "../ui/button";
 import "@xyflow/react/dist/style.css";
 
 interface FlowEditorProps {
@@ -24,7 +38,12 @@ const defaultEdgeOptions = {
     stroke: '#b1b1b7',
   },
   type: 'smoothstep',
-  animated: false,
+  animated: true,
+};
+
+const minimapStyle = {
+  height: 120,
+  width: 160,
 };
 
 export const FlowEditor = ({ 
@@ -84,6 +103,13 @@ export const FlowEditor = ({
     });
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
+  const fitView = useCallback(() => {
+    const flowInstance = document.querySelector('.react-flow__viewport');
+    if (flowInstance) {
+      flowInstance.setAttribute('transform', 'translate(0,0) scale(1)');
+    }
+  }, []);
+
   return (
     <div className="h-full bg-white">
       <ReactFlow
@@ -108,8 +134,39 @@ export const FlowEditor = ({
         fitView
       >
         <FlowConfig>
-          <Background />
-          <Controls />
+          <Panel position="top-right" className="bg-background/60 p-2 rounded-lg backdrop-blur-sm">
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={fitView}
+              className="text-xs"
+            >
+              Reset View
+            </Button>
+          </Panel>
+          <Background 
+            variant={BackgroundVariant.Dots} 
+            gap={12} 
+            size={1}
+            color="#e5e7eb"
+          />
+          <Controls 
+            className="bg-background/60 backdrop-blur-sm"
+            showInteractive={false}
+          />
+          <MiniMap 
+            style={minimapStyle}
+            className="bg-background/60 backdrop-blur-sm"
+            nodeColor={(node) => {
+              switch (node.type) {
+                case 'segment':
+                  return '#93c5fd';
+                default:
+                  return '#e5e7eb';
+              }
+            }}
+            maskColor="rgba(0, 0, 0, 0.1)"
+          />
         </FlowConfig>
       </ReactFlow>
     </div>
