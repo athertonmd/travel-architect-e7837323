@@ -12,11 +12,9 @@ import {
   Panel,
   BackgroundVariant,
   NodeTypes,
-  EdgeTypes,
   OnNodesChange,
   OnEdgesChange,
   OnConnect,
-  NodeDragHandler,
   NodeMouseHandler
 } from '@xyflow/react';
 import { SegmentNode } from "@/components/SegmentNode";
@@ -39,7 +37,7 @@ const nodeTypes: NodeTypes = {
   segment: SegmentNode,
 };
 
-const defaultEdgeOptions: EdgeTypes = {
+const defaultEdgeOptions = {
   style: {
     strokeWidth: 2,
     stroke: '#b1b1b7',
@@ -87,7 +85,7 @@ export const FlowEditor = ({
     [setEdges]
   );
 
-  const onNodeDragStop: NodeDragHandler = useCallback(() => {
+  const onNodeDragStop = useCallback(() => {
     if (readOnly) return;
     
     setNodes((nds) => {

@@ -12,6 +12,7 @@ import { useTripData } from "@/hooks/useTripData";
 import { TripHeader } from "@/components/trip/TripHeader";
 import { Node } from "@xyflow/react";
 import { SegmentNodeData, SupabaseSegment } from "@/types/segment";
+import { segmentIcons } from "@/utils/segmentIcons";
 
 const ViewTrip = () => {
   const { id } = useParams();
@@ -51,7 +52,7 @@ const ViewTrip = () => {
         .update({
           title,
           destination: firstSegmentLocation,
-          segments, // Remove JSON.stringify here since Supabase will handle the conversion
+          segments,
           updated_at: new Date().toISOString(),
         })
         .eq('id', id);
