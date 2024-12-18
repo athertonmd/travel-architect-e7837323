@@ -32,7 +32,7 @@ export interface SegmentData {
 
 export type TripSegments = SegmentData[];
 
-export interface SupabaseSegment extends Record<string, unknown> {
+export type SupabaseSegment = {
   type: string;
   details: SegmentDetails;
   position: {
