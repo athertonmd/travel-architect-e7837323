@@ -3,6 +3,8 @@ import { Label } from "@/components/ui/label";
 import { Node } from "@xyflow/react";
 import { FlightSegmentForm } from "./segments/FlightSegmentForm";
 import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segment";
+import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 type SegmentDetailsProps = {
   selectedNode: Node<SegmentNodeData> | null;
@@ -23,6 +25,10 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   const handleDetailsChange = (newDetails: ISegmentDetails) => {
     console.log('Details changing:', newDetails);
     onDetailsChange(selectedNode.id, newDetails);
+  };
+
+  const handleSave = () => {
+    toast.success("Segment details saved successfully!");
   };
 
   const renderSegmentForm = () => {
@@ -72,6 +78,12 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
       </div>
       
       {renderSegmentForm()}
+
+      <div className="mt-6">
+        <Button onClick={handleSave} className="w-full">
+          Save Details
+        </Button>
+      </div>
     </div>
   );
 }
