@@ -4,16 +4,19 @@ import { DefaultSegmentForm } from "./segments/DefaultSegmentForm";
 import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segment";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Trash2 } from "lucide-react";
 import { memo, useCallback, useRef, useState, useEffect } from "react";
+import { SegmentHeader } from "./segments/SegmentHeader";
+import { SegmentFormContainer } from "./segments/SegmentFormContainer";
 
 type SegmentDetailsProps = {
   selectedNode: Node<SegmentNodeData> | null;
   onDetailsChange: (nodeId: string, details: ISegmentDetails) => void;
 };
 
-const areDetailsEqual = (prevProps: { details: ISegmentDetails; onDetailsChange: any }, 
-                        nextProps: { details: ISegmentDetails; onDetailsChange: any }) => {
+const areDetailsEqual = (
+  prevProps: { details: ISegmentDetails; onDetailsChange: any }, 
+  nextProps: { details: ISegmentDetails; onDetailsChange: any }
+) => {
   return JSON.stringify(prevProps.details) === JSON.stringify(nextProps.details);
 };
 
@@ -83,18 +86,13 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
     };
 
     return (
-      <div 
-        onClick={stopPropagation} 
-        onMouseDown={stopPropagation}
-        onPointerDown={stopPropagation}
-        className="segment-form-container"
-      >
+      <SegmentFormContainer onInteraction={stopPropagation}>
         {type === "flight" ? (
           <MemoizedFlightForm {...formProps} />
         ) : (
           <MemoizedDefaultForm {...formProps} />
         )}
-      </div>
+      </SegmentFormContainer>
     );
   };
 
@@ -106,20 +104,11 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
       onMouseDown={stopPropagation}
       onPointerDown={stopPropagation}
     >
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center gap-2">
-          <span className="text-2xl">{selectedNode.data.icon}</span>
-          <h3 className="font-semibold">{selectedNode.data.label} Details</h3>
-        </div>
-        <Button 
-          variant="ghost" 
-          size="icon"
-          onClick={handleDelete}
-          className="text-red-500 hover:text-red-600 hover:bg-red-50"
-        >
-          <Trash2 className="h-4 w-4" />
-        </Button>
-      </div>
+      <SegmentHeader 
+        icon={selectedNode.data.icon}
+        label={selectedNode.data.label}
+        onDelete={handleDelete}
+      />
       
       {renderSegmentForm()}
 
