@@ -1,6 +1,7 @@
 import { Node } from "@xyflow/react";
 import { FlightSegmentForm } from "./segments/FlightSegmentForm";
 import { DefaultSegmentForm } from "./segments/DefaultSegmentForm";
+import { HotelSegmentForm } from "./segments/HotelSegmentForm";
 import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segment";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -28,6 +29,15 @@ const MemoizedFlightForm = memo(({ details, onDetailsChange }: {
 ), areDetailsEqual);
 
 MemoizedFlightForm.displayName = 'MemoizedFlightForm';
+
+const MemoizedHotelForm = memo(({ details, onDetailsChange }: {
+  details: ISegmentDetails;
+  onDetailsChange: (details: ISegmentDetails) => void;
+}) => (
+  <HotelSegmentForm details={details} onDetailsChange={onDetailsChange} />
+), areDetailsEqual);
+
+MemoizedHotelForm.displayName = 'MemoizedHotelForm';
 
 const MemoizedDefaultForm = memo(({ details, onDetailsChange }: {
   details: ISegmentDetails;
@@ -89,6 +99,8 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
       <SegmentFormContainer onInteraction={stopPropagation}>
         {type === "flight" ? (
           <MemoizedFlightForm {...formProps} />
+        ) : type === "hotel" ? (
+          <MemoizedHotelForm {...formProps} />
         ) : (
           <MemoizedDefaultForm {...formProps} />
         )}
