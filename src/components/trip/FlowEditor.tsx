@@ -1,26 +1,18 @@
-import { 
-  ReactFlow,
+import {
   Connection,
   Edge,
   Node,
   useNodesState,
   useEdgesState,
   addEdge,
-  OnNodesChange,
-  OnEdgesChange,
-  OnConnect,
   OnSelectionChangeParams,
-  useReactFlow,
-  NodeTypes,
   ReactFlowProvider,
 } from '@xyflow/react';
-import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback, useEffect } from "react";
 import { SegmentNodeData } from "@/types/segment";
 import { useFlowDragDrop } from "./FlowDragDrop";
 import { useFlowManagement } from "@/hooks/useFlowManagement";
-import { FlowConfiguration } from "./flow/FlowConfiguration";
-import "@xyflow/react/dist/style.css";
+import { FlowContent } from "./flow/FlowContent";
 
 interface FlowEditorProps {
   onNodesChange?: (nodes: Node<SegmentNodeData>[]) => void;
@@ -28,19 +20,6 @@ interface FlowEditorProps {
   initialNodes?: Node<SegmentNodeData>[];
   readOnly?: boolean;
 }
-
-const nodeTypes: NodeTypes = {
-  segment: SegmentNode,
-};
-
-const defaultEdgeOptions = {
-  style: {
-    strokeWidth: 2,
-    stroke: '#b1b1b7',
-  },
-  type: 'smoothstep',
-  animated: true,
-};
 
 const FlowEditorContent = ({ 
   onNodesChange: onNodesUpdate, 
@@ -51,19 +30,14 @@ const FlowEditorContent = ({
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<SegmentNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
-  const { fitView } = useReactFlow();
 
   useEffect(() => {
     if (initialNodes.length > 0) {
       const updatedNodes = reorganizeNodes(initialNodes);
       setNodes(updatedNodes);
       setEdges(updateEdges(updatedNodes));
-      
-      setTimeout(() => {
-        fitView({ padding: 0.2, duration: 200 });
-      }, 100);
     }
-  }, [initialNodes, reorganizeNodes, setNodes, setEdges, updateEdges, fitView]);
+  }, [initialNodes, reorganizeNodes, setNodes, setEdges, updateEdges]);
 
   const handleSelectionChange = useCallback(({ nodes: selectedNodes }: OnSelectionChangeParams) => {
     if (onNodeSelect) {
@@ -85,8 +59,8 @@ const FlowEditorContent = ({
     }
   });
 
-  const onConnect: OnConnect = useCallback(
-    (params) => setEdges((eds) => addEdge(params, eds)),
+  const onConnect = useCallback(
+    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
     [setEdges]
   );
 
@@ -113,38 +87,20 @@ const FlowEditorContent = ({
     });
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
-  const handleFitView = useCallback(() => {
-    fitView({ padding: 0.2, duration: 200 });
-  }, [fitView]);
-
   return (
-    <div className="h-full bg-gray-50/80">
-      <ReactFlow
-        nodes={nodes}
-        edges={edges}
-        onNodesChange={readOnly ? undefined : onNodesChange}
-        onEdgesChange={readOnly ? undefined : onEdgesChange}
-        onConnect={readOnly ? undefined : onConnect}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
-        onNodeDragStop={onNodeDragStop}
-        onNodesDelete={onNodesDelete}
-        onSelectionChange={handleSelectionChange}
-        nodeTypes={nodeTypes}
-        defaultEdgeOptions={defaultEdgeOptions}
-        deleteKeyCode={readOnly ? null : "Delete"}
-        multiSelectionKeyCode={readOnly ? null : "Shift"}
-        selectionOnDrag={!readOnly}
-        nodesDraggable={!readOnly}
-        nodesConnectable={!readOnly}
-        elementsSelectable={!readOnly}
-        selectNodesOnDrag={false}
-      >
-        <FlowConfiguration onFitView={handleFitView}>
-          {/* Flow controls will be rendered here */}
-        </FlowConfiguration>
-      </ReactFlow>
-    </div>
+    <FlowContent
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onConnect={onConnect}
+      onNodeDragStop={onNodeDragStop}
+      onNodesDelete={onNodesDelete}
+      onSelectionChange={handleSelectionChange}
+      onDragOver={onDragOver}
+      onDrop={onDrop}
+      readOnly={readOnly}
+    />
   );
 };
 
