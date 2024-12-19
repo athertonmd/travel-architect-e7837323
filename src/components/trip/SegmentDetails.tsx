@@ -12,13 +12,17 @@ type SegmentDetailsProps = {
   onDetailsChange: (nodeId: string, details: ISegmentDetails) => void;
 };
 
-// Create memoized form components to prevent unnecessary re-renders
+const areDetailsEqual = (prevProps: { details: ISegmentDetails; onDetailsChange: any }, 
+                        nextProps: { details: ISegmentDetails; onDetailsChange: any }) => {
+  return JSON.stringify(prevProps.details) === JSON.stringify(nextProps.details);
+};
+
 const MemoizedFlightForm = memo(({ details, onDetailsChange }: { 
   details: ISegmentDetails; 
   onDetailsChange: (details: ISegmentDetails) => void;
 }) => (
   <FlightSegmentForm details={details} onDetailsChange={onDetailsChange} />
-));
+), areDetailsEqual);
 
 MemoizedFlightForm.displayName = 'MemoizedFlightForm';
 
@@ -27,7 +31,7 @@ const MemoizedDefaultForm = memo(({ details, onDetailsChange }: {
   onDetailsChange: (details: ISegmentDetails) => void;
 }) => (
   <DefaultSegmentForm details={details} onDetailsChange={onDetailsChange} />
-));
+), areDetailsEqual);
 
 MemoizedDefaultForm.displayName = 'MemoizedDefaultForm';
 
