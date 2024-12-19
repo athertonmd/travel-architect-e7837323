@@ -11,7 +11,7 @@ import {
   NodeTypes,
 } from '@xyflow/react';
 import { SegmentNode } from "@/components/SegmentNode";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { SegmentNodeData } from "@/types/segment";
 import { FlowConfiguration } from "./FlowConfiguration";
 import "@xyflow/react/dist/style.css";
@@ -61,6 +61,18 @@ export function FlowContent({
   const handleFitView = useCallback(() => {
     fitView({ padding: 0.2, duration: 200 });
   }, [fitView]);
+
+  // Add useEffect to center the view when nodes change or component mounts
+  useEffect(() => {
+    // Small timeout to ensure nodes are rendered
+    const timer = setTimeout(() => {
+      if (nodes.length > 0) {
+        fitView({ padding: 0.2, duration: 200 });
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [nodes, fitView]);
 
   return (
     <div className="h-full bg-gray-50/80">
