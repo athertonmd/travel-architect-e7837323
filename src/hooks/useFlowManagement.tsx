@@ -11,15 +11,22 @@ export function useFlowManagement() {
     const DEFAULT_NODE_WIDTH = 160;
     
     return sortedNodes.map((node, index) => {
-      // Get the node's width or use default
-      const nodeWidth = node.width || DEFAULT_NODE_WIDTH;
+      // Get the actual node width from the measured width, or fall back to style width, or use default
+      const nodeWidth = node.width || 
+                       (node.style?.width as number) || 
+                       DEFAULT_NODE_WIDTH;
       
       return {
         ...node,
+        // Ensure the node is centered by calculating its position relative to the canvas center
         position: {
-          // Center the node by subtracting half its width from the canvas center
-          x: CANVAS_CENTER - (nodeWidth / 2),
-          y: index === 0 ? TOP_MARGIN : TOP_MARGIN + (index * VERTICAL_SPACING)
+          x: Math.round(CANVAS_CENTER - (nodeWidth / 2)),
+          y: TOP_MARGIN + (index * VERTICAL_SPACING)
+        },
+        // Store the width in the node's style to maintain consistency
+        style: {
+          ...node.style,
+          width: nodeWidth,
         }
       };
     });
