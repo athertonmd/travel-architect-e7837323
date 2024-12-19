@@ -32,7 +32,30 @@ const MemoizedDefaultForm = memo(({ details, onDetailsChange }: {
 MemoizedDefaultForm.displayName = 'MemoizedDefaultForm';
 
 export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetailsProps) {
+  // All hooks at the top level
   const panelRef = useRef<HTMLDivElement>(null);
+  
+  const handleDetailsChange = useCallback((newDetails: ISegmentDetails) => {
+    if (selectedNode) {
+      console.log('Details changing:', newDetails);
+      onDetailsChange(selectedNode.id, newDetails);
+    }
+  }, [selectedNode, onDetailsChange]);
+
+  const stopPropagation = useCallback((e: React.MouseEvent | React.FocusEvent) => {
+    e.stopPropagation();
+    e.preventDefault();
+  }, []);
+
+  const handleSave = useCallback(() => {
+    toast.success("Segment details saved successfully!");
+  }, []);
+
+  const handleDelete = useCallback(() => {
+    const event = new KeyboardEvent('keydown', { key: 'Delete' });
+    document.dispatchEvent(event);
+    toast.success("Segment deleted successfully!");
+  }, []);
 
   if (!selectedNode) {
     return (
@@ -43,27 +66,6 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   }
 
   const details = selectedNode.data.details || {};
-
-  const handleDetailsChange = useCallback((newDetails: ISegmentDetails) => {
-    console.log('Details changing:', newDetails);
-    onDetailsChange(selectedNode.id, newDetails);
-  }, [selectedNode.id, onDetailsChange]);
-
-  const handleSave = () => {
-    toast.success("Segment details saved successfully!");
-  };
-
-  const handleDelete = () => {
-    const event = new KeyboardEvent('keydown', { key: 'Delete' });
-    document.dispatchEvent(event);
-    toast.success("Segment deleted successfully!");
-  };
-
-  // Enhanced event handling to prevent panel closure
-  const stopPropagation = useCallback((e: React.MouseEvent | React.FocusEvent) => {
-    e.stopPropagation();
-    e.preventDefault();
-  }, []);
 
   const renderSegmentForm = () => {
     const type = selectedNode.data.label.toLowerCase();
