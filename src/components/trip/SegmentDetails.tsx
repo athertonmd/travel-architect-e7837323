@@ -32,7 +32,6 @@ const MemoizedDefaultForm = memo(({ details, onDetailsChange }: {
 MemoizedDefaultForm.displayName = 'MemoizedDefaultForm';
 
 export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetailsProps) {
-  // All hooks at the top level
   const panelRef = useRef<HTMLDivElement>(null);
   
   const handleDetailsChange = useCallback((newDetails: ISegmentDetails) => {
@@ -44,7 +43,6 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   const stopPropagation = useCallback((e: React.MouseEvent | React.FocusEvent) => {
     e.stopPropagation();
-    e.preventDefault();
   }, []);
 
   const handleSave = useCallback(() => {
@@ -77,7 +75,6 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
     return (
       <div 
         onClick={stopPropagation} 
-        onFocus={stopPropagation}
         onMouseDown={stopPropagation}
         onPointerDown={stopPropagation}
         className="segment-form-container"
@@ -96,7 +93,6 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
       ref={panelRef}
       className="h-full p-4 bg-white" 
       onClick={stopPropagation}
-      onFocus={stopPropagation}
       onMouseDown={stopPropagation}
       onPointerDown={stopPropagation}
     >
