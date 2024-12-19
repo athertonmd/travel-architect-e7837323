@@ -37,6 +37,26 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
       </div>
 
       <div className="grid gap-2">
+        <Label htmlFor="departureAirport">Departure Airport</Label>
+        <Input
+          id="departureAirport"
+          value={details.departureAirport as string || ""}
+          onChange={(e) => onDetailsChange("departureAirport", e.target.value)}
+          placeholder="e.g., LAX"
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="destinationAirport">Destination Airport</Label>
+        <Input
+          id="destinationAirport"
+          value={details.destinationAirport as string || ""}
+          onChange={(e) => onDetailsChange("destinationAirport", e.target.value)}
+          placeholder="e.g., JFK"
+        />
+      </div>
+
+      <div className="grid gap-2">
         <Label htmlFor="loyaltyNumber">Loyalty Number</Label>
         <Input
           id="loyaltyNumber"
