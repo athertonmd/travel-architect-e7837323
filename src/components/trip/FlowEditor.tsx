@@ -15,10 +15,11 @@ import {
   OnNodesChange,
   OnEdgesChange,
   OnConnect,
-  OnSelectionChangeParams
+  OnSelectionChangeParams,
+  useReactFlow,
 } from '@xyflow/react';
 import { SegmentNode } from "@/components/SegmentNode";
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { SegmentNodeData } from "@/types/segment";
 import { FlowConfig } from "./FlowConfig";
 import { useFlowDragDrop } from "./FlowDragDrop";
@@ -60,6 +61,21 @@ export const FlowEditor = ({
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<SegmentNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
+  const { fitView } = useReactFlow();
+
+  // Initialize nodes and fit view when initialNodes change
+  useEffect(() => {
+    if (initialNodes.length > 0) {
+      const updatedNodes = reorganizeNodes(initialNodes);
+      setNodes(updatedNodes);
+      setEdges(updateEdges(updatedNodes));
+      
+      // Use setTimeout to ensure the nodes are rendered before fitting view
+      setTimeout(() => {
+        fitView({ padding: 0.2, duration: 200 });
+      }, 100);
+    }
+  }, [initialNodes, reorganizeNodes, setNodes, setEdges, updateEdges, fitView]);
 
   const handleSelectionChange = useCallback(({ nodes: selectedNodes }: OnSelectionChangeParams) => {
     if (onNodeSelect && selectedNodes) {
@@ -109,13 +125,6 @@ export const FlowEditor = ({
     });
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
 
-  const fitView = useCallback(() => {
-    const flowInstance = document.querySelector('.react-flow__viewport');
-    if (flowInstance) {
-      flowInstance.setAttribute('transform', 'translate(0,0) scale(1)');
-    }
-  }, []);
-
   return (
     <div className="h-full bg-gray-50/80">
       <ReactFlow
@@ -144,7 +153,7 @@ export const FlowEditor = ({
             <Button 
               variant="outline" 
               size="sm"
-              onClick={fitView}
+              onClick={() => fitView({ padding: 0.2, duration: 200 })}
               className="text-xs"
             >
               Reset View
