@@ -12,6 +12,11 @@ interface FlightDateSectionProps {
 export function FlightDateSection({ details, onDetailsChange }: FlightDateSectionProps) {
   const today = format(new Date(), "yyyy-MM-dd'T'HH:mm");
 
+  const handleDateChange = (field: keyof SegmentDetails, value: string) => {
+    console.log('Date changed:', field, value);
+    onDetailsChange(field, value);
+  };
+
   return (
     <>
       <div className="grid gap-2">
@@ -21,7 +26,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
           type="datetime-local"
           min={today}
           value={details.departureDate || ""}
-          onChange={(e) => onDetailsChange("departureDate", e.target.value)}
+          onChange={(e) => handleDateChange("departureDate", e.target.value)}
         />
       </div>
 
@@ -42,7 +47,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
             type="datetime-local"
             min={details.departureDate as string || today}
             value={details.returnDate || ""}
-            onChange={(e) => onDetailsChange("returnDate", e.target.value)}
+            onChange={(e) => handleDateChange("returnDate", e.target.value)}
           />
         </div>
       )}
