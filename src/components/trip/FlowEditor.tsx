@@ -117,7 +117,7 @@ export const FlowEditor = ({
   }, []);
 
   return (
-    <div className="h-full bg-white">
+    <div className="h-full bg-gray-50/80">
       <ReactFlow
         nodes={nodes}
         edges={edges}
