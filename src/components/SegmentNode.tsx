@@ -15,9 +15,9 @@ export function SegmentNode({ data, id, selected }: {
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
-        className={`min-w-40 text-center bg-white drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
+        className={`min-w-[200px] w-auto text-center bg-white drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
       >
-        <div className="flex items-center justify-center gap-2">
+        <div className="flex items-center justify-center gap-2 px-4">
           <span>{data.icon}</span>
           <span>{data.label}</span>
           {data.details?.time && <span className="text-sm text-muted-foreground">({data.details.time})</span>}
