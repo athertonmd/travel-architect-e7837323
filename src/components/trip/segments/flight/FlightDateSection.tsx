@@ -1,6 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import { format } from "date-fns";
 import { SegmentDetails } from "@/types/segment";
 
@@ -37,28 +36,15 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
         />
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="isOneWay"
-          checked={details.isOneWay as boolean || false}
-          onCheckedChange={(checked) => onDetailsChange("isOneWay", checked as boolean)}
+      <div className="grid gap-2">
+        <Label htmlFor="loyaltyNumber">Loyalty Number</Label>
+        <Input
+          id="loyaltyNumber"
+          value={details.loyaltyNumber as string || ""}
+          onChange={(e) => onDetailsChange("loyaltyNumber", e.target.value)}
+          placeholder="e.g., FF123456"
         />
-        <Label htmlFor="isOneWay">One Way Flight</Label>
       </div>
-
-      {!details.isOneWay && (
-        <div className="grid gap-2">
-          <Label htmlFor="returnDate">Return Date</Label>
-          <Input
-            id="returnDate"
-            type="datetime-local"
-            min={details.departureDate as string || today}
-            value={details.returnDate || ""}
-            onChange={(e) => handleDateChange("returnDate", e.target.value)}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
-      )}
     </>
   );
 }
