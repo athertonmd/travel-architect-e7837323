@@ -39,13 +39,22 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
     toast.success("Segment deleted successfully!");
   };
 
+  const handleInputClick = (e: React.MouseEvent) => {
+    // Prevent the click from bubbling up and triggering node deselection
+    e.stopPropagation();
+  };
+
   const renderSegmentForm = () => {
     switch (selectedNode.data.label.toLowerCase()) {
       case "flight":
-        return <FlightSegmentForm details={details} onDetailsChange={handleDetailsChange} />;
+        return (
+          <div onClick={handleInputClick}>
+            <FlightSegmentForm details={details} onDetailsChange={handleDetailsChange} />
+          </div>
+        );
       default:
         return (
-          <div className="space-y-4">
+          <div onClick={handleInputClick} className="space-y-4">
             <div className="grid gap-2">
               <Label htmlFor="time">Time</Label>
               <Input
@@ -79,7 +88,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   };
 
   return (
-    <div className="h-full p-4 bg-white">
+    <div className="h-full p-4 bg-white" onClick={handleInputClick}>
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{selectedNode.data.icon}</span>
