@@ -6,11 +6,22 @@ import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segm
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
+import { memo } from "react";
 
 type SegmentDetailsProps = {
   selectedNode: Node<SegmentNodeData> | null;
   onDetailsChange: (nodeId: string, details: ISegmentDetails) => void;
 };
+
+// Create a memoized form component to prevent unnecessary re-renders
+const MemoizedFlightForm = memo(({ details, onDetailsChange }: { 
+  details: ISegmentDetails; 
+  onDetailsChange: (details: ISegmentDetails) => void;
+}) => (
+  <FlightSegmentForm details={details} onDetailsChange={onDetailsChange} />
+));
+
+MemoizedFlightForm.displayName = 'MemoizedFlightForm';
 
 export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetailsProps) {
   if (!selectedNode) {
@@ -33,14 +44,12 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   };
 
   const handleDelete = () => {
-    // The actual deletion is handled by React Flow's built-in functionality
     const event = new KeyboardEvent('keydown', { key: 'Delete' });
     document.dispatchEvent(event);
     toast.success("Segment deleted successfully!");
   };
 
-  const handleInputClick = (e: React.MouseEvent) => {
-    // Prevent the click from bubbling up and triggering node deselection
+  const stopPropagation = (e: React.MouseEvent | React.FocusEvent) => {
     e.stopPropagation();
   };
 
@@ -48,13 +57,21 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
     switch (selectedNode.data.label.toLowerCase()) {
       case "flight":
         return (
-          <div onClick={handleInputClick}>
-            <FlightSegmentForm details={details} onDetailsChange={handleDetailsChange} />
+          <div 
+            onClick={stopPropagation} 
+            onFocus={stopPropagation}
+            className="segment-form-container"
+          >
+            <MemoizedFlightForm details={details} onDetailsChange={handleDetailsChange} />
           </div>
         );
       default:
         return (
-          <div onClick={handleInputClick} className="space-y-4">
+          <div 
+            onClick={stopPropagation} 
+            onFocus={stopPropagation}
+            className="space-y-4"
+          >
             <div className="grid gap-2">
               <Label htmlFor="time">Time</Label>
               <Input
@@ -62,6 +79,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
                 value={details.time || ""}
                 onChange={(e) => handleDetailsChange({ ...details, time: e.target.value })}
                 placeholder="e.g., 2:30 PM"
+                onFocus={stopPropagation}
               />
             </div>
             <div className="grid gap-2">
@@ -71,6 +89,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
                 value={details.location || ""}
                 onChange={(e) => handleDetailsChange({ ...details, location: e.target.value })}
                 placeholder="Enter location"
+                onFocus={stopPropagation}
               />
             </div>
             <div className="grid gap-2">
@@ -80,6 +99,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
                 value={details.notes || ""}
                 onChange={(e) => handleDetailsChange({ ...details, notes: e.target.value })}
                 placeholder="Add any additional notes"
+                onFocus={stopPropagation}
               />
             </div>
           </div>
@@ -88,7 +108,11 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   };
 
   return (
-    <div className="h-full p-4 bg-white" onClick={handleInputClick}>
+    <div 
+      className="h-full p-4 bg-white" 
+      onClick={stopPropagation}
+      onFocus={stopPropagation}
+    >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <span className="text-2xl">{selectedNode.data.icon}</span>
