@@ -17,6 +17,7 @@ import {
   OnConnect,
   OnSelectionChangeParams,
   useReactFlow,
+  ReactFlowProvider,
 } from '@xyflow/react';
 import { SegmentNode } from "@/components/SegmentNode";
 import { useCallback, useEffect } from "react";
@@ -52,7 +53,7 @@ const minimapStyle = {
   width: 160,
 };
 
-export const FlowEditor = ({ 
+const FlowEditorContent = ({ 
   onNodesChange: onNodesUpdate, 
   onNodeSelect,
   initialNodes = [],
@@ -187,3 +188,9 @@ export const FlowEditor = ({
     </div>
   );
 };
+
+export const FlowEditor = (props: FlowEditorProps) => (
+  <ReactFlowProvider>
+    <FlowEditorContent {...props} />
+  </ReactFlowProvider>
+);
