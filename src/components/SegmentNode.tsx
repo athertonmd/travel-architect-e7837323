@@ -11,7 +11,7 @@ export function SegmentNode({ data, id, selected }: {
   const hotelName = data.details?.hotelName;
   
   return (
-    <div>
+    <div className="flex items-center justify-center">
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
@@ -24,7 +24,7 @@ export function SegmentNode({ data, id, selected }: {
           <span className="ml-2 text-sm text-muted-foreground">→ {destinationAirport}</span>
         )}
         {data.label.toLowerCase() === 'hotel' && hotelName && (
-          <span className="ml-2 text-sm text-muted-foreground">- {hotelName}</span>
+          <span className="ml-2 text-sm text-muted-foreground">- {String(hotelName)}</span>
         )}
       </Button>
       <Handle type="source" position={Position.Bottom} />
