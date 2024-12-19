@@ -5,6 +5,7 @@ import { FlightSegmentForm } from "./segments/FlightSegmentForm";
 import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segment";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
+import { Trash2 } from "lucide-react";
 
 type SegmentDetailsProps = {
   selectedNode: Node<SegmentNodeData> | null;
@@ -29,6 +30,13 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   const handleSave = () => {
     toast.success("Segment details saved successfully!");
+  };
+
+  const handleDelete = () => {
+    // The actual deletion is handled by React Flow's built-in functionality
+    const event = new KeyboardEvent('keydown', { key: 'Delete' });
+    document.dispatchEvent(event);
+    toast.success("Segment deleted successfully!");
   };
 
   const renderSegmentForm = () => {
@@ -72,9 +80,19 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   return (
     <div className="h-full p-4 bg-white">
-      <div className="flex items-center gap-2 mb-6">
-        <span className="text-2xl">{selectedNode.data.icon}</span>
-        <h3 className="font-semibold">{selectedNode.data.label} Details</h3>
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-2">
+          <span className="text-2xl">{selectedNode.data.icon}</span>
+          <h3 className="font-semibold">{selectedNode.data.label} Details</h3>
+        </div>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          onClick={handleDelete}
+          className="text-red-500 hover:text-red-600 hover:bg-red-50"
+        >
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </div>
       
       {renderSegmentForm()}
