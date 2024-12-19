@@ -64,14 +64,12 @@ const FlowEditorContent = ({
   const { reorganizeNodes, updateEdges } = useFlowManagement();
   const { fitView } = useReactFlow();
 
-  // Initialize nodes and fit view when initialNodes change
   useEffect(() => {
     if (initialNodes.length > 0) {
       const updatedNodes = reorganizeNodes(initialNodes);
       setNodes(updatedNodes);
       setEdges(updateEdges(updatedNodes));
       
-      // Use setTimeout to ensure the nodes are rendered before fitting view
       setTimeout(() => {
         fitView({ padding: 0.2, duration: 200 });
       }, 100);
@@ -79,7 +77,7 @@ const FlowEditorContent = ({
   }, [initialNodes, reorganizeNodes, setNodes, setEdges, updateEdges, fitView]);
 
   const handleSelectionChange = useCallback(({ nodes: selectedNodes }: OnSelectionChangeParams) => {
-    if (onNodeSelect && selectedNodes) {
+    if (onNodeSelect) {
       const selectedNode = selectedNodes[0] as Node<SegmentNodeData> | undefined;
       onNodeSelect(selectedNode || null);
     }
@@ -147,7 +145,7 @@ const FlowEditorContent = ({
         nodesDraggable={!readOnly}
         nodesConnectable={!readOnly}
         elementsSelectable={!readOnly}
-        fitView
+        selectNodesOnDrag={false}
       >
         <FlowConfig>
           <Panel position="top-right" className="bg-background/60 p-2 rounded-lg backdrop-blur-sm">
