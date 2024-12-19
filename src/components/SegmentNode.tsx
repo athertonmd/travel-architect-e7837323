@@ -9,8 +9,13 @@ export function SegmentNode({ data, id, selected }: {
 }) {
   const destinationAirport = data.details?.destinationAirport;
   
+  const handleClick = (e: React.MouseEvent) => {
+    // Prevent deselection when clicking inside the node
+    e.stopPropagation();
+  };
+  
   return (
-    <>
+    <div onClick={handleClick}>
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
@@ -24,6 +29,6 @@ export function SegmentNode({ data, id, selected }: {
         )}
       </Button>
       <Handle type="source" position={Position.Bottom} />
-    </>
+    </div>
   );
 }
