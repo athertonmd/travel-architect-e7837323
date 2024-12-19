@@ -10,8 +10,10 @@ export function SegmentNode({ data, id, selected }: {
   const destinationAirport = data.details?.destinationAirport;
   
   const handleClick = (e: React.MouseEvent) => {
-    // Prevent deselection when clicking inside the node
-    e.stopPropagation();
+    // Only stop propagation for input elements to prevent deselection when typing
+    if ((e.target as HTMLElement).tagName.toLowerCase() === 'input') {
+      e.stopPropagation();
+    }
   };
   
   return (
