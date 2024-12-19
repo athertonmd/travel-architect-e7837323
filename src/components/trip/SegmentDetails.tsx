@@ -21,6 +21,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   const details = selectedNode.data.details || {};
 
   const handleDetailsChange = (newDetails: ISegmentDetails) => {
+    console.log('Details changing:', newDetails);
     onDetailsChange(selectedNode.id, newDetails);
   };
 
