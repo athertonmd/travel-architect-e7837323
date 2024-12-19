@@ -2,6 +2,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { SegmentDetails } from "@/types/segment";
+import { format } from "date-fns";
 
 interface FlightSegmentFormProps {
   details: SegmentDetails;
@@ -18,6 +19,9 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
     onDetailsChange(updatedDetails);
   };
 
+  // Get today's date in YYYY-MM-DD format for min date validation
+  const today = format(new Date(), "yyyy-MM-dd'T'HH:mm");
+
   return (
     <div className="space-y-4">
       <div className="grid gap-2">
@@ -25,7 +29,8 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Input
           id="departureDate"
           type="datetime-local"
-          value={(details.departureDate as string) ?? ""}
+          min={today}
+          value={details.departureDate || ""}
           onChange={(e) => handleChange("departureDate", e.target.value)}
         />
       </div>
@@ -33,7 +38,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
       <div className="flex items-center space-x-2">
         <Checkbox
           id="isOneWay"
-          checked={details.isOneWay as boolean ?? false}
+          checked={details.isOneWay as boolean || false}
           onCheckedChange={(checked) => handleChange("isOneWay", checked as boolean)}
         />
         <Label htmlFor="isOneWay">One Way Flight</Label>
@@ -45,7 +50,8 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
           <Input
             id="returnDate"
             type="datetime-local"
-            value={(details.returnDate as string) ?? ""}
+            min={details.departureDate as string || today}
+            value={details.returnDate || ""}
             onChange={(e) => handleChange("returnDate", e.target.value)}
           />
         </div>
@@ -55,7 +61,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="departureAirport">Departure Airport</Label>
         <Input
           id="departureAirport"
-          value={(details.departureAirport as string) ?? ""}
+          value={details.departureAirport as string || ""}
           onChange={(e) => handleChange("departureAirport", e.target.value)}
           placeholder="e.g., LAX"
         />
@@ -65,7 +71,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="destinationAirport">Destination Airport</Label>
         <Input
           id="destinationAirport"
-          value={(details.destinationAirport as string) ?? ""}
+          value={details.destinationAirport as string || ""}
           onChange={(e) => handleChange("destinationAirport", e.target.value)}
           placeholder="e.g., JFK"
         />
@@ -75,7 +81,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="flightNumber">Flight Number</Label>
         <Input
           id="flightNumber"
-          value={(details.flightNumber as string) ?? ""}
+          value={details.flightNumber as string || ""}
           onChange={(e) => handleChange("flightNumber", e.target.value)}
           placeholder="e.g., AA123"
         />
@@ -85,7 +91,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="cabinClass">Cabin Class</Label>
         <Input
           id="cabinClass"
-          value={(details.cabinClass as string) ?? ""}
+          value={details.cabinClass as string || ""}
           onChange={(e) => handleChange("cabinClass", e.target.value)}
           placeholder="e.g., Business"
         />
@@ -95,7 +101,7 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
         <Label htmlFor="seatNumber">Seat Number</Label>
         <Input
           id="seatNumber"
-          value={(details.seatNumber as string) ?? ""}
+          value={details.seatNumber as string || ""}
           onChange={(e) => handleChange("seatNumber", e.target.value)}
           placeholder="e.g., 12A"
         />
