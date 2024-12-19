@@ -1,4 +1,6 @@
-export interface SegmentDetails extends Record<string, unknown> {
+export type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
+
+export interface SegmentDetails extends Record<string, JsonValue> {
   location?: string;
   time?: string;
   notes?: string;
@@ -15,24 +17,11 @@ export interface SegmentDetails extends Record<string, unknown> {
   cabinClass?: string;
 }
 
-export interface SegmentNodeData {
+export interface SegmentNodeData extends Record<string, unknown> {
   label: string;
   icon: string;
   details: SegmentDetails;
 }
-
-export type SegmentData = {
-  type: string;
-  details: SegmentDetails;
-  position: {
-    x: number;
-    y: number;
-  };
-}
-
-export type TripSegments = SegmentData[];
-
-export type JsonValue = string | number | boolean | null | { [key: string]: JsonValue } | JsonValue[];
 
 export type SupabaseJsonSegment = {
   type: string;
@@ -42,3 +31,5 @@ export type SupabaseJsonSegment = {
     y: number;
   };
 }
+
+export type TripSegments = SupabaseJsonSegment[];
