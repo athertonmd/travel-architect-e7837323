@@ -17,6 +17,12 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
     onDetailsChange(field, value);
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+    }
+  };
+
   return (
     <>
       <div className="grid gap-2">
@@ -27,6 +33,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
           min={today}
           value={details.departureDate || ""}
           onChange={(e) => handleDateChange("departureDate", e.target.value)}
+          onKeyDown={handleKeyDown}
         />
       </div>
 
@@ -48,6 +55,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
             min={details.departureDate as string || today}
             value={details.returnDate || ""}
             onChange={(e) => handleDateChange("returnDate", e.target.value)}
+            onKeyDown={handleKeyDown}
           />
         </div>
       )}
