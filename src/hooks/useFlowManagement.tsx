@@ -1,22 +1,28 @@
 import { useCallback } from "react";
 import { Connection, Edge, Node } from "@xyflow/react";
 import { SegmentNodeData } from "@/types/segment";
-
-const CANVAS_WIDTH = 800;
-const CANVAS_CENTER = CANVAS_WIDTH / 2;
-const VERTICAL_PADDING = 60;
-const TOP_MARGIN = 20;
+import { CANVAS_CENTER, VERTICAL_SPACING, TOP_MARGIN } from "@/constants/layout";
 
 export function useFlowManagement() {
   const reorganizeNodes = useCallback((nodes: Node<SegmentNodeData>[]) => {
     const sortedNodes = [...nodes].sort((a, b) => a.position.y - b.position.y);
-    return sortedNodes.map((node, index) => ({
-      ...node,
-      position: {
-        x: CANVAS_CENTER - 100,
-        y: index === 0 ? TOP_MARGIN : TOP_MARGIN + (index * VERTICAL_PADDING)
-      }
-    }));
+    
+    // Default node width if not specified (based on min-w-40 class)
+    const DEFAULT_NODE_WIDTH = 160; // 40 * 4px (Tailwind's default spacing unit)
+    
+    return sortedNodes.map((node, index) => {
+      // Get the node's width or use default
+      const nodeWidth = node.width || DEFAULT_NODE_WIDTH;
+      
+      return {
+        ...node,
+        position: {
+          // Center the node by subtracting half its width
+          x: CANVAS_CENTER - (nodeWidth / 2),
+          y: index === 0 ? TOP_MARGIN : TOP_MARGIN + (index * VERTICAL_SPACING)
+        }
+      };
+    });
   }, []);
 
   const updateEdges = useCallback((nodes: Node<SegmentNodeData>[]) => {

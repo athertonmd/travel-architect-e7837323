@@ -33,9 +33,12 @@ const FlowEditorContent = ({
 
   useEffect(() => {
     if (initialNodes.length > 0) {
-      const updatedNodes = reorganizeNodes(initialNodes);
-      setNodes(updatedNodes);
-      setEdges(updateEdges(updatedNodes));
+      // Add a small delay to ensure nodes are measured
+      setTimeout(() => {
+        const updatedNodes = reorganizeNodes(initialNodes);
+        setNodes(updatedNodes);
+        setEdges(updateEdges(updatedNodes));
+      }, 50);
     }
   }, [initialNodes, reorganizeNodes, setNodes, setEdges, updateEdges]);
 
