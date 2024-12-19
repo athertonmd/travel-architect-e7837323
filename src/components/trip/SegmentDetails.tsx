@@ -5,7 +5,7 @@ import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segm
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
-import { memo } from "react";
+import { memo, useCallback, useRef } from "react";
 
 type SegmentDetailsProps = {
   selectedNode: Node<SegmentNodeData> | null;
@@ -22,7 +22,18 @@ const MemoizedFlightForm = memo(({ details, onDetailsChange }: {
 
 MemoizedFlightForm.displayName = 'MemoizedFlightForm';
 
+const MemoizedDefaultForm = memo(({ details, onDetailsChange }: {
+  details: ISegmentDetails;
+  onDetailsChange: (details: ISegmentDetails) => void;
+}) => (
+  <DefaultSegmentForm details={details} onDetailsChange={onDetailsChange} />
+));
+
+MemoizedDefaultForm.displayName = 'MemoizedDefaultForm';
+
 export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetailsProps) {
+  const panelRef = useRef<HTMLDivElement>(null);
+
   if (!selectedNode) {
     return (
       <div className="h-full p-4 bg-white">
@@ -33,10 +44,10 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   const details = selectedNode.data.details || {};
 
-  const handleDetailsChange = (newDetails: ISegmentDetails) => {
+  const handleDetailsChange = useCallback((newDetails: ISegmentDetails) => {
     console.log('Details changing:', newDetails);
     onDetailsChange(selectedNode.id, newDetails);
-  };
+  }, [selectedNode.id, onDetailsChange]);
 
   const handleSave = () => {
     toast.success("Segment details saved successfully!");
@@ -48,9 +59,11 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
     toast.success("Segment deleted successfully!");
   };
 
-  const stopPropagation = (e: React.MouseEvent | React.FocusEvent) => {
+  // Enhanced event handling to prevent panel closure
+  const stopPropagation = useCallback((e: React.MouseEvent | React.FocusEvent) => {
     e.stopPropagation();
-  };
+    e.preventDefault();
+  }, []);
 
   const renderSegmentForm = () => {
     const type = selectedNode.data.label.toLowerCase();
@@ -63,12 +76,14 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
       <div 
         onClick={stopPropagation} 
         onFocus={stopPropagation}
+        onMouseDown={stopPropagation}
+        onPointerDown={stopPropagation}
         className="segment-form-container"
       >
         {type === "flight" ? (
           <MemoizedFlightForm {...formProps} />
         ) : (
-          <DefaultSegmentForm {...formProps} />
+          <MemoizedDefaultForm {...formProps} />
         )}
       </div>
     );
@@ -76,9 +91,12 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   return (
     <div 
+      ref={panelRef}
       className="h-full p-4 bg-white" 
       onClick={stopPropagation}
       onFocus={stopPropagation}
+      onMouseDown={stopPropagation}
+      onPointerDown={stopPropagation}
     >
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
