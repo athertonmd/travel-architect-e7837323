@@ -1,13 +1,14 @@
 import { SegmentDetails } from "@/types/segment";
 import { FlightDateSection } from "./flight/FlightDateSection";
 import { FlightDetailsSection } from "./flight/FlightDetailsSection";
+import { memo } from "react";
 
 interface FlightSegmentFormProps {
   details: SegmentDetails;
   onDetailsChange: (details: SegmentDetails) => void;
 }
 
-export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFormProps) {
+function FlightSegmentFormComponent({ details, onDetailsChange }: FlightSegmentFormProps) {
   const handleChange = (field: keyof SegmentDetails, value: string | boolean) => {
     const updatedDetails = {
       ...details,
@@ -17,8 +18,16 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
     onDetailsChange(updatedDetails);
   };
 
+  const stopPropagation = (e: React.FocusEvent | React.MouseEvent) => {
+    e.stopPropagation();
+  };
+
   return (
-    <div className="space-y-4">
+    <div 
+      className="space-y-4"
+      onClick={stopPropagation}
+      onFocus={stopPropagation}
+    >
       <FlightDateSection 
         details={details} 
         onDetailsChange={handleChange}
@@ -30,3 +39,5 @@ export function FlightSegmentForm({ details, onDetailsChange }: FlightSegmentFor
     </div>
   );
 }
+
+export const FlightSegmentForm = memo(FlightSegmentFormComponent);

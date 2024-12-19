@@ -1,7 +1,6 @@
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Node } from "@xyflow/react";
 import { FlightSegmentForm } from "./segments/FlightSegmentForm";
+import { DefaultSegmentForm } from "./segments/DefaultSegmentForm";
 import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segment";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -13,7 +12,7 @@ type SegmentDetailsProps = {
   onDetailsChange: (nodeId: string, details: ISegmentDetails) => void;
 };
 
-// Create a memoized form component to prevent unnecessary re-renders
+// Create memoized form components to prevent unnecessary re-renders
 const MemoizedFlightForm = memo(({ details, onDetailsChange }: { 
   details: ISegmentDetails; 
   onDetailsChange: (details: ISegmentDetails) => void;
@@ -54,57 +53,25 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   };
 
   const renderSegmentForm = () => {
-    switch (selectedNode.data.label.toLowerCase()) {
-      case "flight":
-        return (
-          <div 
-            onClick={stopPropagation} 
-            onFocus={stopPropagation}
-            className="segment-form-container"
-          >
-            <MemoizedFlightForm details={details} onDetailsChange={handleDetailsChange} />
-          </div>
-        );
-      default:
-        return (
-          <div 
-            onClick={stopPropagation} 
-            onFocus={stopPropagation}
-            className="space-y-4"
-          >
-            <div className="grid gap-2">
-              <Label htmlFor="time">Time</Label>
-              <Input
-                id="time"
-                value={details.time || ""}
-                onChange={(e) => handleDetailsChange({ ...details, time: e.target.value })}
-                placeholder="e.g., 2:30 PM"
-                onFocus={stopPropagation}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="location">Location</Label>
-              <Input
-                id="location"
-                value={details.location || ""}
-                onChange={(e) => handleDetailsChange({ ...details, location: e.target.value })}
-                placeholder="Enter location"
-                onFocus={stopPropagation}
-              />
-            </div>
-            <div className="grid gap-2">
-              <Label htmlFor="notes">Notes</Label>
-              <Input
-                id="notes"
-                value={details.notes || ""}
-                onChange={(e) => handleDetailsChange({ ...details, notes: e.target.value })}
-                placeholder="Add any additional notes"
-                onFocus={stopPropagation}
-              />
-            </div>
-          </div>
-        );
-    }
+    const type = selectedNode.data.label.toLowerCase();
+    const formProps = {
+      details,
+      onDetailsChange: handleDetailsChange,
+    };
+
+    return (
+      <div 
+        onClick={stopPropagation} 
+        onFocus={stopPropagation}
+        className="segment-form-container"
+      >
+        {type === "flight" ? (
+          <MemoizedFlightForm {...formProps} />
+        ) : (
+          <DefaultSegmentForm {...formProps} />
+        )}
+      </div>
+    );
   };
 
   return (
