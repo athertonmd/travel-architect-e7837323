@@ -5,7 +5,7 @@ import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segm
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { Trash2 } from "lucide-react";
-import { memo, useCallback, useRef } from "react";
+import { memo, useCallback, useRef, useState, useEffect } from "react";
 
 type SegmentDetailsProps = {
   selectedNode: Node<SegmentNodeData> | null;
@@ -37,21 +37,29 @@ MemoizedDefaultForm.displayName = 'MemoizedDefaultForm';
 
 export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetailsProps) {
   const panelRef = useRef<HTMLDivElement>(null);
+  const [localDetails, setLocalDetails] = useState<ISegmentDetails>({});
   
-  const handleDetailsChange = useCallback((newDetails: ISegmentDetails) => {
-    if (selectedNode) {
-      console.log('Details changing:', newDetails);
-      onDetailsChange(selectedNode.id, newDetails);
+  useEffect(() => {
+    if (selectedNode?.data?.details) {
+      setLocalDetails(selectedNode.data.details);
     }
-  }, [selectedNode, onDetailsChange]);
+  }, [selectedNode]);
+
+  const handleLocalDetailsChange = useCallback((newDetails: ISegmentDetails) => {
+    console.log('Local details changing:', newDetails);
+    setLocalDetails(newDetails);
+  }, []);
 
   const stopPropagation = useCallback((e: React.MouseEvent | React.FocusEvent) => {
     e.stopPropagation();
   }, []);
 
   const handleSave = useCallback(() => {
-    toast.success("Segment details saved successfully!");
-  }, []);
+    if (selectedNode) {
+      onDetailsChange(selectedNode.id, localDetails);
+      toast.success("Segment details saved successfully!");
+    }
+  }, [selectedNode, onDetailsChange, localDetails]);
 
   const handleDelete = useCallback(() => {
     const event = new KeyboardEvent('keydown', { key: 'Delete' });
@@ -67,13 +75,11 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
     );
   }
 
-  const details = selectedNode.data.details || {};
-
   const renderSegmentForm = () => {
     const type = selectedNode.data.label.toLowerCase();
     const formProps = {
-      details,
-      onDetailsChange: handleDetailsChange,
+      details: localDetails,
+      onDetailsChange: handleLocalDetailsChange,
     };
 
     return (
