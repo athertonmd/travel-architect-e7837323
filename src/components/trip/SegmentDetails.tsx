@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { memo, useCallback, useRef, useState, useEffect } from "react";
 import { SegmentHeader } from "./segments/SegmentHeader";
 import { SegmentFormContainer } from "./segments/SegmentFormContainer";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 type SegmentDetailsProps = {
   selectedNode: Node<SegmentNodeData> | null;
@@ -111,20 +112,24 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   return (
     <div 
       ref={panelRef}
-      className="h-full p-4 bg-white" 
+      className="h-full flex flex-col bg-white" 
       onClick={stopPropagation}
       onMouseDown={stopPropagation}
       onPointerDown={stopPropagation}
     >
-      <SegmentHeader 
-        icon={selectedNode.data.icon}
-        label={selectedNode.data.label}
-        onDelete={handleDelete}
-      />
+      <div className="p-4">
+        <SegmentHeader 
+          icon={selectedNode.data.icon}
+          label={selectedNode.data.label}
+          onDelete={handleDelete}
+        />
+      </div>
       
-      {renderSegmentForm()}
+      <ScrollArea className="flex-1 px-4">
+        {renderSegmentForm()}
+      </ScrollArea>
 
-      <div className="mt-6">
+      <div className="p-4 mt-auto border-t">
         <Button onClick={handleSave} className="w-full">
           Save Details
         </Button>
