@@ -11,21 +11,23 @@ export function SegmentNode({ data, id, selected }: {
   const hotelName = data.details?.hotelName;
   
   return (
-    <div className="flex items-center justify-center">
+    <div className="flex items-center justify-center w-full">
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
-        className={`min-w-40 justify-start gap-2 bg-white drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
+        className={`min-w-40 text-center bg-white drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
       >
-        <span>{data.icon}</span>
-        {data.label}
-        {data.details?.time && <span className="ml-2 text-sm text-muted-foreground">({data.details.time})</span>}
-        {data.label.toLowerCase() === 'flight' && destinationAirport && (
-          <span className="ml-2 text-sm text-muted-foreground">→ {destinationAirport}</span>
-        )}
-        {data.label.toLowerCase() === 'hotel' && hotelName && (
-          <span className="ml-2 text-sm text-muted-foreground">- {String(hotelName)}</span>
-        )}
+        <div className="flex items-center justify-center gap-2">
+          <span>{data.icon}</span>
+          <span>{data.label}</span>
+          {data.details?.time && <span className="text-sm text-muted-foreground">({data.details.time})</span>}
+          {data.label.toLowerCase() === 'flight' && destinationAirport && (
+            <span className="text-sm text-muted-foreground">→ {destinationAirport}</span>
+          )}
+          {data.label.toLowerCase() === 'hotel' && hotelName && (
+            <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
+          )}
+        </div>
       </Button>
       <Handle type="source" position={Position.Bottom} />
     </div>
