@@ -11,7 +11,7 @@ export function SegmentNode({ data, id, selected }: {
   const hotelName = data.details?.hotelName;
   
   return (
-    <div className="flex items-center justify-center w-full">
+    <div className="flex items-center justify-center">
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
