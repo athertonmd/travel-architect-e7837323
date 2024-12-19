@@ -51,6 +51,16 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
       </div>
 
       <div className="grid gap-2">
+        <Label htmlFor="loyaltyNumber">Loyalty Number</Label>
+        <Input
+          id="loyaltyNumber"
+          value={details.loyaltyNumber as string || ""}
+          onChange={(e) => onDetailsChange("loyaltyNumber", e.target.value)}
+          placeholder="e.g., FF123456"
+        />
+      </div>
+
+      <div className="grid gap-2">
         <Label htmlFor="seatNumber">Seat Number</Label>
         <Input
           id="seatNumber"
