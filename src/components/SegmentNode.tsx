@@ -7,6 +7,8 @@ export function SegmentNode({ data, id, selected }: {
   id: string; 
   selected?: boolean 
 }) {
+  const destinationAirport = data.details?.destinationAirport;
+  
   return (
     <>
       <Handle type="target" position={Position.Top} />
@@ -17,6 +19,9 @@ export function SegmentNode({ data, id, selected }: {
         <span>{data.icon}</span>
         {data.label}
         {data.details?.time && <span className="ml-2 text-sm text-muted-foreground">({data.details.time})</span>}
+        {data.label.toLowerCase() === 'flight' && destinationAirport && (
+          <span className="ml-2 text-sm text-muted-foreground">→ {destinationAirport}</span>
+        )}
       </Button>
       <Handle type="source" position={Position.Bottom} />
     </>
