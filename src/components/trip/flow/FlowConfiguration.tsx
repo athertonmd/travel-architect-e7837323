@@ -2,7 +2,7 @@ import { ReactNode } from "react";
 import { FlowControls } from "./FlowControls";
 
 interface FlowConfigurationProps {
-  children: ReactNode;
+  children?: ReactNode;
   onFitView: () => void;
 }
 

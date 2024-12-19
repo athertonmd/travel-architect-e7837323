@@ -140,7 +140,9 @@ const FlowEditorContent = ({
         elementsSelectable={!readOnly}
         selectNodesOnDrag={false}
       >
-        <FlowConfiguration onFitView={handleFitView} />
+        <FlowConfiguration onFitView={handleFitView}>
+          {/* Flow controls will be rendered here */}
+        </FlowConfiguration>
       </ReactFlow>
     </div>
   );
