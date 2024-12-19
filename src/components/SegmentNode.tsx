@@ -9,13 +9,8 @@ export function SegmentNode({ data, id, selected }: {
 }) {
   const destinationAirport = data.details?.destinationAirport;
   
-  const handleClick = (e: React.MouseEvent) => {
-    // Stop propagation for any interaction within the node
-    e.stopPropagation();
-  };
-  
   return (
-    <div onClick={handleClick}>
+    <div>
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
