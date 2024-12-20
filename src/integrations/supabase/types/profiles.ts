@@ -9,11 +9,9 @@ export type ProfilesInsert = {
   id: string;
   username?: string | null;
   avatar_url?: string | null;
-  created_at?: string;
 }
 
 export type ProfilesUpdate = {
   username?: string | null;
   avatar_url?: string | null;
-  created_at?: string;
 }
