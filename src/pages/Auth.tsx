@@ -13,14 +13,14 @@ const Auth = () => {
     // Check if there's already a session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
-        navigate('/');
+        navigate('/dashboard');
       }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'SIGNED_IN' && session) {
         toast.success('Successfully signed in!');
-        navigate('/');
+        navigate('/dashboard');
       }
       if (event === 'SIGNED_OUT') {
         toast.success('Signed out successfully');

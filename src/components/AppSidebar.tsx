@@ -15,7 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
 const menuItems = [
-  { title: "Dashboard", icon: Home, url: "/" },
+  { title: "Dashboard", icon: Home, url: "/dashboard" },
   { title: "All Trips", icon: CalendarDays, url: "/trips" },
   { title: "Create Trip", icon: Plus, url: "/trips/create" },
   { title: "Upload Trips", icon: Upload, url: "/trips/upload" },
@@ -28,7 +28,7 @@ export function AppSidebar() {
     try {
       await supabase.auth.signOut();
       toast.success("Logged out successfully");
-      navigate("/auth");
+      navigate("/");
     } catch (error) {
       toast.error("Error logging out");
     }
