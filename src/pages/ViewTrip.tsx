@@ -35,11 +35,17 @@ const ViewTrip = () => {
         return;
       }
 
+      // Convert nodes to segments format, preserving position
       const segments: SupabaseJsonSegment[] = nodes.map((node) => ({
         type: String(node.data.label).toLowerCase(),
         details: node.data.details || {},
-        position: node.position
+        position: {
+          x: node.position.x,
+          y: node.position.y
+        }
       }));
+
+      console.log('Saving segments with positions:', segments);
 
       const firstSegmentLocation = nodes[0]?.data?.details?.location || "Unknown";
 
@@ -56,7 +62,7 @@ const ViewTrip = () => {
       if (error) throw error;
       
       toast.success("Trip updated successfully!");
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message);
       console.error("Save error:", error);
