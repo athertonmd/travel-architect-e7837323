@@ -9,12 +9,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { toast } from "sonner";
 import { TravellersTable } from "@/components/travellers/TravellersTable";
 import { TravellerForm } from "@/components/travellers/TravellerForm";
+import { TravellerSearch } from "@/components/travellers/TravellerSearch";
 import { TravellersRow } from "@/integrations/supabase/types";
 
 const ManageTravellers = () => {
   const user = useUser();
   const [selectedTraveller, setSelectedTraveller] = useState<TravellersRow | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: travellers, refetch } = useQuery({
     queryKey: ["travellers"],
@@ -27,6 +29,15 @@ const ManageTravellers = () => {
       if (error) throw error;
       return data as TravellersRow[];
     },
+  });
+
+  const filteredTravellers = travellers?.filter((traveller) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      traveller.first_name.toLowerCase().includes(searchLower) ||
+      traveller.last_name.toLowerCase().includes(searchLower) ||
+      (traveller.email?.toLowerCase().includes(searchLower) ?? false)
+    );
   });
 
   const handleSubmit = async (values: any) => {
@@ -110,8 +121,12 @@ const ManageTravellers = () => {
           </Dialog>
         </div>
 
+        <div className="max-w-md mb-6">
+          <TravellerSearch value={searchQuery} onChange={setSearchQuery} />
+        </div>
+
         <TravellersTable
-          travellers={travellers || []}
+          travellers={filteredTravellers || []}
           onEdit={handleEdit}
           onDelete={handleDelete}
         />

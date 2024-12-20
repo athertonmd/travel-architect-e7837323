@@ -1,34 +1,23 @@
-import { ProfilesRow, ProfilesInsert, ProfilesUpdate } from './profiles'
-import { TripsRow, TripsInsert, TripsUpdate } from './trips'
-import { TravellersRow, TravellersInsert, TravellersUpdate } from './travellers'
+export type * from './travellers';
 
 export type Database = {
   public: {
     Tables: {
       manage_travellers: {
-        Row: TravellersRow
-        Insert: TravellersInsert
-        Update: TravellersUpdate
-        Relationships: [
-          {
-            foreignKeyName: "manage_travellers_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          }
-        ]
+        Row: TravellersRow;
+        Insert: TravellersInsert;
+        Update: TravellersUpdate;
       }
       profiles: {
-        Row: ProfilesRow
-        Insert: ProfilesInsert
-        Update: ProfilesUpdate
+        Row: ProfilesRow;
+        Insert: ProfilesInsert;
+        Update: ProfilesUpdate;
         Relationships: []
       }
       trips: {
-        Row: TripsRow
-        Insert: TripsInsert
-        Update: TripsUpdate
+        Row: TripsRow;
+        Insert: TripsInsert;
+        Update: TripsUpdate;
         Relationships: [
           {
             foreignKeyName: "trips_user_id_fkey"
@@ -54,7 +43,3 @@ export type Database = {
     }
   }
 }
-
-export type * from './profiles'
-export type * from './trips'
-export type * from './travellers'

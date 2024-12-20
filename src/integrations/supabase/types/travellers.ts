@@ -1,32 +1,25 @@
 export type TravellersRow = {
-  created_at: string
-  email: string | null
-  first_name: string
-  id: string
-  last_name: string
-  mobile_number: string | null
-  updated_at: string
-  user_id: string
+  id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email: string | null;
+  mobile_number: string | null;
+  created_at: string;
+  updated_at: string;
 }
 
 export type TravellersInsert = {
-  created_at?: string
-  email?: string | null
-  first_name: string
-  id?: string
-  last_name: string
-  mobile_number?: string | null
-  updated_at?: string
-  user_id: string
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email?: string | null;
+  mobile_number?: string | null;
 }
 
 export type TravellersUpdate = {
-  created_at?: string
-  email?: string | null
-  first_name?: string
-  id?: string
-  last_name?: string
-  mobile_number?: string | null
-  updated_at?: string
-  user_id?: string
+  first_name?: string;
+  last_name?: string;
+  email?: string | null;
+  mobile_number?: string | null;
 }

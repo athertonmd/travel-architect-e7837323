@@ -1,4 +1,4 @@
-import { Form, FormControl, FormField, FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
@@ -67,8 +67,14 @@ export const TravellerForm = ({ defaultValues, onSubmit, submitLabel }: Travelle
             <FormItem>
               <FormLabel>Mobile Number</FormLabel>
               <FormControl>
-                <Input {...field} />
+                <Input 
+                  placeholder="+1 (555) 555-5555"
+                  {...field} 
+                />
               </FormControl>
+              <FormDescription>
+                Please enter the number in international format (e.g., +1 for US/Canada)
+              </FormDescription>
             </FormItem>
           )}
         />
