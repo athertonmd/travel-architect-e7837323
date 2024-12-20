@@ -9,6 +9,7 @@ export type SegmentType = {
 };
 
 const segmentTypes: SegmentType[] = [
+  { id: "traveller", type: "traveller", label: "Traveller", icon: "👤" },
   { id: "flight", type: "flight", label: "Flight", icon: "✈️" },
   { id: "hotel", type: "hotel", label: "Hotel", icon: "🏨" },
   { id: "limo", type: "limo", label: "Limo Service", icon: "🚙" },
@@ -17,7 +18,6 @@ const segmentTypes: SegmentType[] = [
   { id: "activity", type: "activity", label: "Activity", icon: "🎯" },
   { id: "transfer", type: "transfer", label: "Transfer", icon: "🚕" },
   { id: "vip", type: "vip", label: "VIP Service", icon: "👑" },
-  { id: "traveller", type: "traveller", label: "Traveller", icon: "👤" },
 ];
 
 export function SegmentPalette() {
