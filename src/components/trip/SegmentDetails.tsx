@@ -65,10 +65,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   }, []);
 
   const stopPropagation = useCallback((e: React.MouseEvent | React.FocusEvent) => {
-    // Only call closest() if target is an Element
-    if (e.target instanceof Element) {
-      e.stopPropagation();
-    }
+    e.stopPropagation();
   }, []);
 
   const handleSave = useCallback(() => {

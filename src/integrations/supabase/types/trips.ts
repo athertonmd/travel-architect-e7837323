@@ -1,16 +1,49 @@
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json | undefined }
+  | Json[]
+
 export type TripsRow = {
-  id: string
-  user_id: string
-  title: string
-  destination?: string | null
-  start_date?: string | null
-  end_date?: string | null
-  travelers?: number
-  status?: string
-  segments?: any
   created_at: string
+  destination: string | null
+  end_date: string | null
+  id: string
+  segments: Json | null
+  start_date: string | null
+  status: string | null
+  title: string
+  travelers: number | null
   updated_at: string
+  user_id: string
 }
 
-export type TripsInsert = Omit<TripsRow, 'id' | 'created_at' | 'updated_at'>
-export type TripsUpdate = Partial<TripsInsert>
+export type TripsInsert = {
+  created_at?: string
+  destination?: string | null
+  end_date?: string | null
+  id?: string
+  segments?: Json | null
+  start_date?: string | null
+  status?: string | null
+  title: string
+  travelers?: number | null
+  updated_at?: string
+  user_id: string
+}
+
+export type TripsUpdate = {
+  created_at?: string
+  destination?: string | null
+  end_date?: string | null
+  id?: string
+  segments?: Json | null
+  start_date?: string | null
+  status?: string | null
+  title?: string
+  travelers?: number | null
+  updated_at?: string
+  user_id?: string
+}

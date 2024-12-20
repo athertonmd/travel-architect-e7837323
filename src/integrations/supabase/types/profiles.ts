@@ -1,9 +1,20 @@
 export type ProfilesRow = {
-  id: string
-  username?: string | null
-  avatar_url?: string | null
+  avatar_url: string | null
   created_at: string
+  id: string
+  username: string | null
 }
 
-export type ProfilesInsert = Omit<ProfilesRow, 'created_at'>
-export type ProfilesUpdate = Partial<ProfilesInsert>
+export type ProfilesInsert = {
+  avatar_url?: string | null
+  created_at?: string
+  id: string
+  username?: string | null
+}
+
+export type ProfilesUpdate = {
+  avatar_url?: string | null
+  created_at?: string
+  id?: string
+  username?: string | null
+}
