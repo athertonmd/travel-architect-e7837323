@@ -1,5 +1,5 @@
 import { Check } from "lucide-react"
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 import { TravellersRow } from "@/integrations/supabase/types/travellers"
 import { supabase } from "@/integrations/supabase/client"
@@ -55,28 +55,30 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
       />
       {isLoading ? (
         <CommandEmpty>Loading...</CommandEmpty>
-      ) : travellers.length === 0 ? (
-        <CommandEmpty>No traveller found.</CommandEmpty>
       ) : (
         <CommandGroup>
-          {travellers.map((traveller) => (
-            <CommandItem
-              key={traveller.id}
-              value={`${traveller.first_name} ${traveller.last_name}`}
-              onSelect={() => {
-                onSelect(traveller)
-                setValue(`${traveller.first_name} ${traveller.last_name}`)
-              }}
-            >
-              <Check
-                className={cn(
-                  "mr-2 h-4 w-4",
-                  value === `${traveller.first_name} ${traveller.last_name}` ? "opacity-100" : "opacity-0"
-                )}
-              />
-              {traveller.first_name} {traveller.last_name}
-            </CommandItem>
-          ))}
+          {travellers.length === 0 ? (
+            <CommandEmpty>No traveller found.</CommandEmpty>
+          ) : (
+            travellers.map((traveller) => (
+              <CommandItem
+                key={traveller.id}
+                value={`${traveller.first_name} ${traveller.last_name}`}
+                onSelect={() => {
+                  onSelect(traveller)
+                  setValue(`${traveller.first_name} ${traveller.last_name}`)
+                }}
+              >
+                <Check
+                  className={cn(
+                    "mr-2 h-4 w-4",
+                    value === `${traveller.first_name} ${traveller.last_name}` ? "opacity-100" : "opacity-0"
+                  )}
+                />
+                {traveller.first_name} {traveller.last_name}
+              </CommandItem>
+            ))
+          )}
         </CommandGroup>
       )}
     </Command>
