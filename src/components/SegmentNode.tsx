@@ -9,7 +9,7 @@ export function SegmentNode({ data, id, selected }: {
 }) {
   const destinationAirport = data.details?.destinationAirport;
   const hotelName = data.details?.hotelName;
-  const travelerCount = data.details?.traveller_names?.length || 0;
+  const travelerCount = Array.isArray(data.details?.traveller_names) ? data.details.traveller_names.length : 0;
   
   return (
     <div className="flex items-center justify-center">
