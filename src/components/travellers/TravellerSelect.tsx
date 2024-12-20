@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { Command, CommandInput } from "@/components/ui/command";
+import { Command, CommandInput, CommandList } from "@/components/ui/command";
 import { TravellersRow } from "@/integrations/supabase/types/travellers";
 import { useTravellerSearch } from "@/hooks/useTravellerSearch";
 import { TravellerSearchResults } from "./TravellerSearchResults";
@@ -49,14 +49,16 @@ export const TravellerSelect = ({ onSelect }: TravellerSelectProps) => {
         value={searchQuery}
         onValueChange={setSearchQuery}
       />
-      <TravellerSearchResults
-        isLoading={isLoading}
-        error={error}
-        travellers={travellers}
-        searchQuery={searchQuery}
-        selectedValue={value}
-        onSelect={handleSelect}
-      />
+      <CommandList>
+        <TravellerSearchResults
+          isLoading={isLoading}
+          error={error}
+          travellers={travellers || []}
+          searchQuery={searchQuery}
+          selectedValue={value}
+          onSelect={handleSelect}
+        />
+      </CommandList>
     </Command>
   );
 };
