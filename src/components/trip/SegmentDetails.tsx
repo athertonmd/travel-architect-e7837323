@@ -76,10 +76,20 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   }, [selectedNode, onDetailsChange, localDetails]);
 
   const handleDelete = useCallback(() => {
-    const event = new KeyboardEvent('keydown', { key: 'Delete' });
-    document.dispatchEvent(event);
-    toast.success("Segment deleted successfully!");
-  }, []);
+    if (selectedNode) {
+      // Create and dispatch a custom keyboard event for the Delete key
+      const deleteEvent = new KeyboardEvent('keydown', {
+        key: 'Delete',
+        code: 'Delete',
+        keyCode: 46,
+        which: 46,
+        bubbles: true,
+        cancelable: true
+      });
+      document.dispatchEvent(deleteEvent);
+      toast.success("Segment deleted successfully!");
+    }
+  }, [selectedNode]);
 
   if (!selectedNode) {
     return (
