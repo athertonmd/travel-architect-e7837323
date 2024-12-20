@@ -78,15 +78,15 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
           <Label>Selected Travellers</Label>
           <ScrollArea className="h-[200px] w-full rounded-md border p-4">
             <div className="space-y-4">
-              {details.traveller_names.map((name, index) => (
+              {(details.traveller_names as string[]).map((name, index) => (
                 <div key={index} className="flex items-start justify-between space-x-4 text-sm">
                   <div className="space-y-1">
                     <p className="font-medium">{name}</p>
-                    {details.emails?.[index] && (
-                      <p className="text-muted-foreground">Email: {details.emails[index]}</p>
+                    {details.emails && (details.emails as string[])[index] && (
+                      <p className="text-muted-foreground">Email: {(details.emails as string[])[index]}</p>
                     )}
-                    {details.mobile_numbers?.[index] && (
-                      <p className="text-muted-foreground">Mobile: {details.mobile_numbers[index]}</p>
+                    {details.mobile_numbers && (details.mobile_numbers as string[])[index] && (
+                      <p className="text-muted-foreground">Mobile: {(details.mobile_numbers as string[])[index]}</p>
                     )}
                   </div>
                   <Button
