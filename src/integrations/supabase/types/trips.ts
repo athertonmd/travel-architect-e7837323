@@ -1,34 +1,16 @@
-export type TripsRow = {
+export interface TripsRow {
   id: string;
   user_id: string;
   title: string;
-  destination: string | null;
-  start_date: string | null;
-  end_date: string | null;
-  travelers: number | null;
-  status: string | null;
-  segments: any | null;
+  destination?: string;
+  start_date?: string;
+  end_date?: string;
+  travelers?: number;
+  status?: string;
+  segments?: any;
   created_at: string;
   updated_at: string;
 }
 
-export type TripsInsert = {
-  user_id: string;
-  title: string;
-  destination?: string | null;
-  start_date?: string | null;
-  end_date?: string | null;
-  travelers?: number | null;
-  status?: string | null;
-  segments?: any | null;
-}
-
-export type TripsUpdate = {
-  title?: string;
-  destination?: string | null;
-  start_date?: string | null;
-  end_date?: string | null;
-  travelers?: number | null;
-  status?: string | null;
-  segments?: any | null;
-}
+export interface TripsInsert extends Omit<TripsRow, 'id' | 'created_at' | 'updated_at'> {}
+export interface TripsUpdate extends Partial<TripsInsert> {}

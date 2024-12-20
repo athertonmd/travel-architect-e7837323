@@ -1,17 +1,9 @@
-export type ProfilesRow = {
+export interface ProfilesRow {
   id: string;
-  username: string | null;
-  avatar_url: string | null;
+  username?: string;
+  avatar_url?: string;
   created_at: string;
 }
 
-export type ProfilesInsert = {
-  id: string;
-  username?: string | null;
-  avatar_url?: string | null;
-}
-
-export type ProfilesUpdate = {
-  username?: string | null;
-  avatar_url?: string | null;
-}
+export interface ProfilesInsert extends Omit<ProfilesRow, 'created_at'> {}
+export interface ProfilesUpdate extends Partial<ProfilesInsert> {}

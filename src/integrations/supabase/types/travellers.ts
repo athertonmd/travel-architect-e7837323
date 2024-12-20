@@ -1,25 +1,13 @@
-export type TravellersRow = {
+export interface TravellersRow {
   id: string;
   user_id: string;
   first_name: string;
   last_name: string;
-  email: string | null;
-  mobile_number: string | null;
+  email?: string;
+  mobile_number?: string;
   created_at: string;
   updated_at: string;
 }
 
-export type TravellersInsert = {
-  user_id: string;
-  first_name: string;
-  last_name: string;
-  email?: string | null;
-  mobile_number?: string | null;
-}
-
-export type TravellersUpdate = {
-  first_name?: string;
-  last_name?: string;
-  email?: string | null;
-  mobile_number?: string | null;
-}
+export interface TravellersInsert extends Omit<TravellersRow, 'id' | 'created_at' | 'updated_at'> {}
+export interface TravellersUpdate extends Partial<TravellersInsert> {}

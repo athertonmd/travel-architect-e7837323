@@ -65,7 +65,9 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   }, []);
 
   const stopPropagation = useCallback((e: React.MouseEvent | React.FocusEvent) => {
-    e.stopPropagation();
+    if (e.target instanceof Element) {
+      e.stopPropagation();
+    }
   }, []);
 
   const handleSave = useCallback(() => {
