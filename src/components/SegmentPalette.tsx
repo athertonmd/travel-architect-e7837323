@@ -17,6 +17,7 @@ const segmentTypes: SegmentType[] = [
   { id: "activity", type: "activity", label: "Activity", icon: "🎯" },
   { id: "transfer", type: "transfer", label: "Transfer", icon: "🚕" },
   { id: "vip", type: "vip", label: "VIP Service", icon: "👑" },
+  { id: "traveller", type: "traveller", label: "Traveller", icon: "👤" },
 ];
 
 export function SegmentPalette() {
