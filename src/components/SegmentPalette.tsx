@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { TravellerSegment } from "./trip/segments/TravellerSegment";
-import { Plus, Users } from "lucide-react";
+import { Users } from "lucide-react";
 
 export type SegmentType = {
   id: string;
