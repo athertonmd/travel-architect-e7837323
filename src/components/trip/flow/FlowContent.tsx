@@ -62,9 +62,7 @@ export function FlowContent({
     fitView({ padding: 0.2, duration: 200 });
   }, [fitView]);
 
-  // Add useEffect to center the view when nodes change or component mounts
   useEffect(() => {
-    // Small timeout to ensure nodes are rendered
     const timer = setTimeout(() => {
       if (nodes.length > 0) {
         fitView({ padding: 0.2, duration: 200 });
@@ -75,7 +73,7 @@ export function FlowContent({
   }, [nodes, fitView]);
 
   return (
-    <div className="h-full bg-gray-50/80">
+    <div className="h-full bg-secondary">
       <ReactFlow
         nodes={nodes}
         edges={edges}
