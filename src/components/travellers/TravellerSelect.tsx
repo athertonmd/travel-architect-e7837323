@@ -49,7 +49,7 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
       />
       <CommandEmpty>No traveller found.</CommandEmpty>
       <CommandGroup>
-        {travellers?.map((traveller) => (
+        {travellers.map((traveller) => (
           <CommandItem
             key={traveller.id}
             value={`${traveller.first_name} ${traveller.last_name}`}
