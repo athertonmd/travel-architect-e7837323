@@ -1,5 +1,5 @@
 import { Check } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 import { TravellersRow } from "@/integrations/supabase/types/travellers"
 import { supabase } from "@/integrations/supabase/client"
@@ -16,6 +16,13 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
   const [searchQuery, setSearchQuery] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Reset travellers when searchQuery is empty
+    if (!searchQuery || searchQuery.length === 0) {
+      setTravellers([]);
+    }
+  }, [searchQuery]);
 
   const searchTravellers = async (query: string) => {
     setSearchQuery(query)
@@ -46,6 +53,7 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
         return;
       }
 
+      // Ensure data is always an array
       const validData = Array.isArray(data) ? data : [];
       console.log('Processed travellers data:', validData);
       setTravellers(validData);
@@ -62,14 +70,16 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
   const handleSelect = (currentValue: string) => {
     if (!currentValue) return;
     
-    const selectedTraveller = travellers.find(
-      traveller => `${traveller.first_name} ${traveller.last_name}` === currentValue
-    );
+    const selectedTraveller = travellers.find(traveller => {
+      const fullName = `${traveller.first_name} ${traveller.last_name}`;
+      return fullName === currentValue;
+    });
 
     if (selectedTraveller) {
       try {
         onSelect(selectedTraveller);
         setValue(currentValue);
+        setSearchQuery(""); // Clear search after selection
       } catch (error) {
         console.error('Error in handleSelect:', error);
         toast.error("Failed to select traveller");
