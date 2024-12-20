@@ -26,25 +26,47 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     try {
-      const session = await supabase.auth.getSession();
-      if (!session.data.session) {
-        console.log('No active session found');
+      // First check if we have a session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session check error:', sessionError);
+        toast.error('Error checking session');
+        return;
+      }
+
+      // If no session, we're already logged out
+      if (!session) {
+        console.log('No active session found, redirecting to home');
         navigate('/');
         return;
       }
 
+      // Attempt to sign out
       const { error } = await supabase.auth.signOut();
+      
+      // Handle session_not_found error specifically
+      if (error?.message?.includes('session_not_found')) {
+        console.log('Session already cleared');
+        navigate('/');
+        return;
+      }
+
+      // Handle other errors
       if (error) {
         console.error('Logout error:', error);
         toast.error('Error logging out');
         return;
       }
 
+      // Success case
       toast.success("Logged out successfully");
       navigate("/");
     } catch (error) {
-      console.error('Logout error:', error);
-      toast.error("Error logging out");
+      console.error('Unexpected logout error:', error);
+      toast.error("Error during logout");
+      // Still redirect to home page in case of errors
+      navigate("/");
     }
   };
 
