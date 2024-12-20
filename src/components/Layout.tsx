@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const isAuthPage = location.pathname === "/auth";
+  const isAuthPage = location.pathname === "/";
 
   if (isAuthPage) {
     return (
