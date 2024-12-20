@@ -1,5 +1,5 @@
 import { Check } from "lucide-react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
 import { TravellersRow } from "@/integrations/supabase/types/travellers"
 import { supabase } from "@/integrations/supabase/client"
@@ -13,10 +13,12 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
   const [value, setValue] = useState("")
   const [travellers, setTravellers] = useState<TravellersRow[]>([])
   const [searchQuery, setSearchQuery] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
 
   const searchTravellers = async (query: string) => {
     setSearchQuery(query)
     try {
+      setIsLoading(true)
       if (query.length > 0) {
         console.log('Searching travellers with query:', query);
         const { data, error } = await supabase
@@ -39,6 +41,8 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
     } catch (error) {
       console.error('Error in searchTravellers:', error);
       setTravellers([]);
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -49,7 +53,9 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
         value={searchQuery}
         onValueChange={searchTravellers}
       />
-      {travellers.length === 0 ? (
+      {isLoading ? (
+        <CommandEmpty>Loading...</CommandEmpty>
+      ) : travellers.length === 0 ? (
         <CommandEmpty>No traveller found.</CommandEmpty>
       ) : (
         <CommandGroup>
