@@ -17,13 +17,28 @@ const Auth = () => {
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'SIGNED_IN' && session) {
         toast.success('Successfully signed in!');
         navigate('/dashboard');
       }
       if (event === 'SIGNED_OUT') {
+        // Clear any local storage or state if needed
+        try {
+          await supabase.auth.signOut();
+        } catch (error: any) {
+          // If we get a 403 session_not_found, we can safely ignore it
+          // as the user is already signed out
+          if (error?.error_type === 'http_client_error' && 
+              error?.body?.includes('session_not_found')) {
+            console.log('Session already cleared');
+          } else {
+            console.error('Logout error:', error);
+            toast.error('Error during sign out');
+          }
+        }
         toast.success('Signed out successfully');
+        navigate('/');
       }
       if (event === 'USER_UPDATED') {
         toast.success('Profile updated successfully');
