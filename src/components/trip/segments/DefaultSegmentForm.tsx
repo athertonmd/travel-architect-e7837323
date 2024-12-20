@@ -3,7 +3,7 @@ import { Label } from "@/components/ui/label";
 import { SegmentDetails } from "@/types/segment";
 import { TravellerSelect } from "@/components/travellers/TravellerSelect";
 import { memo } from "react";
-import { TravellersRow } from "@/integrations/supabase/types";
+import { TravellersRow } from "@/integrations/supabase/types/travellers";
 
 interface DefaultSegmentFormProps {
   details: SegmentDetails;
@@ -39,9 +39,9 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
         <div className="grid gap-2">
           <Label>Selected Traveller</Label>
           <div className="text-sm text-muted-foreground">
-            {details.traveller_name}
-            {details.email && <div>Email: {details.email}</div>}
-            {details.mobile_number && <div>Mobile: {details.mobile_number}</div>}
+            <div>{details.traveller_name as string}</div>
+            {details.email && <div>Email: {details.email as string}</div>}
+            {details.mobile_number && <div>Mobile: {details.mobile_number as string}</div>}
           </div>
         </div>
       )}

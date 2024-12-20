@@ -1,8 +1,9 @@
 import { Check } from "lucide-react"
 import { useState } from "react"
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { TravellersRow } from "@/integrations/supabase/types"
+import { TravellersRow } from "@/integrations/supabase/types/travellers"
 import { supabase } from "@/integrations/supabase/client"
+import { cn } from "@/lib/utils"
 
 interface TravellerSelectProps {
   onSelect: (traveller: TravellersRow) => void;
