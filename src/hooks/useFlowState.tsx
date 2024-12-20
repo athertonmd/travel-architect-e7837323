@@ -6,8 +6,8 @@ import { toast } from "sonner";
 export function useFlowState(
   initialNodes: Node<SegmentNodeData>[],
   readOnly: boolean,
-  onNodesUpdate?: (nodes: Node<SegmentNodeData>[]) => void,
-  reorganizeNodes: (nodes: Node<SegmentNodeData>[]) => void,
+  onNodesUpdate: ((nodes: Node<SegmentNodeData>[]) => void) | undefined,
+  reorganizeNodes: (nodes: Node<SegmentNodeData>[]) => Node<SegmentNodeData>[],
   updateEdges: (nodes: Node<SegmentNodeData>[]) => Edge[]
 ) {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<SegmentNodeData>>(initialNodes);
@@ -15,11 +15,13 @@ export function useFlowState(
 
   useEffect(() => {
     if (initialNodes.length > 0) {
-      setTimeout(() => {
+      const timer = setTimeout(() => {
         const updatedNodes = reorganizeNodes(initialNodes);
         setNodes(updatedNodes);
         setEdges(updateEdges(updatedNodes));
       }, 50);
+
+      return () => clearTimeout(timer);
     }
   }, [initialNodes, reorganizeNodes, setNodes, setEdges, updateEdges]);
 
@@ -31,8 +33,8 @@ export function useFlowState(
   const handleNodeDragStop = useCallback(() => {
     if (readOnly) return;
     
-    setNodes((nds) => {
-      const updatedNodes = reorganizeNodes(nds);
+    setNodes((currentNodes) => {
+      const updatedNodes = reorganizeNodes(currentNodes);
       setEdges(updateEdges(updatedNodes));
       if (onNodesUpdate) {
         onNodesUpdate(updatedNodes);
@@ -45,8 +47,8 @@ export function useFlowState(
   const handleNodesDelete = useCallback((nodesToDelete: Node<SegmentNodeData>[]) => {
     if (readOnly) return;
 
-    setNodes((nds) => {
-      const remainingNodes = nds.filter(
+    setNodes((currentNodes) => {
+      const remainingNodes = currentNodes.filter(
         (node) => !nodesToDelete.find((n) => n.id === node.id)
       );
       const updatedNodes = reorganizeNodes(remainingNodes);
