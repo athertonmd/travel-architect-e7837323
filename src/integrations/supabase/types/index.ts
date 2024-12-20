@@ -1,6 +1,6 @@
-export type { TravellersRow, TravellersInsert, TravellersUpdate } from './travellers';
-export type { ProfilesRow, ProfilesInsert, ProfilesUpdate } from './profiles';
-export type { TripsRow, TripsInsert, TripsUpdate } from './trips';
+export { TravellersRow, TravellersInsert, TravellersUpdate } from './travellers';
+export { ProfilesRow, ProfilesInsert, ProfilesUpdate } from './profiles';
+export { TripsRow, TripsInsert, TripsUpdate } from './trips';
 
 export type Database = {
   public: {
