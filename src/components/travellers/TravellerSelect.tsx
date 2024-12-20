@@ -21,33 +21,34 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
     setSearchQuery(query)
     setError(null)
     
+    if (!query || query.length === 0) {
+      setTravellers([]);
+      return;
+    }
+
     try {
       setIsLoading(true)
       console.log('Starting search with query:', query);
 
-      if (query.length > 0) {
-        const { data, error } = await supabase
-          .from('manage_travellers')
-          .select('*')
-          .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
-          .limit(5)
+      const { data, error } = await supabase
+        .from('manage_travellers')
+        .select('*')
+        .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
+        .limit(5)
 
-        console.log('Supabase query result:', { data, error });
+      console.log('Supabase query result:', { data, error });
 
-        if (error) {
-          console.error('Supabase error:', error);
-          setError(error.message);
-          toast.error("Error searching for travellers");
-          setTravellers([]);
-          return;
-        }
-
-        const validData = Array.isArray(data) ? data : [];
-        console.log('Processed travellers data:', validData);
-        setTravellers(validData);
-      } else {
+      if (error) {
+        console.error('Supabase error:', error);
+        setError(error.message);
+        toast.error("Error searching for travellers");
         setTravellers([]);
+        return;
       }
+
+      const validData = Array.isArray(data) ? data : [];
+      console.log('Processed travellers data:', validData);
+      setTravellers(validData);
     } catch (error) {
       console.error('Unexpected error in searchTravellers:', error);
       setError(error instanceof Error ? error.message : 'An unexpected error occurred');
@@ -59,6 +60,8 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
   }
 
   const handleSelect = (currentValue: string) => {
+    if (!currentValue) return;
+    
     const selectedTraveller = travellers.find(
       traveller => `${traveller.first_name} ${traveller.last_name}` === currentValue
     );
@@ -95,7 +98,7 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
             <CommandItem
               key={traveller.id}
               value={displayValue}
-              onSelect={handleSelect}
+              onSelect={(value) => handleSelect(value)}
             >
               <Check
                 className={cn(
@@ -112,7 +115,12 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
   };
 
   return (
-    <Command className="border rounded-lg" shouldFilter={false}>
+    <Command 
+      className="border rounded-lg" 
+      shouldFilter={false}
+      value={value}
+      onValueChange={(v) => setValue(v)}
+    >
       <CommandInput 
         placeholder="Search traveller..." 
         value={searchQuery}
