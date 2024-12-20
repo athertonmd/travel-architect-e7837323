@@ -2,18 +2,15 @@ import {
   Connection,
   Edge,
   Node,
-  useNodesState,
-  useEdgesState,
-  addEdge,
   OnSelectionChangeParams,
   ReactFlowProvider,
 } from '@xyflow/react';
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { SegmentNodeData } from "@/types/segment";
 import { useFlowDragDrop } from "./FlowDragDrop";
 import { useFlowManagement } from "@/hooks/useFlowManagement";
+import { useFlowState } from "@/hooks/useFlowState";
 import { FlowContent } from "./flow/FlowContent";
-import { toast } from "sonner";
 
 interface FlowEditorProps {
   onNodesChange?: (nodes: Node<SegmentNodeData>[]) => void;
@@ -28,19 +25,17 @@ const FlowEditorContent = ({
   initialNodes = [],
   readOnly = false 
 }: FlowEditorProps) => {
-  const [nodes, setNodes, onNodesChange] = useNodesState<Node<SegmentNodeData>>(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { reorganizeNodes, updateEdges } = useFlowManagement();
-
-  useEffect(() => {
-    if (initialNodes.length > 0) {
-      setTimeout(() => {
-        const updatedNodes = reorganizeNodes(initialNodes);
-        setNodes(updatedNodes);
-        setEdges(updateEdges(updatedNodes));
-      }, 50);
-    }
-  }, [initialNodes, reorganizeNodes, setNodes, setEdges, updateEdges]);
+  
+  const {
+    nodes,
+    edges,
+    onNodesChange,
+    onEdgesChange,
+    onConnect,
+    onNodeDragStop,
+    onNodesDelete
+  } = useFlowState(initialNodes, readOnly, onNodesUpdate, reorganizeNodes, updateEdges);
 
   const handleSelectionChange = useCallback(({ nodes: selectedNodes }: OnSelectionChangeParams) => {
     if (onNodeSelect) {
@@ -54,48 +49,11 @@ const FlowEditorContent = ({
     readOnly, 
     onNodesChange: (newNodes) => {
       const updatedNodes = reorganizeNodes(newNodes);
-      setNodes(updatedNodes);
-      setEdges(updateEdges(updatedNodes));
       if (onNodesUpdate) {
         onNodesUpdate(updatedNodes);
       }
     }
   });
-
-  const onConnect = useCallback(
-    (params: Connection) => setEdges((eds) => addEdge(params, eds)),
-    [setEdges]
-  );
-
-  const onNodeDragStop = useCallback(() => {
-    if (readOnly) return;
-    
-    setNodes((nds) => {
-      const updatedNodes = reorganizeNodes(nds);
-      setEdges(updateEdges(updatedNodes));
-      if (onNodesUpdate) {
-        onNodesUpdate(updatedNodes);
-        toast.success("Trip sequence updated");
-      }
-      return updatedNodes;
-    });
-  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly, onNodesUpdate]);
-
-  const onNodesDelete = useCallback((nodesToDelete: Node<SegmentNodeData>[]) => {
-    if (readOnly) return;
-
-    setNodes((nds) => {
-      const remainingNodes = nds.filter(
-        (node) => !nodesToDelete.find((n) => n.id === node.id)
-      );
-      const updatedNodes = reorganizeNodes(remainingNodes);
-      setEdges(updateEdges(updatedNodes));
-      if (onNodesUpdate) {
-        onNodesUpdate(updatedNodes);
-      }
-      return updatedNodes;
-    });
-  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly, onNodesUpdate]);
 
   return (
     <FlowContent
