@@ -1,3 +1,17 @@
-export * from './profiles';
-export * from './trips';
-export * from './travellers';
+export type {
+  TravellersRow,
+  TravellersInsert,
+  TravellersUpdate,
+} from './travellers';
+
+export type {
+  ProfilesRow,
+  ProfilesInsert,
+  ProfilesUpdate,
+} from './profiles';
+
+export type {
+  TripsRow,
+  TripsInsert,
+  TripsUpdate,
+} from './trips';
