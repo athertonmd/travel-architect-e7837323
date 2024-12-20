@@ -16,7 +16,6 @@ import { toast } from "sonner";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
-  { title: "All Trips", icon: CalendarDays, url: "/trips" },
   { title: "Create Trip", icon: Plus, url: "/trips/create" },
   { title: "Upload Trips", icon: Upload, url: "/trips/upload" },
   { title: "Manage Travellers", icon: Users, url: "/travellers" },
