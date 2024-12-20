@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import CreateTrip from "./pages/CreateTrip";
 import ViewTrip from "./pages/ViewTrip";
 import Auth from "./pages/Auth";
+import ManageTravellers from "./pages/ManageTravellers";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient();
@@ -60,6 +61,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <div className="p-4">Upload Trips Page (Coming Soon)</div>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/travellers"
+              element={
+                <ProtectedRoute>
+                  <ManageTravellers />
                 </ProtectedRoute>
               }
             />

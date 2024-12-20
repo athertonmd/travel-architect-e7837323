@@ -1,4 +1,4 @@
-import { CalendarDays, Home, Plus, Upload, LogOut } from "lucide-react";
+import { CalendarDays, Home, Plus, Upload, LogOut, Users } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,6 +19,7 @@ const menuItems = [
   { title: "All Trips", icon: CalendarDays, url: "/trips" },
   { title: "Create Trip", icon: Plus, url: "/trips/create" },
   { title: "Upload Trips", icon: Upload, url: "/trips/upload" },
+  { title: "Manage Travellers", icon: Users, url: "/travellers" },
 ];
 
 export function AppSidebar() {
