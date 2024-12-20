@@ -1,73 +1,77 @@
-import { Check } from "lucide-react"
-import { useState, useEffect } from "react"
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command"
-import { TravellersRow } from "@/integrations/supabase/types/travellers"
-import { supabase } from "@/integrations/supabase/client"
-import { cn } from "@/lib/utils"
-import { toast } from "sonner"
+import { Check } from "lucide-react";
+import { useState, useEffect, useCallback } from "react";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "@/components/ui/command";
+import { TravellersRow } from "@/integrations/supabase/types/travellers";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface TravellerSelectProps {
   onSelect: (traveller: TravellersRow) => void;
 }
 
-export function TravellerSelect({ onSelect }: TravellerSelectProps) {
-  const [value, setValue] = useState("")
-  const [travellers, setTravellers] = useState<TravellersRow[]>([])
-  const [searchQuery, setSearchQuery] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
+export const TravellerSelect = ({ onSelect }: TravellerSelectProps) => {
+  const [travellers, setTravellers] = useState<TravellersRow[]>([]);
+  const [value, setValue] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
+  // Reset travellers when search is cleared
   useEffect(() => {
-    // Reset travellers when searchQuery is empty
-    if (!searchQuery || searchQuery.length === 0) {
+    if (!searchQuery) {
       setTravellers([]);
     }
   }, [searchQuery]);
 
-  const searchTravellers = async (query: string) => {
-    setSearchQuery(query)
-    setError(null)
-    
-    if (!query || query.length === 0) {
+  // Memoized search function
+  const searchTravellers = useCallback(async (query: string) => {
+    if (!query || query.length < 2) {
       setTravellers([]);
       return;
     }
 
+    setIsLoading(true);
+    setError(null);
+
     try {
-      setIsLoading(true)
-      console.log('Starting search with query:', query);
+      const { data, error: searchError } = await supabase
+        .from("manage_travellers")
+        .select("*")
+        .or(
+          `first_name.ilike.%${query}%,` +
+          `last_name.ilike.%${query}%,` +
+          `email.ilike.%${query}%`
+        )
+        .limit(5);
 
-      const { data, error } = await supabase
-        .from('manage_travellers')
-        .select('*')
-        .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
-        .limit(5)
-
-      console.log('Supabase query result:', { data, error });
-
-      if (error) {
-        console.error('Supabase error:', error);
-        setError(error.message);
-        toast.error("Error searching for travellers");
-        setTravellers([]);
-        return;
+      if (searchError) {
+        throw searchError;
       }
 
       // Ensure data is always an array
       const validData = Array.isArray(data) ? data : [];
       console.log('Processed travellers data:', validData);
       setTravellers(validData);
-    } catch (error) {
-      console.error('Unexpected error in searchTravellers:', error);
-      setError(error instanceof Error ? error.message : 'An unexpected error occurred');
-      toast.error("Failed to search for travellers");
-      setTravellers([]);
+    } catch (err) {
+      console.error('Search error:', err);
+      setError('Failed to search travellers');
+      toast.error("Failed to search travellers");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  }, []);
 
-  const handleSelect = (currentValue: string) => {
+  // Debounced search effect
+  useEffect(() => {
+    const timeoutId = setTimeout(() => {
+      searchTravellers(searchQuery);
+    }, 300);
+
+    return () => clearTimeout(timeoutId);
+  }, [searchQuery, searchTravellers]);
+
+  // Handle traveller selection
+  const handleSelect = useCallback((currentValue: string) => {
     if (!currentValue) return;
     
     const selectedTraveller = travellers.find(traveller => {
@@ -85,58 +89,48 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
         toast.error("Failed to select traveller");
       }
     }
-  };
+  }, [travellers, onSelect]);
 
-  const renderContent = () => {
-    if (error) {
-      return <CommandEmpty>Error: {error}</CommandEmpty>;
-    }
+  // Render traveller name
+  const renderTravellerName = useCallback((traveller: TravellersRow) => {
+    return `${traveller.first_name} ${traveller.last_name}`;
+  }, []);
 
-    if (isLoading) {
-      return <CommandEmpty>Loading...</CommandEmpty>;
-    }
-
-    if (!Array.isArray(travellers) || travellers.length === 0) {
-      return <CommandEmpty>No traveller found.</CommandEmpty>;
-    }
-
-    return (
+  return (
+    <Command shouldFilter={false} className="border rounded-md">
+      <CommandInput
+        placeholder="Search by name or email..."
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+      />
+      <CommandEmpty>
+        {isLoading ? (
+          "Searching..."
+        ) : error ? (
+          error
+        ) : searchQuery.length < 2 ? (
+          "Type at least 2 characters to search"
+        ) : (
+          "No travellers found"
+        )}
+      </CommandEmpty>
       <CommandGroup>
         {travellers.map((traveller) => {
-          const displayValue = `${traveller.first_name} ${traveller.last_name}`;
+          const travellerName = renderTravellerName(traveller);
           return (
             <CommandItem
               key={traveller.id}
-              value={displayValue}
-              onSelect={(value) => handleSelect(value)}
+              value={travellerName}
+              onSelect={handleSelect}
             >
-              <Check
-                className={cn(
-                  "mr-2 h-4 w-4",
-                  value === displayValue ? "opacity-100" : "opacity-0"
-                )}
-              />
-              {displayValue}
+              {travellerName}
+              {value === travellerName && (
+                <Check className="ml-auto h-4 w-4" />
+              )}
             </CommandItem>
           );
         })}
       </CommandGroup>
-    );
-  };
-
-  return (
-    <Command 
-      className="border rounded-lg" 
-      shouldFilter={false}
-      value={value}
-      onValueChange={(v) => setValue(v)}
-    >
-      <CommandInput 
-        placeholder="Search traveller..." 
-        value={searchQuery}
-        onValueChange={searchTravellers}
-      />
-      {renderContent()}
     </Command>
   );
-}
+};
