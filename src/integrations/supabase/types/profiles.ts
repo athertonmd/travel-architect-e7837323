@@ -5,13 +5,6 @@ export type ProfilesRow = {
   created_at: string;
 };
 
-export type ProfilesInsert = {
-  id: string;
-  username?: string | null;
-  avatar_url?: string | null;
-};
+export type ProfilesInsert = Omit<ProfilesRow, 'created_at'>;
 
-export type ProfilesUpdate = {
-  username?: string | null;
-  avatar_url?: string | null;
-};
+export type ProfilesUpdate = Partial<ProfilesInsert>;

@@ -77,17 +77,21 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   const handleDelete = useCallback(() => {
     if (selectedNode) {
-      // Create and dispatch a custom keyboard event for the Delete key
-      const deleteEvent = new KeyboardEvent('keydown', {
-        key: 'Delete',
-        code: 'Delete',
-        keyCode: 46,
-        which: 46,
-        bubbles: true,
-        cancelable: true
-      });
-      document.dispatchEvent(deleteEvent);
-      toast.success("Segment deleted successfully!");
+      // Find the ReactFlow container element
+      const flowContainer = document.querySelector('.react-flow');
+      if (flowContainer) {
+        // Create and dispatch a custom keyboard event for the Delete key
+        const deleteEvent = new KeyboardEvent('keydown', {
+          key: 'Delete',
+          code: 'Delete',
+          keyCode: 46,
+          which: 46,
+          bubbles: true,
+          cancelable: true
+        });
+        flowContainer.dispatchEvent(deleteEvent);
+        toast.success("Segment deleted successfully!");
+      }
     }
   }, [selectedNode]);
 
