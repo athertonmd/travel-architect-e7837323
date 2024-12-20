@@ -1,7 +1,9 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SegmentDetails } from "@/types/segment";
+import { TravellerSelect } from "@/components/travellers/TravellerSelect";
 import { memo } from "react";
+import { TravellersRow } from "@/integrations/supabase/types";
 
 interface DefaultSegmentFormProps {
   details: SegmentDetails;
@@ -9,8 +11,14 @@ interface DefaultSegmentFormProps {
 }
 
 function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmentFormProps) {
-  const handleChange = (field: keyof SegmentDetails, value: string) => {
-    onDetailsChange({ ...details, [field]: value });
+  const handleTravellerSelect = (traveller: TravellersRow) => {
+    onDetailsChange({
+      ...details,
+      traveller_id: traveller.id,
+      traveller_name: `${traveller.first_name} ${traveller.last_name}`,
+      email: traveller.email || "",
+      mobile_number: traveller.mobile_number || "",
+    });
   };
 
   const stopPropagation = (e: React.FocusEvent | React.MouseEvent) => {
@@ -24,38 +32,19 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
       onFocus={stopPropagation}
     >
       <div className="grid gap-2">
-        <Label htmlFor="time">Time</Label>
-        <Input
-          id="time"
-          value={details.time || ""}
-          onChange={(e) => handleChange("time", e.target.value)}
-          placeholder="e.g., 2:30 PM"
-          onFocus={stopPropagation}
-          onClick={stopPropagation}
-        />
+        <Label>Traveller</Label>
+        <TravellerSelect onSelect={handleTravellerSelect} />
       </div>
-      <div className="grid gap-2">
-        <Label htmlFor="location">Location</Label>
-        <Input
-          id="location"
-          value={details.location || ""}
-          onChange={(e) => handleChange("location", e.target.value)}
-          placeholder="Enter location"
-          onFocus={stopPropagation}
-          onClick={stopPropagation}
-        />
-      </div>
-      <div className="grid gap-2">
-        <Label htmlFor="notes">Notes</Label>
-        <Input
-          id="notes"
-          value={details.notes || ""}
-          onChange={(e) => handleChange("notes", e.target.value)}
-          placeholder="Add any additional notes"
-          onFocus={stopPropagation}
-          onClick={stopPropagation}
-        />
-      </div>
+      {details.traveller_name && (
+        <div className="grid gap-2">
+          <Label>Selected Traveller</Label>
+          <div className="text-sm text-muted-foreground">
+            {details.traveller_name}
+            {details.email && <div>Email: {details.email}</div>}
+            {details.mobile_number && <div>Mobile: {details.mobile_number}</div>}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
