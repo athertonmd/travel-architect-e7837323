@@ -33,10 +33,14 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
         return;
       }
 
+      // Map nodes to segments, preserving all node data including position
       const segments = nodes.map(node => ({
         type: String(node.data.label).toLowerCase(),
         details: node.data.details,
-        position: node.position
+        position: {
+          x: node.position.x,
+          y: node.position.y
+        }
       }));
 
       const firstSegmentLocation = nodes[0]?.data?.details?.location;
