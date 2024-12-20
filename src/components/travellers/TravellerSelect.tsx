@@ -18,7 +18,6 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
   const [error, setError] = useState<string | null>(null)
 
   const searchTravellers = async (query: string) => {
-    // Reset states
     setSearchQuery(query)
     setError(null)
     
@@ -43,7 +42,6 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
           return;
         }
 
-        // Ensure data is always an array
         const validData = Array.isArray(data) ? data : [];
         console.log('Processed travellers data:', validData);
         setTravellers(validData);
@@ -60,17 +58,19 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
     }
   }
 
-  const handleSelect = (traveller: TravellersRow) => {
-    try {
-      if (!traveller || !traveller.id) {
-        console.error('Invalid traveller selected:', traveller);
-        return;
+  const handleSelect = (currentValue: string) => {
+    const selectedTraveller = travellers.find(
+      traveller => `${traveller.first_name} ${traveller.last_name}` === currentValue
+    );
+
+    if (selectedTraveller) {
+      try {
+        onSelect(selectedTraveller);
+        setValue(currentValue);
+      } catch (error) {
+        console.error('Error in handleSelect:', error);
+        toast.error("Failed to select traveller");
       }
-      onSelect(traveller);
-      setValue(`${traveller.first_name} ${traveller.last_name}`);
-    } catch (error) {
-      console.error('Error in handleSelect:', error);
-      toast.error("Failed to select traveller");
     }
   };
 
@@ -89,27 +89,30 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
 
     return (
       <CommandGroup>
-        {travellers.map((traveller) => (
-          <CommandItem
-            key={traveller.id}
-            value={`${traveller.first_name} ${traveller.last_name}`}
-            onSelect={() => handleSelect(traveller)}
-          >
-            <Check
-              className={cn(
-                "mr-2 h-4 w-4",
-                value === `${traveller.first_name} ${traveller.last_name}` ? "opacity-100" : "opacity-0"
-              )}
-            />
-            {traveller.first_name} {traveller.last_name}
-          </CommandItem>
-        ))}
+        {travellers.map((traveller) => {
+          const displayValue = `${traveller.first_name} ${traveller.last_name}`;
+          return (
+            <CommandItem
+              key={traveller.id}
+              value={displayValue}
+              onSelect={handleSelect}
+            >
+              <Check
+                className={cn(
+                  "mr-2 h-4 w-4",
+                  value === displayValue ? "opacity-100" : "opacity-0"
+                )}
+              />
+              {displayValue}
+            </CommandItem>
+          );
+        })}
       </CommandGroup>
     );
   };
 
   return (
-    <Command className="border rounded-lg">
+    <Command className="border rounded-lg" shouldFilter={false}>
       <CommandInput 
         placeholder="Search traveller..." 
         value={searchQuery}
