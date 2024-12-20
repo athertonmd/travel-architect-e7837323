@@ -13,6 +13,7 @@ import { SegmentNodeData } from "@/types/segment";
 import { useFlowDragDrop } from "./FlowDragDrop";
 import { useFlowManagement } from "@/hooks/useFlowManagement";
 import { FlowContent } from "./flow/FlowContent";
+import { toast } from "sonner";
 
 interface FlowEditorProps {
   onNodesChange?: (nodes: Node<SegmentNodeData>[]) => void;
@@ -33,7 +34,6 @@ const FlowEditorContent = ({
 
   useEffect(() => {
     if (initialNodes.length > 0) {
-      // Add a small delay to ensure nodes are measured
       setTimeout(() => {
         const updatedNodes = reorganizeNodes(initialNodes);
         setNodes(updatedNodes);
@@ -73,9 +73,13 @@ const FlowEditorContent = ({
     setNodes((nds) => {
       const updatedNodes = reorganizeNodes(nds);
       setEdges(updateEdges(updatedNodes));
+      if (onNodesUpdate) {
+        onNodesUpdate(updatedNodes);
+        toast.success("Trip sequence updated");
+      }
       return updatedNodes;
     });
-  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
+  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly, onNodesUpdate]);
 
   const onNodesDelete = useCallback((nodesToDelete: Node<SegmentNodeData>[]) => {
     if (readOnly) return;
@@ -86,9 +90,12 @@ const FlowEditorContent = ({
       );
       const updatedNodes = reorganizeNodes(remainingNodes);
       setEdges(updateEdges(updatedNodes));
+      if (onNodesUpdate) {
+        onNodesUpdate(updatedNodes);
+      }
       return updatedNodes;
     });
-  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly]);
+  }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly, onNodesUpdate]);
 
   return (
     <FlowContent
