@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import { TravellersTable } from "@/components/travellers/TravellersTable";
 import { TravellerForm } from "@/components/travellers/TravellerForm";
 import { TravellerSearch } from "@/components/travellers/TravellerSearch";
-import { TravellersRow } from "@/integrations/supabase/types";
+import { TravellersRow } from "@/integrations/supabase/types/travellers";
 
 const ManageTravellers = () => {
   const user = useUser();

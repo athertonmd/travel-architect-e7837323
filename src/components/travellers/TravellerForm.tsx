@@ -2,7 +2,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } fr
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
-import { TravellersRow } from "@/integrations/supabase/types";
+import { TravellersRow } from "@/integrations/supabase/types/travellers";
 
 interface TravellerFormProps {
   defaultValues?: Partial<TravellersRow>;

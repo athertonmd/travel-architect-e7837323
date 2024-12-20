@@ -17,17 +17,25 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
 
   const searchTravellers = async (query: string) => {
     setSearchQuery(query)
-    if (query.length > 0) {
-      const { data, error } = await supabase
-        .from('manage_travellers')
-        .select('*')
-        .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
-        .limit(5)
+    try {
+      if (query.length > 0) {
+        const { data, error } = await supabase
+          .from('manage_travellers')
+          .select('*')
+          .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
+          .limit(5)
 
-      if (!error && data) {
-        setTravellers(data)
+        if (!error && data) {
+          setTravellers(data)
+        } else {
+          console.error('Error fetching travellers:', error)
+          setTravellers([])
+        }
+      } else {
+        setTravellers([])
       }
-    } else {
+    } catch (error) {
+      console.error('Error in searchTravellers:', error)
       setTravellers([])
     }
   }
@@ -41,7 +49,7 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
       />
       <CommandEmpty>No traveller found.</CommandEmpty>
       <CommandGroup>
-        {travellers.map((traveller) => (
+        {travellers?.map((traveller) => (
           <CommandItem
             key={traveller.id}
             value={`${traveller.first_name} ${traveller.last_name}`}

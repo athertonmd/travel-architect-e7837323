@@ -8,7 +8,7 @@ import {
 } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { Pencil, Trash2 } from "lucide-react";
-import { TravellersRow } from "@/integrations/supabase/types";
+import { TravellersRow } from "@/integrations/supabase/types/travellers";
 
 interface TravellersTableProps {
   travellers: TravellersRow[];
