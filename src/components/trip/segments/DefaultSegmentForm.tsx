@@ -12,6 +12,7 @@ interface DefaultSegmentFormProps {
 
 function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmentFormProps) {
   const handleTravellerSelect = (traveller: TravellersRow) => {
+    console.log('Selected traveller:', traveller);
     onDetailsChange({
       ...details,
       traveller_id: traveller.id,
@@ -32,16 +33,16 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
       onFocus={stopPropagation}
     >
       <div className="grid gap-2">
-        <Label>Traveller</Label>
+        <Label>Search Traveller</Label>
         <TravellerSelect onSelect={handleTravellerSelect} />
       </div>
       {details.traveller_name && (
         <div className="grid gap-2">
           <Label>Selected Traveller</Label>
-          <div className="text-sm text-muted-foreground">
-            <div>{details.traveller_name as string}</div>
-            {details.email && <div>Email: {details.email as string}</div>}
-            {details.mobile_number && <div>Mobile: {details.mobile_number as string}</div>}
+          <div className="text-sm text-muted-foreground space-y-1">
+            <div>{details.traveller_name}</div>
+            {details.email && <div>Email: {details.email}</div>}
+            {details.mobile_number && <div>Mobile: {details.mobile_number}</div>}
           </div>
         </div>
       )}

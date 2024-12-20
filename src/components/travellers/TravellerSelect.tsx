@@ -10,7 +10,6 @@ interface TravellerSelectProps {
 }
 
 export function TravellerSelect({ onSelect }: TravellerSelectProps) {
-  const [open, setOpen] = useState(false)
   const [value, setValue] = useState("")
   const [travellers, setTravellers] = useState<TravellersRow[]>([])
   const [searchQuery, setSearchQuery] = useState("")
@@ -19,24 +18,27 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
     setSearchQuery(query)
     try {
       if (query.length > 0) {
+        console.log('Searching travellers with query:', query);
         const { data, error } = await supabase
           .from('manage_travellers')
           .select('*')
           .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
           .limit(5)
 
-        if (!error && data) {
-          setTravellers(data)
-        } else {
-          console.error('Error fetching travellers:', error)
-          setTravellers([])
+        if (error) {
+          console.error('Error fetching travellers:', error);
+          setTravellers([]);
+          return;
         }
+
+        console.log('Found travellers:', data);
+        setTravellers(data || []);
       } else {
-        setTravellers([])
+        setTravellers([]);
       }
     } catch (error) {
-      console.error('Error in searchTravellers:', error)
-      setTravellers([])
+      console.error('Error in searchTravellers:', error);
+      setTravellers([]);
     }
   }
 
@@ -56,7 +58,6 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
             onSelect={() => {
               onSelect(traveller)
               setValue(`${traveller.first_name} ${traveller.last_name}`)
-              setOpen(false)
             }}
           >
             <Check
