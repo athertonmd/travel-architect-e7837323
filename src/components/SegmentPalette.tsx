@@ -1,14 +1,18 @@
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { TravellerSegment } from "./trip/segments/TravellerSegment";
+import { Plus, Users } from "lucide-react";
 
 export type SegmentType = {
   id: string;
   type: string;
   label: string;
   icon: React.ReactNode;
+  customComponent?: React.ReactNode;
 };
 
 const segmentTypes: SegmentType[] = [
+  { id: "traveller", type: "traveller", label: "Traveller", icon: "👤", customComponent: <TravellerSegment /> },
   { id: "flight", type: "flight", label: "Flight", icon: "✈️" },
   { id: "hotel", type: "hotel", label: "Hotel", icon: "🏨" },
   { id: "limo", type: "limo", label: "Limo Service", icon: "🚙" },
@@ -40,6 +44,7 @@ export function SegmentPalette() {
             >
               <span>{segment.icon}</span>
               {segment.label}
+              {segment.customComponent}
             </Button>
           ))}
         </div>

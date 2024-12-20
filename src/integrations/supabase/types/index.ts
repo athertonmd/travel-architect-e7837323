@@ -1,4 +1,6 @@
 export type * from './travellers';
+export type * from './trips';
+export type * from './profiles';
 
 export type Database = {
   public: {

@@ -9,6 +9,7 @@ export function SegmentNode({ data, id, selected }: {
 }) {
   const destinationAirport = data.details?.destinationAirport;
   const hotelName = data.details?.hotelName;
+  const travellers = data.details?.travellers as Array<{ first_name: string; last_name: string }> | undefined;
   
   return (
     <div className="flex items-center justify-center">
@@ -26,6 +27,11 @@ export function SegmentNode({ data, id, selected }: {
           )}
           {data.label.toLowerCase() === 'hotel' && hotelName && (
             <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
+          )}
+          {data.label.toLowerCase() === 'traveller' && travellers && (
+            <span className="text-sm text-muted-foreground">
+              - {travellers.map(t => `${t.first_name} ${t.last_name}`).join(', ')}
+            </span>
           )}
         </div>
       </Button>
