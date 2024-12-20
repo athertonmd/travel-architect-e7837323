@@ -24,7 +24,7 @@ export function TravellerSelect({ onSelect }: TravellerSelectProps) {
         const { data, error } = await supabase
           .from('manage_travellers')
           .select('*')
-          .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%`)
+          .or(`first_name.ilike.%${query}%,last_name.ilike.%${query}%,email.ilike.%${query}%`)
           .limit(5)
 
         if (error) {
