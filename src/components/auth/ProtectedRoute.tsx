@@ -76,7 +76,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     let isSubscribed = true;
 
-    const subscription = supabase.auth.onAuthStateChange(async (event, session) => {
+    // Store the subscription object directly
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('Auth event:', event, session ? 'Session exists' : 'No session');
       
       if (event === 'TOKEN_REFRESHED') {
@@ -100,6 +101,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       isSubscribed = false;
       clearTimeout(authCheckTimeoutRef.current);
       clearTimeout(initialCheckTimeout);
+      // Properly unsubscribe from the auth state changes
       subscription?.unsubscribe();
     };
   }, [checkSession, handleAuthError]);
