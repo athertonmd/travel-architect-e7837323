@@ -9,12 +9,15 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
+const MAX_RETRIES = 2;
+const RETRY_DELAY = 800;
+const INITIAL_CHECK_DELAY = 100;
+
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const session = useSession();
   const navigate = useNavigate();
   const authCheckTimeoutRef = useRef<NodeJS.Timeout>();
   const retryCountRef = useRef(0);
-  const MAX_RETRIES = 2;
 
   const handleAuthError = useCallback(async (isSubscribed: boolean) => {
     if (!isSubscribed) return;
@@ -52,14 +55,16 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         console.log('No active session found');
         if (retryCountRef.current < MAX_RETRIES) {
           retryCountRef.current++;
-          authCheckTimeoutRef.current = setTimeout(() => checkSession(isSubscribed), 800);
+          authCheckTimeoutRef.current = setTimeout(
+            () => checkSession(isSubscribed), 
+            RETRY_DELAY
+          );
           return;
         }
         handleAuthError(isSubscribed);
         return;
       }
 
-      // Reset retry count on successful session check
       retryCountRef.current = 0;
 
       const { data: { user }, error: userError } = await supabase.auth.getUser();
@@ -76,8 +81,9 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     let isSubscribed = true;
 
-    // Store the subscription object directly
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth event:', event, session ? 'Session exists' : 'No session');
       
       if (event === 'TOKEN_REFRESHED') {
@@ -92,16 +98,14 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     });
 
-    // Initial session check with a small delay to allow browser to restore session
     const initialCheckTimeout = setTimeout(() => {
       checkSession(isSubscribed);
-    }, 100);
+    }, INITIAL_CHECK_DELAY);
 
     return () => {
       isSubscribed = false;
       clearTimeout(authCheckTimeoutRef.current);
       clearTimeout(initialCheckTimeout);
-      // Properly unsubscribe from the auth state changes
       subscription?.unsubscribe();
     };
   }, [checkSession, handleAuthError]);
