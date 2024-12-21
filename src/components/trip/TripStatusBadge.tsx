@@ -27,6 +27,15 @@ export function TripStatusBadge({ status, tripId }: TripStatusBadgeProps) {
     agreed: "bg-emerald-100 text-emerald-800",
   };
 
+  const statusOptions = [
+    { value: "draft", label: "Draft" },
+    { value: "confirmed", label: "Confirmed" },
+    { value: "in-progress", label: "In Progress" },
+    { value: "completed", label: "Completed" },
+    { value: "sent", label: "Sent" },
+    { value: "agreed", label: "Agreed" },
+  ];
+
   const handleStatusChange = async (newStatus: string) => {
     try {
       const { error } = await supabase
@@ -48,25 +57,30 @@ export function TripStatusBadge({ status, tripId }: TripStatusBadgeProps) {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Badge 
-          className={`${statusColors[status]} cursor-pointer flex items-center gap-1`}
+          className={`${statusColors[status]} cursor-pointer flex items-center gap-1 action-button`}
         >
           {status}
           <ChevronDown className="h-3 w-3" />
         </Badge>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => handleStatusChange("sent")}>
-          <div className="flex items-center gap-2">
-            {status === "sent" && <Check className="h-4 w-4" />}
-            <span className="text-blue-800">Sent</span>
-          </div>
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => handleStatusChange("agreed")}>
-          <div className="flex items-center gap-2">
-            {status === "agreed" && <Check className="h-4 w-4" />}
-            <span className="text-emerald-800">Agreed</span>
-          </div>
-        </DropdownMenuItem>
+        {statusOptions.map((option) => (
+          <DropdownMenuItem 
+            key={option.value}
+            onClick={() => handleStatusChange(option.value)}
+          >
+            <div className="flex items-center gap-2">
+              {status === option.value && <Check className="h-4 w-4" />}
+              <span className={
+                option.value === 'sent' ? 'text-blue-800' :
+                option.value === 'agreed' ? 'text-emerald-800' :
+                'text-gray-800'
+              }>
+                {option.label}
+              </span>
+            </div>
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
