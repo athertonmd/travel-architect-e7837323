@@ -10,11 +10,9 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Link, useNavigate } from "react-router-dom";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
-import { useCallback, useState } from "react";
+import { Link } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
+import { useLogout } from "@/hooks/useLogout";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -25,45 +23,8 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-  const navigate = useNavigate();
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
   const session = useSession();
-
-  const handleLogout = useCallback(async () => {
-    // Prevent multiple logout attempts
-    if (isLoggingOut || !session) return;
-
-    const toastId = toast.loading('Logging out...');
-    
-    try {
-      setIsLoggingOut(true);
-      console.log('Starting logout process...');
-      
-      // Force clear the session locally first
-      await supabase.auth.setSession(null);
-      
-      // Attempt to sign out to clean up any lingering state
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        console.error('Logout error:', error);
-        toast.error('Error during logout', { id: toastId });
-        return;
-      }
-      
-      console.log('Logout successful');
-      toast.success('Logged out successfully', { id: toastId });
-      
-      // Force navigation to login page using window.location for a clean state
-      window.location.href = '/';
-      
-    } catch (error) {
-      console.error('Unexpected logout error:', error);
-      toast.error('Error during logout', { id: toastId });
-    } finally {
-      setIsLoggingOut(false);
-    }
-  }, [navigate, isLoggingOut, session]);
+  const { handleLogout, isLoggingOut } = useLogout();
 
   return (
     <Sidebar>
