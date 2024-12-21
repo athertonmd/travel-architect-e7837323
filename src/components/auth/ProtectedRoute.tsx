@@ -16,52 +16,65 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   
   useEffect(() => {
     const handleAuthError = async () => {
-      console.log('Session invalid, redirecting to login');
-      // Clear any existing session data
-      const { error } = await supabase.auth.signOut();
-      if (error) console.error('Error clearing session:', error);
-      
+      console.log('Session invalid or expired');
+      await supabase.auth.signOut();
       navigate('/');
       toast.error("Please sign in to continue");
     };
 
+    // Initial session check
+    const checkSession = async () => {
+      try {
+        const { data: { session: currentSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Session check error:', error);
+          handleAuthError();
+          return;
+        }
+
+        if (!currentSession) {
+          console.log('No active session found');
+          handleAuthError();
+          return;
+        }
+
+        // Verify token is still valid
+        const { data: { user }, error: userError } = await supabase.auth.getUser();
+        if (userError || !user) {
+          console.error('User verification failed:', userError);
+          handleAuthError();
+        }
+      } catch (error) {
+        console.error('Session verification error:', error);
+        handleAuthError();
+      }
+    };
+
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event: AuthChangeEvent) => {
-      console.log('Auth event:', event);
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, currentSession) => {
+      console.log('Auth event:', event, currentSession ? 'Session exists' : 'No session');
       
       if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
       }
       
-      if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
-        handleAuthError();
-      }
-
-      // Handle invalid session states
-      if (!session) {
-        console.error('Session invalid');
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        console.log('User signed out or deleted');
         handleAuthError();
       }
     });
 
-    // Verify session on mount
-    const checkSession = async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
-      if (error || !session) {
-        console.error('Session check failed:', error);
-        handleAuthError();
-      }
-    };
-    
+    // Check session on mount
     checkSession();
 
     // Cleanup subscription
     return () => {
       subscription.unsubscribe();
     };
-  }, [navigate, session]);
+  }, [navigate]);
 
+  // Redirect if no session
   if (!session) {
     return <Navigate to="/" replace />;
   }
