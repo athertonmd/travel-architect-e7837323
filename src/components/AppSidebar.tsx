@@ -12,7 +12,6 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -31,7 +30,6 @@ export function AppSidebar() {
       
       if (sessionError) {
         console.error('Session check error:', sessionError);
-        toast.error('Error checking session');
         return;
       }
 
@@ -51,15 +49,12 @@ export function AppSidebar() {
 
       if (error) {
         console.error('Logout error:', error);
-        toast.error('Error logging out');
         return;
       }
 
-      toast.success("Logged out successfully");
       navigate("/");
     } catch (error) {
       console.error('Unexpected logout error:', error);
-      toast.error("Error during logout");
       navigate("/");
     }
   };
