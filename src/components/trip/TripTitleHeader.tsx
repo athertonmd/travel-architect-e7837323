@@ -31,7 +31,7 @@ export const TripTitleHeader = ({ title, onTitleChange }: TripTitleHeaderProps) 
             type="text"
             value={editedTitle}
             onChange={(e) => setEditedTitle(e.target.value)}
-            className="text-3xl font-bold text-gray-800 h-auto py-1"
+            className="text-3xl font-bold text-gray-800 dark:text-gray-800 h-auto py-1 bg-white"
             autoFocus
           />
           <Button type="submit" size="sm" variant="ghost">
