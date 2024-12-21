@@ -20,21 +20,46 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const navigate = useNavigate();
   
   useEffect(() => {
-    const handleAuthError = () => {
+    const handleAuthError = async () => {
       console.log('Session invalid, redirecting to login');
+      // Clear any existing session data
+      const { error } = await supabase.auth.signOut();
+      if (error) console.error('Error clearing session:', error);
+      
       navigate('/');
+      toast.error("Please sign in to continue");
     };
 
     // Set up auth state change listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('Auth event:', event);
+      
       if (event === 'TOKEN_REFRESHED') {
         console.log('Token refreshed successfully');
       }
-      if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
+      
+      if (event === 'SIGNED_OUT' || event === 'USER_DELETED') {
+        console.log('User signed out or deleted');
+        handleAuthError();
+      }
+
+      // Handle token refresh errors
+      if (event === 'TOKEN_REFRESH_FAILED') {
+        console.error('Token refresh failed');
         handleAuthError();
       }
     });
+
+    // Verify session on mount
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        console.error('Session check failed:', error);
+        handleAuthError();
+      }
+    };
+    
+    checkSession();
 
     // Cleanup subscription
     return () => {
@@ -43,8 +68,6 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   }, [navigate]);
 
   if (!session) {
-    console.log('No active session, redirecting to login');
-    toast.error("Please sign in to continue");
     return <Navigate to="/" replace />;
   }
   
