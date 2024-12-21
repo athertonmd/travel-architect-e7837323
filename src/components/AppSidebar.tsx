@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/sidebar";
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -26,36 +27,21 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     try {
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Session check error:', sessionError);
-        return;
-      }
-
-      if (!session) {
-        console.log('No active session found, redirecting to home');
-        navigate('/');
-        return;
-      }
-
       const { error } = await supabase.auth.signOut();
       
-      if (error?.message?.includes('session_not_found')) {
-        console.log('Session already cleared');
-        navigate('/');
-        return;
-      }
-
       if (error) {
         console.error('Logout error:', error);
+        toast.error('Error logging out');
         return;
       }
 
+      // Clear any local state or cached data here if needed
+      console.log('User logged out successfully');
       navigate("/");
+      
     } catch (error) {
       console.error('Unexpected logout error:', error);
-      navigate("/");
+      toast.error('Error during logout');
     }
   };
 
