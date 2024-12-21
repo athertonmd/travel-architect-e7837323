@@ -35,7 +35,6 @@ const ViewTrip = () => {
         return;
       }
 
-      // Convert nodes to segments format, preserving position
       const segments: SupabaseJsonSegment[] = nodes.map((node) => ({
         type: String(node.data.label).toLowerCase(),
         details: node.data.details || {},
@@ -77,6 +76,7 @@ const ViewTrip = () => {
           onTitleChange={setTitle}
           travelers={trip?.travelers}
           onSave={handleSave}
+          tripId={id}
         />
 
         <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-lg border">
