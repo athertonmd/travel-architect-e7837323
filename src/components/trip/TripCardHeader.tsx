@@ -4,15 +4,17 @@ import { TripStatusBadge } from "./TripStatusBadge";
 import { TripActions } from "./TripActions";
 
 interface TripCardHeaderProps {
+  id: string;
   title: string;
   destination: string;
-  status: "draft" | "confirmed" | "in-progress" | "completed";
+  status: "draft" | "confirmed" | "in-progress" | "completed" | "sent" | "agreed";
   onDelete: () => void;
   onArchive: () => void;
   archived?: boolean;
 }
 
 export function TripCardHeader({
+  id,
   title,
   destination,
   status,
@@ -31,7 +33,7 @@ export function TripCardHeader({
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
-          <TripStatusBadge status={status} />
+          <TripStatusBadge status={status} tripId={id} />
           <TripActions 
             onDelete={onDelete}
             onArchive={onArchive}

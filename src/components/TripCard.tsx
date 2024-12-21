@@ -14,7 +14,7 @@ interface TripCardProps {
   startDate: string;
   endDate: string;
   travelers: number;
-  status: "draft" | "confirmed" | "in-progress" | "completed";
+  status: "draft" | "confirmed" | "in-progress" | "completed" | "sent" | "agreed";
   archived?: boolean;
 }
 
@@ -62,6 +62,7 @@ export function TripCard({
       onClick={handleCardClick}
     >
       <TripCardHeader
+        id={id}
         title={title}
         destination={destination}
         status={status}
