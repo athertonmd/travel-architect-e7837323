@@ -39,17 +39,10 @@ export function AppSidebar() {
       setIsLoggingOut(true);
       console.log('Starting logout process...');
       
-      // Get current session state
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      // Force clear the session locally first
+      await supabase.auth.setSession(null);
       
-      if (!currentSession) {
-        console.log('No active session found, redirecting to login');
-        window.location.href = '/';
-        toast.error('No active session found', { id: toastId });
-        return;
-      }
-      
-      // Perform the signout
+      // Attempt to sign out to clean up any lingering state
       const { error } = await supabase.auth.signOut();
       
       if (error) {
