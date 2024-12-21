@@ -15,23 +15,31 @@ interface TripHeaderProps {
 export function TripHeader({ title, onTitleChange, travelers, onSave, tripId }: TripHeaderProps) {
   const queryClient = useQueryClient();
 
-  const handleSave = async () => {
-    if (tripId) {
-      try {
-        const { error } = await supabase
-          .from('trips')
-          .update({ status: 'draft' })
-          .eq('id', tripId);
+  const updateTripStatus = async () => {
+    if (!tripId) return;
+    
+    try {
+      const { error } = await supabase
+        .from('trips')
+        .update({ status: 'draft' })
+        .eq('id', tripId);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        await queryClient.invalidateQueries({ queryKey: ['trips'] });
-        toast.success("Trip status reset to draft");
-      } catch (error: any) {
-        toast.error("Failed to update trip status");
-        console.error("Status update error:", error);
-      }
+      await queryClient.invalidateQueries({ 
+        queryKey: ['trip', tripId],
+        exact: true 
+      });
+      
+      toast.success("Trip status reset to draft");
+    } catch (error: any) {
+      toast.error("Failed to update trip status");
+      console.error("Status update error:", error);
     }
+  };
+
+  const handleSave = async () => {
+    await updateTripStatus();
     onSave();
   };
 
