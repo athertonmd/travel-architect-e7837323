@@ -38,8 +38,14 @@ export function AppSidebar() {
       setIsLoggingOut(true);
       console.log('Starting logout process...');
 
-      // Simple signout without session validation
-      await supabase.auth.signOut();
+      // Basic signout without scope parameter
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        console.error('Logout error:', error);
+        toast.error('Error during logout', { id: toastId });
+        return;
+      }
       
       console.log('Logout successful');
       toast.success('Logged out successfully', { id: toastId });
