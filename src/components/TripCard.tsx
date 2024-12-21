@@ -1,12 +1,11 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { TripStatusBadge } from "./trip/TripStatusBadge";
-import { TripActions } from "./trip/TripActions";
 import { TripMetadata } from "./trip/TripMetadata";
 import { useQueryClient } from "@tanstack/react-query";
+import { TripCardHeader } from "./trip/TripCardHeader";
+import { useArchiveTrip } from "@/hooks/useArchiveTrip";
 
 interface TripCardProps {
   id: string;
@@ -31,6 +30,7 @@ export function TripCard({
 }: TripCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { archiveTrip } = useArchiveTrip();
   
   const handleDelete = async () => {
     try {
@@ -43,31 +43,6 @@ export function TripCard({
       
       await queryClient.invalidateQueries({ queryKey: ['trips'] });
       toast.success("Trip deleted successfully");
-    } catch (error: any) {
-      toast.error(error.message);
-    }
-  };
-
-  const handleArchive = async () => {
-    try {
-      const { error } = await supabase
-        .from('trips')
-        .update({ archived: !archived })
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      await queryClient.invalidateQueries({ queryKey: ['trips'] });
-      toast.success(archived ? "Trip unarchived successfully" : "Trip archived successfully", {
-        duration: 2000,
-      });
-
-      // Navigate to the appropriate page after archiving/unarchiving
-      if (!archived) {
-        navigate('/trips/archive');
-      } else {
-        navigate('/dashboard');
-      }
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -86,25 +61,14 @@ export function TripCard({
       className="hover:shadow-lg transition-shadow cursor-pointer relative animate-in fade-in-50 duration-300" 
       onClick={handleCardClick}
     >
-      <CardHeader>
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-xl font-semibold">{title}</CardTitle>
-            <CardDescription className="flex items-center mt-1">
-              <MapPin className="h-4 w-4 mr-1" />
-              {destination}
-            </CardDescription>
-          </div>
-          <div className="flex items-center gap-2">
-            <TripStatusBadge status={status} />
-            <TripActions 
-              onDelete={handleDelete}
-              onArchive={handleArchive}
-              archived={archived}
-            />
-          </div>
-        </div>
-      </CardHeader>
+      <TripCardHeader
+        title={title}
+        destination={destination}
+        status={status}
+        onDelete={handleDelete}
+        onArchive={() => archiveTrip(id, !!archived)}
+        archived={archived}
+      />
       <CardContent>
         <TripMetadata 
           startDate={startDate}
