@@ -30,6 +30,7 @@ export function AppSidebar() {
   const session = useSession();
 
   const handleLogout = useCallback(async () => {
+    // Prevent multiple logout attempts
     if (isLoggingOut || !session) return;
 
     const toastId = toast.loading('Logging out...');
@@ -38,8 +39,13 @@ export function AppSidebar() {
       setIsLoggingOut(true);
       console.log('Starting logout process...');
 
-      // Basic signout without scope parameter
-      const { error } = await supabase.auth.signOut();
+      // First, clear any existing session data
+      await supabase.auth.clearSession();
+      
+      // Then perform the signout
+      const { error } = await supabase.auth.signOut({
+        scope: 'local'  // Use local scope to avoid session validation
+      });
       
       if (error) {
         console.error('Logout error:', error);
@@ -49,7 +55,9 @@ export function AppSidebar() {
       
       console.log('Logout successful');
       toast.success('Logged out successfully', { id: toastId });
-      navigate("/", { replace: true });
+      
+      // Force navigation to login page
+      window.location.href = '/';
       
     } catch (error) {
       console.error('Unexpected logout error:', error);
