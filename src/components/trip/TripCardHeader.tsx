@@ -7,7 +7,7 @@ interface TripCardHeaderProps {
   id: string;
   title: string;
   destination: string;
-  status: "draft" | "confirmed" | "in-progress" | "completed" | "sent" | "agreed";
+  status: "draft" | "in-progress" | "confirmed";
   onDelete: () => void;
   onArchive: () => void;
   archived?: boolean;

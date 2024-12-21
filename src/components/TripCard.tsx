@@ -14,7 +14,7 @@ interface TripCardProps {
   startDate: string;
   endDate: string;
   travelers: number;
-  status: "draft" | "confirmed" | "in-progress" | "completed" | "sent" | "agreed";
+  status: "draft" | "in-progress" | "confirmed";
   archived?: boolean;
 }
 

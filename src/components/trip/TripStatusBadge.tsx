@@ -60,7 +60,7 @@ export function TripStatusBadge({ status, tripId }: TripStatusBadgeProps) {
           <Badge 
             className={`${statusColors[status]} cursor-pointer flex items-center gap-1 hover:bg-opacity-90 transition-colors`}
           >
-            {status}
+            {status === "in-progress" ? "In Progress" : status.charAt(0).toUpperCase() + status.slice(1)}
             <ChevronDown className="h-3 w-3" />
           </Badge>
         </DropdownMenuTrigger>
