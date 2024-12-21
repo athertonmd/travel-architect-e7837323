@@ -10,7 +10,7 @@ import {
   SidebarMenuItem,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
 import { useLogout } from "@/hooks/useLogout";
 
@@ -25,6 +25,7 @@ const menuItems = [
 export function AppSidebar() {
   const session = useSession();
   const { handleLogout, isLoggingOut } = useLogout();
+  const location = useLocation();
 
   return (
     <Sidebar>
@@ -35,8 +36,14 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
-                    <Link to={item.url} className="flex items-center gap-2 text-white">
+                  <SidebarMenuButton 
+                    asChild
+                    data-active={location.pathname === item.url}
+                  >
+                    <Link 
+                      to={item.url} 
+                      className="flex items-center gap-2 text-white w-full"
+                    >
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>
