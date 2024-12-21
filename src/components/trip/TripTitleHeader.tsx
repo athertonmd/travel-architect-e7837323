@@ -40,7 +40,7 @@ export const TripTitleHeader = ({ title, onTitleChange }: TripTitleHeaderProps) 
         </form>
       ) : (
         <>
-          <h1 className="text-3xl font-bold text-navy">{title}</h1>
+          <h1 className="text-3xl font-bold text-white">{title}</h1>
           <Button
             variant="ghost"
             size="icon"
