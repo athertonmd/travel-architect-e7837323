@@ -1,6 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CalendarDays, MapPin, Users, Trash2 } from "lucide-react";
+import { CalendarDays, MapPin, Users, Trash2, Archive } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
@@ -24,9 +24,10 @@ interface TripCardProps {
   endDate: string;
   travelers: number;
   status: "draft" | "confirmed" | "in-progress" | "completed";
+  archived?: boolean;
 }
 
-export function TripCard({ id, title, destination, startDate, endDate, travelers, status }: TripCardProps) {
+export function TripCard({ id, title, destination, startDate, endDate, travelers, status, archived }: TripCardProps) {
   const navigate = useNavigate();
   
   const statusColors = {
@@ -46,7 +47,22 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
       if (error) throw error;
       
       toast.success("Trip deleted successfully");
-      // Force a page refresh to update the trips list
+      window.location.reload();
+    } catch (error: any) {
+      toast.error(error.message);
+    }
+  };
+
+  const handleArchive = async () => {
+    try {
+      const { error } = await supabase
+        .from('trips')
+        .update({ archived: !archived })
+        .eq('id', id);
+
+      if (error) throw error;
+      
+      toast.success(archived ? "Trip unarchived successfully" : "Trip archived successfully");
       window.location.reload();
     } catch (error: any) {
       toast.error(error.message);
@@ -54,9 +70,8 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Prevent navigation when clicking any part of the AlertDialog
     if ((e.target as HTMLElement).closest('[role="dialog"]') || 
-        (e.target as HTMLElement).closest('.delete-button')) {
+        (e.target as HTMLElement).closest('.action-button')) {
       e.stopPropagation();
       return;
     }
@@ -79,11 +94,17 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
           </div>
           <div className="flex items-center gap-2">
             <Badge className={statusColors[status]}>{status}</Badge>
+            <button 
+              className="action-button p-2 hover:bg-gray-100 rounded-full transition-colors"
+              onClick={handleArchive}
+              title={archived ? "Unarchive trip" : "Archive trip"}
+            >
+              <Archive className="h-4 w-4 text-gray-500 hover:text-blue-500" />
+            </button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <button 
-                  className="delete-button p-2 hover:bg-gray-100 rounded-full transition-colors"
-                  onClick={(e) => e.stopPropagation()}
+                  className="action-button p-2 hover:bg-gray-100 rounded-full transition-colors"
                 >
                   <Trash2 className="h-4 w-4 text-gray-500 hover:text-red-500" />
                 </button>
@@ -96,7 +117,7 @@ export function TripCard({ id, title, destination, startDate, endDate, travelers
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                  <AlertDialogCancel onClick={(e) => e.stopPropagation()}>Cancel</AlertDialogCancel>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
                   <AlertDialogAction 
                     onClick={handleDelete}
                     className="bg-red-500 hover:bg-red-600"

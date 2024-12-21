@@ -73,6 +73,7 @@ export type Database = {
       }
       trips: {
         Row: {
+          archived: boolean | null
           created_at: string
           destination: string | null
           end_date: string | null
@@ -86,6 +87,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          archived?: boolean | null
           created_at?: string
           destination?: string | null
           end_date?: string | null
@@ -99,6 +101,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          archived?: boolean | null
           created_at?: string
           destination?: string | null
           end_date?: string | null
