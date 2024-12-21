@@ -38,12 +38,23 @@ export function AppSidebar() {
       setIsLoggingOut(true);
       console.log('Starting logout process...');
 
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'  // Use local scope to avoid session validation issues
+      // First refresh the session
+      const { data: sessionData, error: refreshError } = await supabase.auth.refreshSession();
+      
+      if (refreshError) {
+        console.error('Session refresh error:', refreshError);
+        toast.error('Session refresh failed', { id: toastId });
+        navigate("/", { replace: true });
+        return;
+      }
+
+      // Then attempt to sign out
+      const { error: signOutError } = await supabase.auth.signOut({
+        scope: 'local'
       });
       
-      if (error) {
-        console.error('Logout error:', error);
+      if (signOutError) {
+        console.error('Logout error:', signOutError);
         toast.error('Error logging out', { id: toastId });
         return;
       }

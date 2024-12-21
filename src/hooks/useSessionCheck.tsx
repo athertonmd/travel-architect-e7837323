@@ -16,7 +16,14 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
     console.log('Session invalid or expired');
     try {
       clearTimeout(authCheckTimeoutRef.current);
-      await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({
+        scope: 'local'
+      });
+      
+      if (error) {
+        console.error('Error during sign out:', error);
+      }
+      
       if (isSubscribed) {
         navigate('/', { replace: true });
         toast.error("Please sign in to continue");
@@ -33,8 +40,7 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
     if (!isSubscribed) return;
 
     try {
-      const { data: { session: currentSession }, error: sessionError } = 
-        await supabase.auth.getSession();
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
       if (sessionError) {
         console.error('Session check error:', sessionError);
@@ -42,7 +48,7 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
         return;
       }
 
-      if (!currentSession) {
+      if (!session) {
         console.log('No active session found');
         if (retryCountRef.current < MAX_RETRIES) {
           retryCountRef.current++;
@@ -56,13 +62,10 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
         return;
       }
 
+      // Reset retry counter on successful session check
       retryCountRef.current = 0;
+      console.log('Session check successful');
 
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-      if (userError || !user) {
-        console.error('User check error:', userError);
-        handleAuthError(isSubscribed);
-      }
     } catch (error) {
       console.error('Unexpected error during session check:', error);
       handleAuthError(isSubscribed);
