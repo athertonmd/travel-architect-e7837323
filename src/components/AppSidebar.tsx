@@ -27,10 +27,6 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     try {
-      // First navigate to prevent UI freezing
-      navigate("/", { replace: true });
-      
-      // Then perform the logout
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -40,6 +36,7 @@ export function AppSidebar() {
       }
 
       console.log('User logged out successfully');
+      navigate("/", { replace: true });
       
     } catch (error) {
       console.error('Unexpected logout error:', error);
