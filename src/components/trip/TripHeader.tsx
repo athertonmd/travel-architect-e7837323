@@ -13,9 +13,6 @@ export function TripHeader({ title, onTitleChange, travelers, onSave }: TripHead
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
         <TripTitleHeader title={title} onTitleChange={onTitleChange} />
-        <div className="text-sm text-muted-foreground">
-          {travelers} {travelers === 1 ? 'traveler' : 'travelers'}
-        </div>
       </div>
       <Button
         onClick={onSave}
