@@ -14,6 +14,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useCallback, useState } from "react";
+import { useSession } from '@supabase/auth-helpers-react';
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -26,15 +27,20 @@ const menuItems = [
 export function AppSidebar() {
   const navigate = useNavigate();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const session = useSession();
 
   const handleLogout = useCallback(async () => {
-    if (isLoggingOut) return; // Prevent multiple logout attempts
+    if (isLoggingOut || !session) return;
 
+    const toastId = toast.loading('Logging out...');
+    
     try {
       setIsLoggingOut(true);
-      const toastId = toast.loading('Logging out...');
+      console.log('Starting logout process...');
 
-      const { error } = await supabase.auth.signOut();
+      const { error } = await supabase.auth.signOut({
+        scope: 'local'  // Use local scope to avoid session validation issues
+      });
       
       if (error) {
         console.error('Logout error:', error);
@@ -42,17 +48,17 @@ export function AppSidebar() {
         return;
       }
 
-      // Only navigate after successful logout
+      console.log('Logout successful');
       toast.success('Logged out successfully', { id: toastId });
       navigate("/", { replace: true });
       
     } catch (error) {
       console.error('Unexpected logout error:', error);
-      toast.error('Error during logout');
+      toast.error('Error during logout', { id: toastId });
     } finally {
       setIsLoggingOut(false);
     }
-  }, [navigate, isLoggingOut]);
+  }, [navigate, isLoggingOut, session]);
 
   return (
     <Sidebar>
@@ -78,7 +84,7 @@ export function AppSidebar() {
       <SidebarFooter className="mt-auto p-4">
         <SidebarMenuButton
           onClick={handleLogout}
-          disabled={isLoggingOut}
+          disabled={isLoggingOut || !session}
           className="flex w-full items-center gap-2 text-destructive hover:text-destructive disabled:opacity-50"
         >
           <LogOut className="h-4 w-4" />
