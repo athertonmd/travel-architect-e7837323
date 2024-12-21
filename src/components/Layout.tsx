@@ -20,9 +20,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full bg-background">
+      <div className="min-h-screen flex w-full bg-navy">
         <AppSidebar />
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-8 bg-navy text-white">
           <div className="container">
             <SidebarTrigger />
             {children}
