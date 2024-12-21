@@ -26,7 +26,6 @@ export function AppSidebar() {
 
   const handleLogout = async () => {
     try {
-      // First check if we have a session
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
       
       if (sessionError) {
@@ -35,37 +34,31 @@ export function AppSidebar() {
         return;
       }
 
-      // If no session, we're already logged out
       if (!session) {
         console.log('No active session found, redirecting to home');
         navigate('/');
         return;
       }
 
-      // Attempt to sign out
       const { error } = await supabase.auth.signOut();
       
-      // Handle session_not_found error specifically
       if (error?.message?.includes('session_not_found')) {
         console.log('Session already cleared');
         navigate('/');
         return;
       }
 
-      // Handle other errors
       if (error) {
         console.error('Logout error:', error);
         toast.error('Error logging out');
         return;
       }
 
-      // Success case
       toast.success("Logged out successfully");
       navigate("/");
     } catch (error) {
       console.error('Unexpected logout error:', error);
       toast.error("Error during logout");
-      // Still redirect to home page in case of errors
       navigate("/");
     }
   };
@@ -74,13 +67,13 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+          <SidebarGroupLabel className="text-white">Navigation</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton asChild>
-                    <Link to={item.url} className="flex items-center gap-2">
+                    <Link to={item.url} className="flex items-center gap-2 text-white">
                       <item.icon className="h-4 w-4" />
                       <span>{item.title}</span>
                     </Link>

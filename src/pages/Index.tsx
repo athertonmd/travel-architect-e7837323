@@ -73,7 +73,7 @@ const Index = () => {
             <p className="text-white mt-1">Manage your travel itineraries</p>
           </div>
           <Button 
-            className="bg-navy hover:bg-navy-light"
+            className="bg-navy hover:bg-navy-light border border-white"
             onClick={() => navigate("/trips/create")}
           >
             <Plus className="h-4 w-4 mr-2" />
