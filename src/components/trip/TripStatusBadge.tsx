@@ -11,7 +11,7 @@ import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 
 interface TripStatusBadgeProps {
-  status: "draft" | "confirmed" | "in-progress" | "completed" | "sent" | "agreed";
+  status: "draft" | "in-progress" | "confirmed";
   tripId: string;
 }
 
@@ -20,20 +20,14 @@ export function TripStatusBadge({ status, tripId }: TripStatusBadgeProps) {
 
   const statusColors = {
     draft: "bg-gray-200 text-gray-800",
-    confirmed: "bg-green-100 text-green-800",
     "in-progress": "bg-blue-100 text-blue-800",
-    completed: "bg-purple-100 text-purple-800",
-    sent: "bg-blue-100 text-blue-800",
-    agreed: "bg-emerald-100 text-emerald-800",
+    confirmed: "bg-green-100 text-green-800",
   };
 
   const statusOptions = [
     { value: "draft", label: "Draft" },
-    { value: "confirmed", label: "Confirmed" },
     { value: "in-progress", label: "In Progress" },
-    { value: "completed", label: "Completed" },
-    { value: "sent", label: "Sent" },
-    { value: "agreed", label: "Agreed" },
+    { value: "confirmed", label: "Confirmed" },
   ];
 
   const handleStatusChange = async (newStatus: string) => {
@@ -82,13 +76,7 @@ export function TripStatusBadge({ status, tripId }: TripStatusBadgeProps) {
             >
               <div className="flex items-center gap-2">
                 {status === option.value && <Check className="h-4 w-4" />}
-                <span className={
-                  option.value === 'sent' ? 'text-blue-800' :
-                  option.value === 'agreed' ? 'text-emerald-800' :
-                  'text-gray-800'
-                }>
-                  {option.label}
-                </span>
+                <span>{option.label}</span>
               </div>
             </DropdownMenuItem>
           ))}
