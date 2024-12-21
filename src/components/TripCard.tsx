@@ -61,6 +61,13 @@ export function TripCard({
       toast.success(archived ? "Trip unarchived successfully" : "Trip archived successfully", {
         duration: 2000,
       });
+
+      // Navigate to the appropriate page after archiving/unarchiving
+      if (!archived) {
+        navigate('/trips/archive');
+      } else {
+        navigate('/dashboard');
+      }
     } catch (error: any) {
       toast.error(error.message);
     }
