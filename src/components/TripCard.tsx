@@ -63,12 +63,12 @@ export function TripCard({
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).closest('[role="dialog"]') || 
-        (e.target as HTMLElement).closest('.action-button')) {
-      e.stopPropagation();
-      return;
+    // Only navigate if the click was directly on the card or its non-interactive children
+    if (!(e.target as HTMLElement).closest('[role="dialog"]') && 
+        !(e.target as HTMLElement).closest('.action-button') &&
+        !(e.target as HTMLElement).closest('[role="button"]')) {
+      navigate(`/trips/${id}`);
     }
-    navigate(`/trips/${id}`);
   };
 
   return (
