@@ -53,26 +53,32 @@ export function TripStatusBadge({ status, tripId }: TripStatusBadgeProps) {
     }
   };
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-  };
-
   return (
-    <div onClick={handleClick} className="action-button">
+    <div 
+      className="action-button" 
+      onClick={(e) => {
+        e.stopPropagation();
+        e.preventDefault();
+      }}
+    >
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger className="focus:outline-none">
           <Badge 
-            className={`${statusColors[status]} cursor-pointer flex items-center gap-1`}
+            className={`${statusColors[status]} cursor-pointer flex items-center gap-1 hover:bg-opacity-90 transition-colors`}
           >
             {status}
             <ChevronDown className="h-3 w-3" />
           </Badge>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="z-50 bg-white">
+        <DropdownMenuContent 
+          align="end" 
+          className="z-50 bg-white shadow-lg rounded-md border border-gray-200"
+        >
           {statusOptions.map((option) => (
             <DropdownMenuItem 
               key={option.value}
               onClick={() => handleStatusChange(option.value)}
+              className="cursor-pointer hover:bg-gray-50"
             >
               <div className="flex items-center gap-2">
                 {status === option.value && <Check className="h-4 w-4" />}
