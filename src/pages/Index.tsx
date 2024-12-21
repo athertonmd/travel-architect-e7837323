@@ -70,7 +70,7 @@ const Index = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-white">Travel Dashboard</h1>
-            <p className="text-gray-600 mt-1">Manage your luxury travel itineraries</p>
+            <p className="text-white mt-1">Manage your travel itineraries</p>
           </div>
           <Button 
             className="bg-navy hover:bg-navy-light"
