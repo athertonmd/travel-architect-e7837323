@@ -11,41 +11,42 @@ const Auth = () => {
 
   useEffect(() => {
     // Check if there's already a session
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error) {
+        console.error('Session check error:', error);
+        toast.error('Error checking session');
+        return;
+      }
+      
       if (session) {
+        console.log('Active session found, redirecting to dashboard');
         navigate('/dashboard');
       }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
+      
       if (event === 'SIGNED_IN' && session) {
+        console.log('Sign in successful, redirecting to dashboard');
         toast.success('Successfully signed in!');
         navigate('/dashboard');
       }
       if (event === 'SIGNED_OUT') {
-        // Clear any local storage or state if needed
-        try {
-          await supabase.auth.signOut();
-        } catch (error: any) {
-          // If we get a 403 session_not_found, we can safely ignore it
-          // as the user is already signed out
-          if (error?.error_type === 'http_client_error' && 
-              error?.body?.includes('session_not_found')) {
-            console.log('Session already cleared');
-          } else {
-            console.error('Logout error:', error);
-            toast.error('Error during sign out');
-          }
-        }
+        console.log('User signed out, clearing session');
         toast.success('Signed out successfully');
         navigate('/');
       }
       if (event === 'USER_UPDATED') {
+        console.log('User profile updated');
         toast.success('Profile updated successfully');
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      console.log('Cleaning up auth subscriptions');
+      subscription.unsubscribe();
+    };
   }, [navigate]);
 
   return (
