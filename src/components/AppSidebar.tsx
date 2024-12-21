@@ -39,16 +39,17 @@ export function AppSidebar() {
       setIsLoggingOut(true);
       console.log('Starting logout process...');
       
-      // First, get the current session to verify we have one
+      // Get current session state
       const { data: { session: currentSession } } = await supabase.auth.getSession();
       
       if (!currentSession) {
-        console.log('No active session found, proceeding with navigation');
+        console.log('No active session found, redirecting to login');
         window.location.href = '/';
+        toast.error('No active session found', { id: toastId });
         return;
       }
       
-      // Perform the signout without any scope parameter
+      // Perform the signout
       const { error } = await supabase.auth.signOut();
       
       if (error) {
