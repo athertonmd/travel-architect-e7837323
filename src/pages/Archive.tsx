@@ -1,9 +1,8 @@
 import { Layout } from "@/components/Layout";
-import { TripCard } from "@/components/TripCard";
+import { TripGrid } from "@/components/TripGrid";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from '@supabase/auth-helpers-react';
-import { Skeleton } from "@/components/ui/skeleton";
 
 const Archive = () => {
   const user = useUser();
@@ -46,21 +45,6 @@ const Archive = () => {
     fetchArchivedTrips();
   }, [user]);
 
-  const LoadingSkeleton = () => (
-    <>
-      {[1, 2, 3].map((i) => (
-        <div key={i} className="space-y-4 p-6 border rounded-lg shadow-sm">
-          <Skeleton className="h-6 w-3/4" />
-          <Skeleton className="h-4 w-1/2" />
-          <div className="flex gap-2 mt-4">
-            <Skeleton className="h-4 w-1/4" />
-            <Skeleton className="h-4 w-1/4" />
-          </div>
-        </div>
-      ))}
-    </>
-  );
-
   return (
     <Layout>
       <div className="space-y-8">
@@ -75,19 +59,7 @@ const Archive = () => {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {isLoading ? (
-            <LoadingSkeleton />
-          ) : trips.length > 0 ? (
-            trips.map((trip) => (
-              <TripCard key={trip.id} {...trip} />
-            ))
-          ) : (
-            <div className="col-span-full text-center p-8 border border-dashed rounded-lg">
-              <p className="text-gray-500">No archived trips found.</p>
-            </div>
-          )}
-        </div>
+        <TripGrid trips={trips} isLoading={isLoading} />
       </div>
     </Layout>
   );
