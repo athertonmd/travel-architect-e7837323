@@ -38,14 +38,9 @@ export function AppSidebar() {
     try {
       setIsLoggingOut(true);
       console.log('Starting logout process...');
-
-      // First, clear any existing session data
-      await supabase.auth.clearSession();
       
-      // Then perform the signout
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'  // Use local scope to avoid session validation
-      });
+      // Perform the signout
+      const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error('Logout error:', error);
