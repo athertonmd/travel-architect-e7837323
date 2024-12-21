@@ -35,7 +35,7 @@ export function SegmentPalette() {
             <Button
               key={segment.id}
               variant="outline"
-              className="w-full justify-start gap-2"
+              className="w-full justify-start gap-2 text-blue-500"
               draggable
               onDragStart={(e) => onDragStart(e, segment.type)}
             >
