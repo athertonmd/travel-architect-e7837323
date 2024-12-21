@@ -92,7 +92,7 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="h-8 w-8"
+                    className="h-8 w-8 text-gray-700 hover:text-gray-900"
                     onClick={() => removeTraveller(index)}
                   >
                     <X className="h-4 w-4" />
