@@ -38,27 +38,9 @@ export function AppSidebar() {
       setIsLoggingOut(true);
       console.log('Starting logout process...');
 
-      // First refresh the session
-      const { data: sessionData, error: refreshError } = await supabase.auth.refreshSession();
+      // Simple signout without session validation
+      await supabase.auth.signOut();
       
-      if (refreshError) {
-        console.error('Session refresh error:', refreshError);
-        toast.error('Session refresh failed', { id: toastId });
-        navigate("/", { replace: true });
-        return;
-      }
-
-      // Then attempt to sign out
-      const { error: signOutError } = await supabase.auth.signOut({
-        scope: 'local'
-      });
-      
-      if (signOutError) {
-        console.error('Logout error:', signOutError);
-        toast.error('Error logging out', { id: toastId });
-        return;
-      }
-
       console.log('Logout successful');
       toast.success('Logged out successfully', { id: toastId });
       navigate("/", { replace: true });

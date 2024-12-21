@@ -16,13 +16,9 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
     console.log('Session invalid or expired');
     try {
       clearTimeout(authCheckTimeoutRef.current);
-      const { error } = await supabase.auth.signOut({
-        scope: 'local'
-      });
       
-      if (error) {
-        console.error('Error during sign out:', error);
-      }
+      // Simple local signout without session validation
+      await supabase.auth.signOut();
       
       if (isSubscribed) {
         navigate('/', { replace: true });
@@ -62,7 +58,6 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
         return;
       }
 
-      // Reset retry counter on successful session check
       retryCountRef.current = 0;
       console.log('Session check successful');
 
