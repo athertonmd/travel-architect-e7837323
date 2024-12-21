@@ -3,8 +3,8 @@ import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupContent,
   SidebarGroupLabel,
+  SidebarGroupContent,
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
@@ -13,7 +13,7 @@ import {
 import { Link, useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -25,46 +25,34 @@ const menuItems = [
 
 export function AppSidebar() {
   const navigate = useNavigate();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const handleLogout = useCallback(async () => {
+    if (isLoggingOut) return; // Prevent multiple logout attempts
+
     try {
-      // Disable the logout button to prevent multiple clicks
-      const logoutButton = document.querySelector('[data-logout-button]');
-      if (logoutButton) {
-        (logoutButton as HTMLButtonElement).disabled = true;
-      }
+      setIsLoggingOut(true);
+      const toastId = toast.loading('Logging out...');
 
-      // Show loading state
-      toast.loading('Logging out...');
-
-      // Perform the logout
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error('Logout error:', error);
-        toast.error('Error logging out');
+        toast.error('Error logging out', { id: toastId });
         return;
       }
 
-      // Clear any cached data or state if needed
-      console.log('User logged out successfully');
-      
-      // Navigate after successful logout
+      // Only navigate after successful logout
+      toast.success('Logged out successfully', { id: toastId });
       navigate("/", { replace: true });
-      toast.success('Logged out successfully');
       
     } catch (error) {
       console.error('Unexpected logout error:', error);
       toast.error('Error during logout');
     } finally {
-      // Re-enable the logout button
-      const logoutButton = document.querySelector('[data-logout-button]');
-      if (logoutButton) {
-        (logoutButton as HTMLButtonElement).disabled = false;
-      }
-      toast.dismiss();
+      setIsLoggingOut(false);
     }
-  }, [navigate]);
+  }, [navigate, isLoggingOut]);
 
   return (
     <Sidebar>
@@ -89,9 +77,9 @@ export function AppSidebar() {
       </SidebarContent>
       <SidebarFooter className="mt-auto p-4">
         <SidebarMenuButton
-          data-logout-button
           onClick={handleLogout}
-          className="flex w-full items-center gap-2 text-destructive hover:text-destructive"
+          disabled={isLoggingOut}
+          className="flex w-full items-center gap-2 text-destructive hover:text-destructive disabled:opacity-50"
         >
           <LogOut className="h-4 w-4" />
           <span>Log Out</span>
