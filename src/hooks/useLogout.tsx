@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef } from 'react';
+import { useState, useCallback, useRef, useEffect } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSession } from '@supabase/auth-helpers-react';
@@ -52,13 +52,16 @@ export const useLogout = () => {
 
       // Attempt to sign out with a timeout
       const signOutPromise = supabase.auth.signOut();
-      const timeoutPromise = new Promise((_, reject) => 
+      const timeoutPromise = new Promise<{ error: Error }>((_, reject) => 
         setTimeout(() => reject(new Error('Signout timeout')), 3000)
       );
 
-      const { error } = await Promise.race([signOutPromise, timeoutPromise])
-        .catch(error => ({ error }));
+      const result = await Promise.race([
+        signOutPromise,
+        timeoutPromise
+      ]).catch(error => ({ error }));
 
+      const error = 'error' in result ? result.error : null;
       console.log('Signout attempt result:', { error });
       
       if (error) {
@@ -88,7 +91,7 @@ export const useLogout = () => {
   }, [isLoggingOut, navigate, session]);
 
   // Cleanup on unmount
-  React.useEffect(() => {
+  useEffect(() => {
     return cleanup;
   }, []);
 
