@@ -58,7 +58,7 @@ export function TripCard({
 
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow cursor-pointer relative animate-in fade-in-50 duration-300" 
+      className="hover:shadow-lg transition-shadow cursor-pointer relative animate-in fade-in-50 duration-300 w-full" 
       onClick={handleCardClick}
     >
       <TripCardHeader
@@ -70,7 +70,7 @@ export function TripCard({
         onArchive={() => archiveTrip(id, !!archived)}
         archived={archived}
       />
-      <CardContent>
+      <CardContent className="p-4 sm:p-6">
         <TripMetadata 
           startDate={startDate}
           endDate={endDate}
