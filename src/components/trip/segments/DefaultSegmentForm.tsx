@@ -81,7 +81,7 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
               {(details.traveller_names as string[]).map((name, index) => (
                 <div key={index} className="flex items-start justify-between space-x-4 text-sm">
                   <div className="space-y-1">
-                    <p className="font-medium">{name}</p>
+                    <p className="font-medium text-blue-500">{name}</p>
                     {details.emails && (details.emails as string[])[index] && (
                       <p className="text-muted-foreground">Email: {(details.emails as string[])[index]}</p>
                     )}
