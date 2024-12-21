@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { TripStatusBadge } from "./trip/TripStatusBadge";
 import { TripActions } from "./trip/TripActions";
 import { TripMetadata } from "./trip/TripMetadata";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface TripCardProps {
   id: string;
@@ -29,6 +30,7 @@ export function TripCard({
   archived 
 }: TripCardProps) {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   
   const handleDelete = async () => {
     try {
@@ -39,8 +41,8 @@ export function TripCard({
 
       if (error) throw error;
       
+      await queryClient.invalidateQueries({ queryKey: ['trips'] });
       toast.success("Trip deleted successfully");
-      window.location.reload();
     } catch (error: any) {
       toast.error(error.message);
     }
@@ -55,15 +57,16 @@ export function TripCard({
 
       if (error) throw error;
       
-      toast.success(archived ? "Trip unarchived successfully" : "Trip archived successfully");
-      window.location.reload();
+      await queryClient.invalidateQueries({ queryKey: ['trips'] });
+      toast.success(archived ? "Trip unarchived successfully" : "Trip archived successfully", {
+        duration: 2000,
+      });
     } catch (error: any) {
       toast.error(error.message);
     }
   };
 
   const handleCardClick = (e: React.MouseEvent) => {
-    // Only navigate if the click was directly on the card or its non-interactive children
     if (!(e.target as HTMLElement).closest('[role="dialog"]') && 
         !(e.target as HTMLElement).closest('.action-button') &&
         !(e.target as HTMLElement).closest('[role="button"]')) {
@@ -73,7 +76,7 @@ export function TripCard({
 
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow cursor-pointer relative" 
+      className="hover:shadow-lg transition-shadow cursor-pointer relative animate-in fade-in-50 duration-300" 
       onClick={handleCardClick}
     >
       <CardHeader>
