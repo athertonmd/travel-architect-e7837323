@@ -22,11 +22,32 @@ export const useLogout = () => {
       setIsLoggingOut(true);
 
       // First check if we have a session
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
       
+      if (sessionError) {
+        console.error('Session check error:', sessionError);
+        // If we can't get the session, it's likely expired/invalid
+        await supabase.auth.setSession(null);
+        toast.success('Session cleared', { id: toastId });
+        navigate('/');
+        return;
+      }
+
       if (!currentSession) {
         console.log('No active session found, redirecting to login');
         toast.success('Logged out successfully', { id: toastId });
+        navigate('/');
+        return;
+      }
+
+      // Check if token is expired
+      const tokenExpiryTime = new Date(currentSession.expires_at * 1000);
+      const isTokenExpired = tokenExpiryTime <= new Date();
+
+      if (isTokenExpired) {
+        console.log('Token expired, clearing session');
+        await supabase.auth.setSession(null);
+        toast.success('Session expired, logged out successfully', { id: toastId });
         navigate('/');
         return;
       }
@@ -36,9 +57,16 @@ export const useLogout = () => {
       
       if (error) {
         console.error('Logout error:', error);
-        // Even if there's an error, we'll clear the local session
-        await supabase.auth.setSession(null);
-        toast.error('Error during logout, but session cleared', { id: toastId });
+        // Handle specific error cases
+        if (error.message?.includes('token') || error.message?.includes('JWT')) {
+          console.log('Token invalid, clearing session');
+          await supabase.auth.setSession(null);
+          toast.success('Session cleared successfully', { id: toastId });
+        } else {
+          // Even if there's an error, we'll clear the local session
+          await supabase.auth.setSession(null);
+          toast.error('Error during logout, but session cleared', { id: toastId });
+        }
       } else {
         console.log('Logout successful');
         toast.success('Logged out successfully', { id: toastId });
