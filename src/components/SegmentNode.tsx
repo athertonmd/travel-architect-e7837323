@@ -9,7 +9,7 @@ export function SegmentNode({ data, id, selected }: {
 }) {
   const destinationAirport = data.details?.destinationAirport;
   const hotelName = data.details?.hotelName;
-  const provider = data.details?.provider;
+  const provider = data.details?.provider as string | undefined;
   const travelerCount = Array.isArray(data.details?.traveller_names) ? data.details.traveller_names.length : 0;
   
   return (
@@ -29,7 +29,7 @@ export function SegmentNode({ data, id, selected }: {
           {data.label.toLowerCase() === 'hotel' && hotelName && (
             <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
           )}
-          {data.label.toLowerCase() === 'car' && provider && (
+          {data.label.toLowerCase() === 'car' && provider && provider.trim() !== '' && (
             <span className="text-sm text-muted-foreground">({provider})</span>
           )}
           {travelerCount > 0 && (
