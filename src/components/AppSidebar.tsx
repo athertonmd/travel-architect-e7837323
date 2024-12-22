@@ -1,4 +1,4 @@
-import { CalendarDays, Home, Plus, Upload, LogOut, Users, Archive, Loader2 } from "lucide-react";
+import { CalendarDays, Home, Plus, Upload, LogOut, Users, Archive } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -60,12 +60,8 @@ export function AppSidebar() {
           disabled={isLoggingOut || !session}
           className="flex w-full items-center gap-2 text-destructive hover:text-destructive disabled:opacity-50"
         >
-          {isLoggingOut ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <LogOut className="h-4 w-4" />
-          )}
-          <span>{isLoggingOut ? 'Logging out...' : 'Log Out'}</span>
+          <LogOut className="h-4 w-4" />
+          <span>Log Out</span>
         </SidebarMenuButton>
       </SidebarFooter>
     </Sidebar>
