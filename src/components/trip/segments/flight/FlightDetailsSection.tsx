@@ -17,6 +17,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           value={details.departureAirport as string || ""}
           onChange={(e) => onDetailsChange("departureAirport", e.target.value)}
           placeholder="e.g., LAX"
+          className="text-gray-700"
         />
       </div>
 
@@ -27,6 +28,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           value={details.destinationAirport as string || ""}
           onChange={(e) => onDetailsChange("destinationAirport", e.target.value)}
           placeholder="e.g., JFK"
+          className="text-gray-700"
         />
       </div>
 
@@ -37,6 +39,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           value={details.flightNumber as string || ""}
           onChange={(e) => onDetailsChange("flightNumber", e.target.value)}
           placeholder="e.g., AA123"
+          className="text-gray-700"
         />
       </div>
 
@@ -47,6 +50,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           value={details.cabinClass as string || ""}
           onChange={(e) => onDetailsChange("cabinClass", e.target.value)}
           placeholder="e.g., Business"
+          className="text-gray-700"
         />
       </div>
 
@@ -57,6 +61,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           value={details.loyaltyNumber as string || ""}
           onChange={(e) => onDetailsChange("loyaltyNumber", e.target.value)}
           placeholder="e.g., FF123456"
+          className="text-gray-700"
         />
       </div>
 
@@ -67,6 +72,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           value={details.seatNumber as string || ""}
           onChange={(e) => onDetailsChange("seatNumber", e.target.value)}
           placeholder="e.g., 12A"
+          className="text-gray-700"
         />
       </div>
     </>
