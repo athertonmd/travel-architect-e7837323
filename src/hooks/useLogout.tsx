@@ -10,19 +10,8 @@ export const useLogout = () => {
   const navigate = useNavigate();
 
   const handleLogout = useCallback(async () => {
-    console.log('Logout initiated...', { 
-      isLoggingOut, 
-      hasSession: !!session,
-      sessionDetails: session ? 'Session exists' : 'No session'
-    });
-
-    if (isLoggingOut) {
-      console.log('Preventing duplicate logout attempt');
-      return;
-    }
-
-    if (!session) {
-      console.warn('No active session found during logout');
+    if (isLoggingOut || !session) {
+      console.log('Logout prevented:', { isLoggingOut, hasSession: !!session });
       navigate('/');
       return;
     }
@@ -31,29 +20,19 @@ export const useLogout = () => {
     setIsLoggingOut(true);
 
     try {
-      console.log('Attempting Supabase signOut...');
-      const { error } = await supabase.auth.signOut();
+      // Clear any stored auth state first
+      localStorage.removeItem('supabase.auth.token');
       
-      if (error) {
-        console.error('Logout error:', error.message);
-        toast.error('Logout failed. Please try again.', { id: toastId });
-        return;
-      }
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
 
-      console.log('Logout successful');
       toast.success('Logged out successfully', { id: toastId });
+      navigate('/');
     } catch (error) {
-      console.error('Unexpected logout error:', error);
+      console.error('Logout error:', error);
       toast.error('Error during logout', { id: toastId });
     } finally {
-      console.log('Cleanup: Resetting logout state');
       setIsLoggingOut(false);
-      
-      // Small delay before navigation to ensure state updates complete
-      setTimeout(() => {
-        console.log('Navigating to home page');
-        navigate('/');
-      }, 100);
     }
   }, [session, isLoggingOut, navigate]);
 
