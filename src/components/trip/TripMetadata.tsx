@@ -17,7 +17,9 @@ export function TripMetadata({ startDate, endDate, travelers }: TripMetadataProp
       </div>
       <div className="flex items-center">
         <Users className="h-4 w-4 mr-1 text-gray-500" />
-        <span className="text-sm">{travelers} travelers</span>
+        <span className="text-sm">
+          {travelers} {travelers === 1 ? 'traveler' : 'travelers'}
+        </span>
       </div>
     </div>
   );

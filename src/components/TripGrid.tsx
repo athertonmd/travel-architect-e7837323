@@ -11,6 +11,7 @@ interface Trip {
   travelers: number;
   status: "draft" | "in-progress" | "confirmed";
   archived?: boolean;
+  segments?: any[];
 }
 
 interface TripGridProps {

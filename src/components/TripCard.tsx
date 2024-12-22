@@ -16,6 +16,7 @@ interface TripCardProps {
   travelers: number;
   status: "draft" | "in-progress" | "confirmed";
   archived?: boolean;
+  segments?: any[];
 }
 
 export function TripCard({ 
@@ -26,12 +27,21 @@ export function TripCard({
   endDate, 
   travelers, 
   status, 
-  archived 
+  archived,
+  segments 
 }: TripCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const { archiveTrip } = useArchiveTrip();
   
+  // Calculate actual traveler count from segments
+  const actualTravelerCount = segments?.reduce((count, segment) => {
+    if (segment.details?.traveller_names?.length > count) {
+      return segment.details.traveller_names.length;
+    }
+    return count;
+  }, 0) || travelers; // Fallback to the travelers prop if no segments data
+
   const handleDelete = async () => {
     try {
       const { error } = await supabase
@@ -74,7 +84,7 @@ export function TripCard({
         <TripMetadata 
           startDate={startDate}
           endDate={endDate}
-          travelers={travelers}
+          travelers={actualTravelerCount}
         />
       </CardContent>
     </Card>
