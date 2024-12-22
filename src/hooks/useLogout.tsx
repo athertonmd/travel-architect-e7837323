@@ -1,25 +1,24 @@
-import { useState, useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSession } from '@supabase/auth-helpers-react';
 import { useNavigate } from 'react-router-dom';
 
 export const useLogout = () => {
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const isLoggingOutRef = useRef(false);
   const session = useSession();
   const navigate = useNavigate();
 
   const handleLogout = useCallback(async () => {
-    console.log('Logout initiated:', { hasSession: !!session, isLoggingOut });
+    console.log('Logout initiated:', { hasSession: !!session, isLoggingOut: isLoggingOutRef.current });
     
-    // Prevent multiple logout attempts
-    if (isLoggingOut) {
+    if (isLoggingOutRef.current) {
       console.log('Logout already in progress');
       return;
     }
 
+    isLoggingOutRef.current = true;
     const toastId = toast.loading('Logging out...');
-    setIsLoggingOut(true);
 
     try {
       // Always clear local storage first
@@ -41,15 +40,15 @@ export const useLogout = () => {
       toast.error('Error during logout', { id: toastId });
       
     } finally {
-      setIsLoggingOut(false);
+      isLoggingOutRef.current = false;
       // Always redirect to login page, regardless of errors
       console.log('Redirecting to login page');
       navigate('/', { replace: true });
     }
-  }, [navigate, isLoggingOut]);
+  }, [navigate, session]);
 
   return {
     handleLogout,
-    isLoggingOut
+    isLoggingOut: isLoggingOutRef.current
   };
 };
