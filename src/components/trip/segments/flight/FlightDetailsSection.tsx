@@ -11,7 +11,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
   return (
     <>
       <div className="grid gap-2">
-        <Label htmlFor="departureAirport">Departure Airport</Label>
+        <Label htmlFor="departureAirport" className="text-blue-500">Departure Airport</Label>
         <Input
           id="departureAirport"
           value={details.departureAirport as string || ""}
@@ -21,7 +21,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="destinationAirport">Destination Airport</Label>
+        <Label htmlFor="destinationAirport" className="text-blue-500">Destination Airport</Label>
         <Input
           id="destinationAirport"
           value={details.destinationAirport as string || ""}
@@ -31,7 +31,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="flightNumber">Flight Number</Label>
+        <Label htmlFor="flightNumber" className="text-blue-500">Flight Number</Label>
         <Input
           id="flightNumber"
           value={details.flightNumber as string || ""}
@@ -41,7 +41,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="cabinClass">Cabin Class</Label>
+        <Label htmlFor="cabinClass" className="text-blue-500">Cabin Class</Label>
         <Input
           id="cabinClass"
           value={details.cabinClass as string || ""}
@@ -51,7 +51,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="loyaltyNumber">Loyalty Number</Label>
+        <Label htmlFor="loyaltyNumber" className="text-blue-500">Loyalty Number</Label>
         <Input
           id="loyaltyNumber"
           value={details.loyaltyNumber as string || ""}
@@ -61,7 +61,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
       </div>
 
       <div className="grid gap-2">
-        <Label htmlFor="seatNumber">Seat Number</Label>
+        <Label htmlFor="seatNumber" className="text-blue-500">Seat Number</Label>
         <Input
           id="seatNumber"
           value={details.seatNumber as string || ""}

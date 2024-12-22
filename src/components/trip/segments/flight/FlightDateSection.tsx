@@ -25,7 +25,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
   return (
     <>
       <div className="grid gap-2">
-        <Label htmlFor="departureDate">Departure Date</Label>
+        <Label htmlFor="departureDate" className="text-blue-500">Departure Date</Label>
         <Input
           id="departureDate"
           type="datetime-local"
