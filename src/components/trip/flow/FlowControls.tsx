@@ -18,7 +18,7 @@ export function FlowControls({ onFitView }: FlowControlsProps) {
           variant="outline" 
           size="sm"
           onClick={onFitView}
-          className="text-xs"
+          className="text-xs text-blue-500 hover:text-blue-600"
         >
           Reset View
         </Button>
@@ -30,7 +30,7 @@ export function FlowControls({ onFitView }: FlowControlsProps) {
         color="#e5e7eb"
       />
       <Controls 
-        className="bg-background/60 backdrop-blur-sm"
+        className="bg-background/60 backdrop-blur-sm text-blue-500"
         showInteractive={false}
       />
       <MiniMap 
