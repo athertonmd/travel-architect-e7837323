@@ -1,5 +1,5 @@
 import { CalendarDays, Users } from "lucide-react";
-import { format } from "date-fns";
+import { format, isValid, parseISO } from "date-fns";
 
 interface TripMetadataProps {
   startDate: string;
@@ -11,11 +11,21 @@ interface TripMetadataProps {
 export function TripMetadata({ startDate, endDate, travelers, earliestDate }: TripMetadataProps) {
   const formatDate = (dateString: string) => {
     try {
-      const date = new Date(dateString);
+      if (!dateString) return 'No date set';
+      
+      // Try to parse the date string
+      const date = parseISO(dateString);
+      
+      // Check if the parsed date is valid
+      if (!isValid(date)) {
+        console.log('Invalid date:', dateString);
+        return 'Invalid date';
+      }
+      
       return format(date, 'EEEE, d MMMM yyyy');
     } catch (error) {
       console.error('Error formatting date:', error);
-      return dateString;
+      return 'Invalid date';
     }
   };
 
