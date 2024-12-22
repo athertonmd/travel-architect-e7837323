@@ -10,7 +10,7 @@ interface TravelerSelectionProps {
 export function TravelerSelection({ travelerCount, onSelect }: TravelerSelectionProps) {
   return (
     <div className="grid gap-2">
-      <Label>Add Travelers ({travelerCount} {travelerCount === 1 ? 'traveler' : 'travelers'})</Label>
+      <Label className="text-blue-500">Add Travelers ({travelerCount} {travelerCount === 1 ? 'traveler' : 'travelers'})</Label>
       <TravellerSelect onSelect={onSelect} />
     </div>
   );
