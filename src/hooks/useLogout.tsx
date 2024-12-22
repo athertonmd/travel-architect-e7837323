@@ -8,12 +8,18 @@ export const useLogout = () => {
   const navigate = useNavigate();
   const session = useSession();
   const isLoggingOutRef = useRef(false);
+  const navigationTimeoutRef = useRef<NodeJS.Timeout>();
 
   const handleLogout = async () => {
     // Prevent multiple logout attempts
     if (isLoggingOutRef.current) {
       console.log('Logout already in progress');
       return;
+    }
+
+    // Clear any existing navigation timeout
+    if (navigationTimeoutRef.current) {
+      clearTimeout(navigationTimeoutRef.current);
     }
 
     isLoggingOutRef.current = true;
@@ -40,6 +46,7 @@ export const useLogout = () => {
 
       // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
+      
       if (error) {
         console.error('Error during Supabase signOut:', error);
         toast.dismiss(loadingToast);
@@ -50,8 +57,10 @@ export const useLogout = () => {
         toast.success('Logged out successfully');
       }
 
-      // Always navigate after cleanup
-      navigate('/', { replace: true });
+      // Set a timeout for navigation to ensure cleanup is complete
+      navigationTimeoutRef.current = setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 100);
 
     } catch (error) {
       console.error('Unexpected logout error:', error);
@@ -59,7 +68,7 @@ export const useLogout = () => {
       toast.error('Error during logout. Please try again.');
       
       // Force navigation on error after a short delay
-      setTimeout(() => {
+      navigationTimeoutRef.current = setTimeout(() => {
         navigate('/', { replace: true });
       }, 100);
 

@@ -24,6 +24,8 @@ export const useAuthStateChange = (
       const {
         data: { subscription },
       } = supabase.auth.onAuthStateChange((event, session) => {
+        if (!isSubscribed) return; // Prevent events if component is unmounted
+        
         console.log('Auth event:', event, session ? 'Session exists' : 'No session');
         
         if (event === 'TOKEN_REFRESHED') {
@@ -42,8 +44,11 @@ export const useAuthStateChange = (
       subscriptionRef.current = subscription;
     }
 
+    // Initial session check with debounce
     const initialCheckTimeout = setTimeout(() => {
-      checkSession(isSubscribed);
+      if (isSubscribed) {
+        checkSession(isSubscribed);
+      }
     }, INITIAL_CHECK_DELAY);
 
     // Cleanup function
