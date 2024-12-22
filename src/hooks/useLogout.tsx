@@ -21,10 +21,7 @@ export const useLogout = () => {
     const toastId = toast.loading('Logging out...');
 
     try {
-      // Always clear local storage first
-      localStorage.removeItem('supabase.auth.token');
-      
-      // Attempt to sign out from Supabase
+      // Let Supabase handle session cleanup
       const { error } = await supabase.auth.signOut();
       
       if (error) {
@@ -41,7 +38,6 @@ export const useLogout = () => {
       
     } finally {
       isLoggingOutRef.current = false;
-      // Always redirect to login page, regardless of errors
       console.log('Redirecting to login page');
       navigate('/', { replace: true });
     }
