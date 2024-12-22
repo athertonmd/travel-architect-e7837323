@@ -9,6 +9,7 @@ export const useLogout = () => {
   const session = useSession();
   const isLoggingOutRef = useRef(false);
   const navigationTimeoutRef = useRef<NodeJS.Timeout>();
+  const toastIdRef = useRef<string>();
 
   const handleLogout = async () => {
     // Prevent multiple logout attempts
@@ -17,13 +18,18 @@ export const useLogout = () => {
       return;
     }
 
-    // Clear any existing navigation timeout
+    // Clear any existing timeouts
     if (navigationTimeoutRef.current) {
       clearTimeout(navigationTimeoutRef.current);
     }
 
+    // Clear any existing toasts
+    if (toastIdRef.current) {
+      toast.dismiss(toastIdRef.current);
+    }
+
     isLoggingOutRef.current = true;
-    const loadingToast = toast.loading('Signing out...', {
+    toastIdRef.current = toast.loading('Signing out...', {
       duration: Infinity
     });
 
@@ -31,7 +37,7 @@ export const useLogout = () => {
       // If no session exists, just navigate away
       if (!session) {
         console.log('No active session found, proceeding with navigation');
-        toast.dismiss(loadingToast);
+        toast.dismiss(toastIdRef.current);
         navigate('/', { replace: true });
         return;
       }
@@ -49,11 +55,11 @@ export const useLogout = () => {
       
       if (error) {
         console.error('Error during Supabase signOut:', error);
-        toast.dismiss(loadingToast);
+        toast.dismiss(toastIdRef.current);
         toast.error('Error during logout. Please try again.');
       } else {
         console.log('Logout successful');
-        toast.dismiss(loadingToast);
+        toast.dismiss(toastIdRef.current);
         toast.success('Logged out successfully');
       }
 
@@ -64,7 +70,7 @@ export const useLogout = () => {
 
     } catch (error) {
       console.error('Unexpected logout error:', error);
-      toast.dismiss(loadingToast);
+      toast.dismiss(toastIdRef.current);
       toast.error('Error during logout. Please try again.');
       
       // Force navigation on error after a short delay
