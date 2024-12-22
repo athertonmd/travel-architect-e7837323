@@ -29,9 +29,6 @@ export function SegmentNode({ data, id, selected }: {
           {data.label.toLowerCase() === 'hotel' && hotelName && (
             <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
           )}
-          {data.label.toLowerCase() === 'car' && provider && provider.trim() !== '' && (
-            <span className="text-sm text-muted-foreground">({provider})</span>
-          )}
           {travelerCount > 0 && (
             <span className="text-sm text-muted-foreground ml-2">
               ({travelerCount} {travelerCount === 1 ? 'traveler' : 'travelers'})
