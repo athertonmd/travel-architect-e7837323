@@ -10,7 +10,6 @@ export const useLogout = () => {
   const navigate = useNavigate();
   const logoutTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Simple cleanup function
   const cleanup = useCallback(() => {
     if (logoutTimeoutRef.current) {
       clearTimeout(logoutTimeoutRef.current);
@@ -19,38 +18,37 @@ export const useLogout = () => {
   }, []);
 
   const handleLogout = useCallback(async () => {
-    if (isLoggingOut) {
-      return; // Prevent multiple logout attempts
-    }
+    if (isLoggingOut) return;
 
     const toastId = toast.loading('Logging out...');
     setIsLoggingOut(true);
 
     try {
-      // Set a hard timeout of 3 seconds
+      // Force clear the session locally first
+      await supabase.auth.setSession(null);
+      console.log('Local session cleared');
+
+      // Set a timeout for the server-side logout
       const timeoutPromise = new Promise<void>((_, reject) => {
         logoutTimeoutRef.current = setTimeout(() => {
           reject(new Error('Logout timed out'));
         }, 3000);
       });
 
-      // Try to sign out with a timeout
+      // Attempt server-side logout with timeout
       await Promise.race([
         supabase.auth.signOut(),
         timeoutPromise
       ]);
 
-      // If successful, clear session and redirect
-      await supabase.auth.setSession(null);
       toast.success('Logged out successfully', { id: toastId });
-      
     } catch (error) {
       console.error('Logout error:', error);
-      // Force clear session on error
-      await supabase.auth.setSession(null);
-      toast.error('Error during logout, session cleared', { id: toastId });
+      // Session is already cleared locally, so we can safely continue
+      toast.error('Error during logout, but session cleared', { id: toastId });
     } finally {
       cleanup();
+      // Force navigation regardless of logout success
       navigate('/');
     }
   }, [isLoggingOut, navigate, cleanup]);
