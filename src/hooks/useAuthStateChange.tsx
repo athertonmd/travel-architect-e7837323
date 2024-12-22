@@ -10,6 +10,8 @@ export const useAuthStateChange = (
   authCheckTimeoutRef: React.RefObject<NodeJS.Timeout>
 ) => {
   useEffect(() => {
+    console.log('Setting up auth state change listener');
+    
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((event, session) => {
@@ -32,6 +34,7 @@ export const useAuthStateChange = (
     }, INITIAL_CHECK_DELAY);
 
     return () => {
+      console.log('Cleaning up auth subscriptions');
       clearTimeout(authCheckTimeoutRef.current);
       clearTimeout(initialCheckTimeout);
       subscription?.unsubscribe();

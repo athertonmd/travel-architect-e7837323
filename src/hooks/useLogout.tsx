@@ -43,6 +43,10 @@ export const useLogout = () => {
           .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
 
+      // Remove any existing auth subscriptions
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {});
+      subscription?.unsubscribe();
+
       try {
         // Attempt to sign out from Supabase
         await supabase.auth.signOut();
