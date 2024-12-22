@@ -58,8 +58,8 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
         return;
       }
 
-      retryCountRef.current = 0;
       console.log('Session check successful');
+      retryCountRef.current = 0;
 
     } catch (error) {
       console.error('Unexpected error during session check:', error);

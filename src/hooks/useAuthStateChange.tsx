@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 
-const INITIAL_CHECK_DELAY = 800; // Increased delay to prevent rapid firing
+const INITIAL_CHECK_DELAY = 800;
 
 // Singleton to track if listener is already set up
 let isListenerSetup = false;
@@ -42,7 +42,7 @@ export const useAuthStateChange = (
         debounceEvent(event, () => {
           console.log('Auth event:', event, session ? 'Session exists' : 'No session');
           
-          if (event === 'TOKEN_REFRESHED') {
+          if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
             checkSession(isSubscribed);
           }
           
