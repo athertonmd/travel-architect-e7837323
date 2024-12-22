@@ -12,6 +12,7 @@ export function SegmentNode({ data, id, selected }: {
   const provider = data.details?.provider as string | undefined;
   const travelerCount = Array.isArray(data.details?.traveller_names) ? data.details.traveller_names.length : 0;
   const showTravelers = data.label.toLowerCase() !== 'limo service';
+  const showProvider = provider && provider.trim() !== '';
   
   return (
     <div className="flex items-center justify-center">
@@ -30,7 +31,7 @@ export function SegmentNode({ data, id, selected }: {
           {data.label.toLowerCase() === 'hotel' && hotelName && (
             <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
           )}
-          {(data.label.toLowerCase() === 'car' || data.label.toLowerCase() === 'limo service') && provider && provider.trim() !== '' && (
+          {(data.label.toLowerCase() === 'car' || data.label.toLowerCase() === 'limo service') && showProvider && (
             <span className="text-sm text-muted-foreground">({provider})</span>
           )}
           {showTravelers && travelerCount > 0 && (
