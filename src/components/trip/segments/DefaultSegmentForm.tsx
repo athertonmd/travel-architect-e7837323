@@ -62,6 +62,8 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
     e.stopPropagation();
   };
 
+  const travelerCount = Array.isArray(details.traveller_names) ? details.traveller_names.length : 0;
+
   return (
     <div 
       className="space-y-4"
@@ -69,13 +71,13 @@ function DefaultSegmentFormComponent({ details, onDetailsChange }: DefaultSegmen
       onFocus={stopPropagation}
     >
       <div className="grid gap-2">
-        <Label>Search Traveller</Label>
+        <Label>Add Travelers ({travelerCount} {travelerCount === 1 ? 'traveler' : 'travelers'})</Label>
         <TravellerSelect onSelect={handleTravellerSelect} />
       </div>
       
       {Array.isArray(details.traveller_names) && details.traveller_names.length > 0 && (
         <div className="grid gap-2">
-          <Label>Selected Travellers</Label>
+          <Label>Selected Travelers</Label>
           <ScrollArea className="h-[200px] w-full rounded-md border p-4">
             <div className="space-y-4">
               {(details.traveller_names as string[]).map((name, index) => (
