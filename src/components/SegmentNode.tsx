@@ -20,9 +20,9 @@ export function SegmentNode({ data, id, selected }: {
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
-        className={`w-auto min-w-[200px] max-w-[800px] text-center bg-white text-blue-500 drag-handle cursor-move whitespace-nowrap ${selected ? 'ring-2 ring-primary' : ''}`}
+        className={`w-fit min-w-[200px] max-w-[800px] text-center bg-white text-blue-500 drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
       >
-        <div className="flex items-center justify-start gap-2 px-4 w-full overflow-hidden">
+        <div className="flex items-center justify-start gap-2 px-4 w-full">
           <span className="flex-shrink-0">{data.icon}</span>
           <span className="flex-shrink-0">{data.label}</span>
           {data.details?.time && <span className="text-sm text-muted-foreground flex-shrink-0">({data.details.time})</span>}
