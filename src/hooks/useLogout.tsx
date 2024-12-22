@@ -26,39 +26,37 @@ export const useLogout = () => {
     }
 
     isLoggingOutRef.current = true;
-    const toastId = toast.loading('Logging out...');
     
     try {
-      console.log('Attempting to sign out with Supabase');
-      const timeout = new Promise((_, reject) => 
-        setTimeout(() => {
-          console.log('Logout timeout reached');
-          reject(new Error('Logout timed out'));
-        }, LOGOUT_TIMEOUT)
-      );
+      console.log('Starting logout process');
+      
+      // Start the signOut process
+      const signOutPromise = supabase.auth.signOut();
+      
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT);
+      });
 
-      await Promise.race([
-        supabase.auth.signOut(),
-        timeout
-      ]);
-
-      console.log('Logout successful');
-      toast.success('Logged out successfully', { id: toastId });
+      // Show loading toast immediately
+      toast.loading('Signing out...', { duration: 2000 });
+      
+      // Navigate immediately to prevent blank screen
+      console.log('Navigating to login page');
+      navigate('/', { replace: true });
+      
+      // Wait for signOut in background
+      const result = await Promise.race([signOutPromise, timeoutPromise]);
+      console.log('Logout completed:', result);
+      
+      toast.success('Logged out successfully');
       
     } catch (error) {
       console.error('Logout error:', error);
-      if (error instanceof Error && error.message === 'Logout timed out') {
-        console.log('Timeout error detected');
-        toast.error('Logout timed out. Please try again.', { id: toastId });
-      } else {
-        console.log('Generic error detected');
-        toast.error('Error during logout', { id: toastId });
-      }
+      toast.error('Error during logout. Please refresh the page.');
       
     } finally {
       isLoggingOutRef.current = false;
-      console.log('Redirecting to login page');
-      navigate('/', { replace: true });
     }
   }, [navigate, session]);
 
