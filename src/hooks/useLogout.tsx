@@ -12,6 +12,12 @@ export const useLogout = () => {
   const handleLogout = useCallback(async () => {
     console.log('Logout initiated:', { hasSession: !!session, isLoggingOut: isLoggingOutRef.current });
     
+    if (!session) {
+      console.warn('No active session. Redirecting to login.');
+      navigate('/', { replace: true });
+      return;
+    }
+
     if (isLoggingOutRef.current) {
       console.log('Logout already in progress');
       return;
