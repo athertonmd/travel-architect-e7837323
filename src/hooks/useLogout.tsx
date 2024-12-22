@@ -14,40 +14,37 @@ export const useLogout = () => {
   const handleLogout = useCallback(async () => {
     console.log('Logout initiated:', { hasSession: !!session, isLoggingOut: isLoggingOutRef.current });
     
+    if (isLoggingOutRef.current) {
+      console.log('Logout already in progress');
+      return;
+    }
+
     if (!session) {
       console.warn('No active session. Redirecting to login.');
       navigate('/', { replace: true });
       return;
     }
 
-    if (isLoggingOutRef.current) {
-      console.log('Logout already in progress');
-      return;
-    }
-
     isLoggingOutRef.current = true;
     
     try {
-      console.log('Starting logout process');
-      
-      // Start the signOut process
-      const signOutPromise = supabase.auth.signOut();
-      
-      // Create a timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT);
+      // Show loading toast - Sonner doesn't use IDs for toast management
+      toast.loading('Signing out...', {
+        duration: 2000 // Auto dismiss after 2 seconds
       });
-
-      // Show loading toast immediately
-      toast.loading('Signing out...', { duration: 2000 });
       
-      // Navigate immediately to prevent blank screen
-      console.log('Navigating to login page');
+      console.log('Starting logout process');
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT)
+      );
+
+      // Navigate first to prevent blank screen
       navigate('/', { replace: true });
       
       // Wait for signOut in background
-      const result = await Promise.race([signOutPromise, timeoutPromise]);
-      console.log('Logout completed:', result);
+      await Promise.race([signOutPromise, timeoutPromise]);
+      console.log('Logout successful');
       
       toast.success('Logged out successfully');
       
