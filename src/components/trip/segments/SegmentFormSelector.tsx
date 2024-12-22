@@ -90,7 +90,7 @@ export function SegmentFormSelector({
         <MemoizedHotelForm {...formProps} />
       ) : type === "car" ? (
         <MemoizedCarForm {...formProps} />
-      ) : type === "limo service" ? (
+      ) : type === "limo service" || type === "limo" ? (
         <MemoizedLimoForm {...formProps} />
       ) : (
         <MemoizedDefaultForm {...formProps} />
