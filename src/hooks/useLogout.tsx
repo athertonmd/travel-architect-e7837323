@@ -32,8 +32,20 @@ export const useLogout = () => {
       
       console.log('Starting logout process');
 
-      // If there's no session, just clean up the UI
-      if (!session) {
+      // First try to get a fresh session
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error('Session check error:', sessionError);
+        // If we can't get the session, just clear local state
+        await supabase.auth.signOut({ scope: 'local' });
+        toast.success('Signed out successfully', {
+          duration: 3000
+        });
+        return;
+      }
+
+      if (!currentSession) {
         console.warn('No active session found');
         toast.success('Signed out successfully', {
           duration: 3000
@@ -41,6 +53,7 @@ export const useLogout = () => {
         return;
       }
 
+      // If we have a valid session, try to sign out properly
       const signOutPromise = supabase.auth.signOut({ scope: 'local' });
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT)
