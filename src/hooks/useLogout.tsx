@@ -34,7 +34,7 @@ export const useLogout = () => {
       const { error } = await Promise.race([
         supabase.auth.signOut(),
         timeoutPromise
-      ]);
+      ]) as { error: Error | null };
 
       if (error) throw error;
 
@@ -60,5 +60,8 @@ export const useLogout = () => {
     }
   };
 
-  return handleLogout;
+  return {
+    handleLogout,
+    isLoggingOut: isLoggingOutRef.current
+  };
 };
