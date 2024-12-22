@@ -1,4 +1,4 @@
-import { useState, useCallback, useRef, useEffect } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useSession } from '@supabase/auth-helpers-react';
@@ -10,55 +10,87 @@ export const useLogout = () => {
   const navigate = useNavigate();
   const logoutTimeoutRef = useRef<NodeJS.Timeout>();
 
-  // Simple cleanup function
-  const cleanup = useCallback(() => {
+  // Cleanup function to clear timeout
+  const cleanup = () => {
     if (logoutTimeoutRef.current) {
       clearTimeout(logoutTimeoutRef.current);
     }
     setIsLoggingOut(false);
-  }, []);
+  };
 
   const handleLogout = useCallback(async () => {
     if (isLoggingOut) {
-      return; // Prevent multiple logout attempts
+      console.log('Already logging out, preventing duplicate attempts');
+      return;
     }
 
-    const toastId = toast.loading('Logging out...');
-    setIsLoggingOut(true);
-
-    try {
-      // Set a hard timeout of 3 seconds
-      const timeoutPromise = new Promise<void>((_, reject) => {
-        logoutTimeoutRef.current = setTimeout(() => {
-          reject(new Error('Logout timed out'));
-        }, 3000);
-      });
-
-      // Try to sign out with a timeout
-      await Promise.race([
-        supabase.auth.signOut(),
-        timeoutPromise
-      ]);
-
-      // If successful, clear session and redirect
-      await supabase.auth.setSession(null);
-      toast.success('Logged out successfully', { id: toastId });
-      
-    } catch (error) {
-      console.error('Logout error:', error);
-      // Force clear session on error
-      await supabase.auth.setSession(null);
-      toast.error('Error during logout, session cleared', { id: toastId });
-    } finally {
+    // Set a timeout to force cleanup after 5 seconds
+    logoutTimeoutRef.current = setTimeout(() => {
+      console.warn('Logout timeout reached, forcing cleanup');
       cleanup();
       navigate('/');
+      toast.error('Logout timed out, please try again');
+    }, 5000);
+
+    const toastId = toast.loading('Logging out...');
+    console.log('Starting logout process...');
+    
+    try {
+      setIsLoggingOut(true);
+
+      // First validate the current session
+      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
+      console.log('Session check result:', { currentSession, sessionError });
+
+      if (sessionError) {
+        console.error('Session validation error:', sessionError);
+        await supabase.auth.setSession(null);
+        toast.success('Session cleared', { id: toastId });
+        navigate('/');
+        return;
+      }
+
+      // Attempt to sign out with a timeout
+      const signOutPromise = supabase.auth.signOut();
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Signout timeout')), 3000)
+      );
+
+      const { error } = await Promise.race([signOutPromise, timeoutPromise])
+        .catch(error => ({ error }));
+
+      console.log('Signout attempt result:', { error });
+      
+      if (error) {
+        console.error('Logout error:', error);
+        // Force clear session on any error
+        await supabase.auth.setSession(null);
+        toast.error('Error during logout, session cleared', { id: toastId });
+      } else {
+        console.log('Logout successful');
+        toast.success('Logged out successfully', { id: toastId });
+      }
+    } catch (error) {
+      console.error('Critical error during logout:', error);
+      // Force clear session on critical errors
+      try {
+        await supabase.auth.setSession(null);
+        console.log('Session forcefully cleared after error');
+      } catch (clearError) {
+        console.error('Failed to clear session:', clearError);
+      }
+      toast.error('Unexpected error during logout', { id: toastId });
+    } finally {
+      cleanup();
+      console.log('Logout process completed, redirecting to home');
+      navigate('/');
     }
-  }, [isLoggingOut, navigate, cleanup]);
+  }, [isLoggingOut, navigate, session]);
 
   // Cleanup on unmount
-  useEffect(() => {
+  React.useEffect(() => {
     return cleanup;
-  }, [cleanup]);
+  }, []);
 
   return {
     handleLogout,
