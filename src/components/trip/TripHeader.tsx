@@ -50,7 +50,7 @@ export function TripHeader({ title, onTitleChange, travelers, onSave, tripId }: 
       </div>
       <Button
         onClick={handleSave}
-        className="bg-primary text-primary-foreground hover:bg-primary/90"
+        className="bg-navy hover:bg-navy-light border border-white"
       >
         Save Changes
       </Button>
