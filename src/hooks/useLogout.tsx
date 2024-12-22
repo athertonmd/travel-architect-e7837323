@@ -9,7 +9,7 @@ export const useLogout = () => {
   const session = useSession();
   const isLoggingOutRef = useRef(false);
   const navigationTimeoutRef = useRef<NodeJS.Timeout>();
-  const toastIdRef = useRef<string>();
+  const toastIdRef = useRef<string | number>();
 
   const handleLogout = async () => {
     // Prevent multiple logout attempts
