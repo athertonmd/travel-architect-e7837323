@@ -36,11 +36,12 @@ export function TripCard({
   
   // Calculate actual traveler count from segments
   const actualTravelerCount = segments?.reduce((count, segment) => {
+    // Check if the segment is a traveler node and has traveler_names array
     if (segment.details?.traveller_names?.length > count) {
       return segment.details.traveller_names.length;
     }
     return count;
-  }, 0) || travelers; // Fallback to the travelers prop if no segments data
+  }, 0) || 0; // Default to 0 if no valid segments found
 
   const handleDelete = async () => {
     try {
