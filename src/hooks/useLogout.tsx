@@ -27,39 +27,35 @@ export const useLogout = () => {
     try {
       console.log('Starting logout process');
       
+      // If no session exists, just navigate away
       if (!session) {
         console.log('No active session found, proceeding with navigation');
+        toast.dismiss(loadingToast);
         navigate('/', { replace: true });
         return;
       }
 
-      // Create a timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT);
+      // First try to clear local storage and cookies
+      localStorage.clear();
+      document.cookie.split(";").forEach((c) => {
+        document.cookie = c
+          .replace(/^ +/, "")
+          .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
 
-      // Race between logout and timeout
-      const { error } = await Promise.race([
-        supabase.auth.signOut({ scope: 'local' }), // Only clear local session
-        timeoutPromise
-      ]) as { error: Error | null };
-
-      if (error) {
-        console.error('Logout error:', error);
-        // If we get a session not found error, just proceed with navigation
-        if (error.message?.includes('session_not_found')) {
-          console.log('Session not found, proceeding with navigation');
-          navigate('/', { replace: true });
-          return;
-        }
-        throw error;
+      try {
+        // Attempt to sign out from Supabase
+        await supabase.auth.signOut();
+      } catch (signOutError) {
+        console.error('Error during Supabase signOut:', signOutError);
+        // Continue with navigation even if signOut fails
       }
 
       console.log('Logout successful');
       toast.dismiss(loadingToast);
       toast.success('Logged out successfully');
       
-      // Navigate after successful logout
+      // Always navigate after cleanup
       navigate('/', { replace: true });
 
     } catch (error) {
