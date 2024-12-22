@@ -19,59 +19,38 @@ export const useLogout = () => {
       return;
     }
 
-    // Always navigate first to prevent UI issues
-    navigate('/', { replace: true });
+    if (!session) {
+      console.warn('No active session. Redirecting to login.');
+      navigate('/', { replace: true });
+      return;
+    }
 
     isLoggingOutRef.current = true;
     
     try {
-      // Show loading toast
+      // Show loading toast - Sonner doesn't use IDs for toast management
       toast.loading('Signing out...', {
         duration: 2000 // Auto dismiss after 2 seconds
       });
       
       console.log('Starting logout process');
-
-      // First try to get a fresh session
-      const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error('Session check error:', sessionError);
-        // If we can't get the session, just clear local state
-        await supabase.auth.signOut({ scope: 'local' });
-        toast.success('Signed out successfully', {
-          duration: 3000
-        });
-        return;
-      }
-
-      if (!currentSession) {
-        console.warn('No active session found');
-        toast.success('Signed out successfully', {
-          duration: 3000
-        });
-        return;
-      }
-
-      // If we have a valid session, try to sign out properly
-      const signOutPromise = supabase.auth.signOut({ scope: 'local' });
+      const signOutPromise = supabase.auth.signOut();
       const timeoutPromise = new Promise((_, reject) => 
         setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT)
       );
+
+      // Navigate first to prevent blank screen
+      navigate('/', { replace: true });
       
       // Wait for signOut in background
       await Promise.race([signOutPromise, timeoutPromise]);
       console.log('Logout successful');
       
-      toast.success('Logged out successfully', {
-        duration: 3000
-      });
+      toast.success('Logged out successfully');
       
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if server logout fails, we want to clear local state
-      await supabase.auth.signOut({ scope: 'local' });
-      toast.error('Error during logout, but local session cleared');
+      toast.error('Error during logout. Please refresh the page.');
       
     } finally {
       isLoggingOutRef.current = false;
