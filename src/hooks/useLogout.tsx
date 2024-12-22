@@ -10,9 +10,11 @@ export const useLogout = () => {
   const navigate = useNavigate();
 
   const handleLogout = useCallback(async () => {
-    if (isLoggingOut || !session) {
-      console.log('Logout prevented:', { isLoggingOut, hasSession: !!session });
-      navigate('/');
+    console.log('Logout initiated:', { hasSession: !!session, isLoggingOut });
+    
+    // Prevent multiple logout attempts
+    if (isLoggingOut) {
+      console.log('Logout already in progress');
       return;
     }
 
@@ -20,21 +22,31 @@ export const useLogout = () => {
     setIsLoggingOut(true);
 
     try {
-      // Clear any stored auth state first
+      // Always clear local storage first
       localStorage.removeItem('supabase.auth.token');
       
+      // Attempt to sign out from Supabase
       const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      
+      if (error) {
+        console.error('Supabase signOut error:', error);
+        throw error;
+      }
 
+      console.log('Logout successful');
       toast.success('Logged out successfully', { id: toastId });
-      navigate('/');
+      
     } catch (error) {
       console.error('Logout error:', error);
       toast.error('Error during logout', { id: toastId });
+      
     } finally {
       setIsLoggingOut(false);
+      // Always redirect to login page, regardless of errors
+      console.log('Redirecting to login page');
+      navigate('/', { replace: true });
     }
-  }, [session, isLoggingOut, navigate]);
+  }, [navigate, isLoggingOut]);
 
   return {
     handleLogout,
