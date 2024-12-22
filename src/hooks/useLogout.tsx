@@ -12,8 +12,12 @@ export const useLogout = () => {
   const navigate = useNavigate();
 
   const logoutWithTimeout = async () => {
+    console.log('Starting logout with timeout');
     const timeout = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT)
+      setTimeout(() => {
+        console.log('Logout timeout reached');
+        reject(new Error('Logout timed out'));
+      }, LOGOUT_TIMEOUT)
     );
     return Promise.race([supabase.auth.signOut(), timeout]);
   };
@@ -33,19 +37,22 @@ export const useLogout = () => {
     }
 
     isLoggingOutRef.current = true;
+    console.log('Setting isLoggingOut flag');
     
     // Show loading toast
     toast.loading('Logging out...', {
       duration: Infinity, // Keep showing until we dismiss it
     });
+    console.log('Loading toast displayed');
 
     try {
+      console.log('Attempting to sign out with Supabase');
       // Use the timeout-wrapped logout function
-      const { error } = await logoutWithTimeout();
+      const result = await logoutWithTimeout();
       
-      if (error) {
-        console.error('Supabase signOut error:', error);
-        throw error;
+      if ('error' in result && result.error) {
+        console.error('Supabase signOut error:', result.error);
+        throw result.error;
       }
 
       console.log('Logout successful');
@@ -58,8 +65,10 @@ export const useLogout = () => {
       // Dismiss all toasts and show error
       toast.dismiss();
       if (error instanceof Error && error.message === 'Logout timed out') {
+        console.log('Timeout error detected');
         toast.error('Logout timed out. Please try again.');
       } else {
+        console.log('Generic error detected');
         toast.error('Error during logout');
       }
       
