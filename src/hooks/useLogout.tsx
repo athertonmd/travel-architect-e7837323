@@ -2,11 +2,13 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useRef } from 'react';
+import { useSession } from '@supabase/auth-helpers-react';
 
 const LOGOUT_TIMEOUT = 5000; // 5 seconds timeout
 
 export const useLogout = () => {
   const navigate = useNavigate();
+  const session = useSession();
   const isLoggingOutRef = useRef(false);
 
   const handleLogout = async () => {
@@ -25,6 +27,12 @@ export const useLogout = () => {
     try {
       console.log('Starting logout process');
       
+      if (!session) {
+        console.log('No active session found, proceeding with navigation');
+        navigate('/', { replace: true });
+        return;
+      }
+
       // Create a timeout promise
       const timeoutPromise = new Promise((_, reject) => {
         setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT);
@@ -32,17 +40,26 @@ export const useLogout = () => {
 
       // Race between logout and timeout
       const { error } = await Promise.race([
-        supabase.auth.signOut(),
+        supabase.auth.signOut({ scope: 'local' }), // Only clear local session
         timeoutPromise
       ]) as { error: Error | null };
 
-      if (error) throw error;
+      if (error) {
+        console.error('Logout error:', error);
+        // If we get a session not found error, just proceed with navigation
+        if (error.message?.includes('session_not_found')) {
+          console.log('Session not found, proceeding with navigation');
+          navigate('/', { replace: true });
+          return;
+        }
+        throw error;
+      }
 
       console.log('Logout successful');
       toast.dismiss(loadingToast);
       toast.success('Logged out successfully');
       
-      // Only navigate after successful logout
+      // Navigate after successful logout
       navigate('/', { replace: true });
 
     } catch (error) {
