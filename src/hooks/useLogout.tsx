@@ -12,18 +12,30 @@ export const useLogout = () => {
   const isLoggingOutRef = useRef(false);
 
   const cleanup = useCallback(() => {
+    console.log('Running cleanup...');
     if (logoutTimeoutRef.current) {
+      console.log('Clearing timeout...');
       clearTimeout(logoutTimeoutRef.current);
     }
+    console.log('Resetting logout states...');
     setIsLoggingOut(false);
     isLoggingOutRef.current = false;
   }, []);
 
   const handleLogout = useCallback(async () => {
-    if (isLoggingOutRef.current) return;
+    console.log('Logout initiated...', { 
+      isLoggingOutRef: isLoggingOutRef.current,
+      hasSession: !!session,
+      sessionDetails: session ? 'Session exists' : 'No session'
+    });
+
+    if (isLoggingOutRef.current) {
+      console.log('Preventing duplicate logout attempt');
+      return;
+    }
 
     if (!session) {
-      console.warn('No active session. Redirecting to home.');
+      console.warn('No active session found during logout');
       navigate('/');
       return;
     }
@@ -33,39 +45,61 @@ export const useLogout = () => {
     setIsLoggingOut(true);
 
     try {
+      console.log('Setting up logout timeout...');
       const timeoutPromise = new Promise<void>((_, reject) => {
         logoutTimeoutRef.current = setTimeout(() => {
+          console.log('Logout timeout triggered');
           reject(new Error('Logout timed out'));
-        }, 5000); // 5 second timeout
+        }, 3000); // Reduced timeout to 3 seconds for faster feedback
       });
 
-      // Attempt Supabase signOut with timeout
+      console.log('Attempting Supabase signOut...');
+      // First clear the session locally
+      await supabase.auth.setSession(null);
+      console.log('Local session cleared');
+
+      // Then attempt server-side logout
       await Promise.race([
-        supabase.auth.signOut(),
+        supabase.auth.signOut().then(() => {
+          console.log('Server-side signOut completed');
+        }),
         timeoutPromise
       ]);
 
+      console.log('Logout successful');
       toast.success('Logged out successfully', { id: toastId });
     } catch (error: any) {
+      console.error('Logout error details:', {
+        errorMessage: error?.message,
+        errorName: error?.name,
+        errorStack: error?.stack,
+        errorType: typeof error
+      });
+
       if (error.message === 'Logout timed out') {
-        console.error('Logout request timed out. Proceeding with local cleanup.');
+        console.warn('Logout request timed out, proceeding with local cleanup');
         toast.error('Logout timed out. Local session cleared.', { id: toastId });
       } else {
         console.error('Unexpected logout error:', error);
         toast.error('Error during logout. Local session cleared.', { id: toastId });
       }
-      
-      // Force clear the session locally in case of any error
-      await supabase.auth.setSession(null);
     } finally {
+      console.log('Entering finally block...');
       cleanup();
-      navigate('/');
+      console.log('Navigating to home...');
+      // Add a small delay before navigation to ensure cleanup completes
+      setTimeout(() => {
+        navigate('/');
+        console.log('Navigation completed');
+      }, 100);
     }
   }, [session, navigate, cleanup]);
 
-  // Cleanup on unmount
   useEffect(() => {
-    return cleanup;
+    return () => {
+      console.log('Component unmounting, running cleanup...');
+      cleanup();
+    };
   }, [cleanup]);
 
   return {
