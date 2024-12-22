@@ -28,29 +28,28 @@ export const useLogout = () => {
     isLoggingOutRef.current = true;
     
     try {
-      // Show loading toast - Sonner doesn't use IDs for toast management
+      // Show loading toast
       toast.loading('Signing out...', {
-        duration: 2000 // Auto dismiss after 2 seconds
+        duration: 2000
       });
       
       console.log('Starting logout process');
-      const signOutPromise = supabase.auth.signOut();
-      const timeoutPromise = new Promise((_, reject) => 
-        setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT)
-      );
-
-      // Navigate first to prevent blank screen
-      navigate('/', { replace: true });
+      const { error } = await supabase.auth.signOut();
       
-      // Wait for signOut in background
-      await Promise.race([signOutPromise, timeoutPromise]);
+      if (error) throw error;
+      
       console.log('Logout successful');
-      
       toast.success('Logged out successfully');
+      
+      // Navigate after successful logout
+      navigate('/', { replace: true });
       
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Error during logout. Please refresh the page.');
+      toast.error('Error during logout. Please try again.');
+      
+      // Even if there's an error, redirect to login page for safety
+      navigate('/', { replace: true });
       
     } finally {
       isLoggingOutRef.current = false;
