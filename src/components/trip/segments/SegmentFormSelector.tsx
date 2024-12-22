@@ -4,6 +4,7 @@ import { FlightSegmentForm } from "./FlightSegmentForm";
 import { DefaultSegmentForm } from "./DefaultSegmentForm";
 import { HotelSegmentForm } from "./HotelSegmentForm";
 import { CarSegmentForm } from "./CarSegmentForm";
+import { LimoSegmentForm } from "./LimoSegmentForm";
 import { memo } from "react";
 
 const areDetailsEqual = (
@@ -49,6 +50,15 @@ const MemoizedDefaultForm = memo(({ details, onDetailsChange }: {
 
 MemoizedDefaultForm.displayName = 'MemoizedDefaultForm';
 
+const MemoizedLimoForm = memo(({ details, onDetailsChange }: {
+  details: SegmentDetails;
+  onDetailsChange: (details: SegmentDetails) => void;
+}) => (
+  <LimoSegmentForm details={details} onDetailsChange={onDetailsChange} />
+), areDetailsEqual);
+
+MemoizedLimoForm.displayName = 'MemoizedLimoForm';
+
 interface SegmentFormSelectorProps {
   selectedNode: Node<SegmentNodeData>;
   details: SegmentDetails;
@@ -80,6 +90,8 @@ export function SegmentFormSelector({
         <MemoizedHotelForm {...formProps} />
       ) : type === "car" ? (
         <MemoizedCarForm {...formProps} />
+      ) : type === "limo service" ? (
+        <MemoizedLimoForm {...formProps} />
       ) : (
         <MemoizedDefaultForm {...formProps} />
       )}
