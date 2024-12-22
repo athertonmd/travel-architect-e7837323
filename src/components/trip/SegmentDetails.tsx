@@ -2,6 +2,7 @@ import { Node } from "@xyflow/react";
 import { FlightSegmentForm } from "./segments/FlightSegmentForm";
 import { DefaultSegmentForm } from "./segments/DefaultSegmentForm";
 import { HotelSegmentForm } from "./segments/HotelSegmentForm";
+import { CarSegmentForm } from "./segments/CarSegmentForm";
 import { SegmentDetails as ISegmentDetails, SegmentNodeData } from "@/types/segment";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
@@ -40,6 +41,15 @@ const MemoizedHotelForm = memo(({ details, onDetailsChange }: {
 
 MemoizedHotelForm.displayName = 'MemoizedHotelForm';
 
+const MemoizedCarForm = memo(({ details, onDetailsChange }: {
+  details: ISegmentDetails;
+  onDetailsChange: (details: ISegmentDetails) => void;
+}) => (
+  <CarSegmentForm details={details} onDetailsChange={onDetailsChange} />
+), areDetailsEqual);
+
+MemoizedCarForm.displayName = 'MemoizedCarForm';
+
 const MemoizedDefaultForm = memo(({ details, onDetailsChange }: {
   details: ISegmentDetails;
   onDetailsChange: (details: ISegmentDetails) => void;
@@ -77,10 +87,8 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   const handleDelete = useCallback(() => {
     if (selectedNode) {
-      // Find the ReactFlow container element
       const flowContainer = document.querySelector('.react-flow');
       if (flowContainer) {
-        // Create and dispatch a custom keyboard event for the Delete key
         const deleteEvent = new KeyboardEvent('keydown', {
           key: 'Delete',
           code: 'Delete',
@@ -116,6 +124,8 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
           <MemoizedFlightForm {...formProps} />
         ) : type === "hotel" ? (
           <MemoizedHotelForm {...formProps} />
+        ) : type === "car" ? (
+          <MemoizedCarForm {...formProps} />
         ) : (
           <MemoizedDefaultForm {...formProps} />
         )}
