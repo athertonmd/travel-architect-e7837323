@@ -33,6 +33,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
           value={details.departureDate || ""}
           onChange={(e) => handleDateChange("departureDate", e.target.value)}
           onKeyDown={handleKeyDown}
+          className="text-gray-700"
         />
       </div>
     </>
