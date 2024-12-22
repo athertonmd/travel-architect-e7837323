@@ -20,23 +20,23 @@ export function SegmentNode({ data, id, selected }: {
       <Handle type="target" position={Position.Top} />
       <Button
         variant="outline"
-        className={`w-fit min-w-[200px] max-w-[800px] text-center bg-white text-blue-500 drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
+        className={`min-w-[200px] inline-flex whitespace-nowrap px-6 py-3 bg-white text-blue-500 drag-handle cursor-move ${selected ? 'ring-2 ring-primary' : ''}`}
       >
-        <div className="flex items-center justify-start gap-2 px-4 w-full">
-          <span className="flex-shrink-0">{data.icon}</span>
-          <span className="flex-shrink-0">{data.label}</span>
-          {data.details?.time && <span className="text-sm text-muted-foreground flex-shrink-0">({data.details.time})</span>}
+        <div className="flex items-center gap-2">
+          <span>{data.icon}</span>
+          <span>{data.label}</span>
+          {data.details?.time && <span className="text-sm text-muted-foreground">({data.details.time})</span>}
           {data.label.toLowerCase() === 'flight' && destinationAirport && (
-            <span className="text-sm text-muted-foreground flex-shrink-0">→ {destinationAirport}</span>
+            <span className="text-sm text-muted-foreground">→ {destinationAirport}</span>
           )}
           {data.label.toLowerCase() === 'hotel' && hotelName && (
-            <span className="text-sm text-muted-foreground flex-shrink-0">- {String(hotelName)}</span>
+            <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
           )}
           {(data.label.toLowerCase() === 'car' || isLimoType) && showProvider && (
-            <span className="text-sm text-muted-foreground flex-shrink-0">({provider})</span>
+            <span className="text-sm text-muted-foreground">({provider})</span>
           )}
           {showTravelers && travelerCount > 0 && (
-            <span className="text-sm text-muted-foreground flex-shrink-0 ml-2">
+            <span className="text-sm text-muted-foreground">
               ({travelerCount} {travelerCount === 1 ? 'traveler' : 'travelers'})
             </span>
           )}
