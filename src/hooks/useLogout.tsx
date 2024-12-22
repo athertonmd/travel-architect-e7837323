@@ -4,8 +4,6 @@ import { toast } from 'sonner';
 import { useRef } from 'react';
 import { useSession } from '@supabase/auth-helpers-react';
 
-const LOGOUT_TIMEOUT = 5000; // 5 seconds timeout
-
 export const useLogout = () => {
   const navigate = useNavigate();
   const session = useSession();
@@ -19,14 +17,11 @@ export const useLogout = () => {
     }
 
     isLoggingOutRef.current = true;
-    
     const loadingToast = toast.loading('Signing out...', {
-      duration: Infinity // Don't auto dismiss while processing
+      duration: Infinity
     });
 
     try {
-      console.log('Starting logout process');
-      
       // If no session exists, just navigate away
       if (!session) {
         console.log('No active session found, proceeding with navigation');
@@ -35,7 +30,7 @@ export const useLogout = () => {
         return;
       }
 
-      // First try to clear local storage and cookies
+      // Clear local storage and cookies
       localStorage.clear();
       document.cookie.split(";").forEach((c) => {
         document.cookie = c
@@ -43,23 +38,23 @@ export const useLogout = () => {
           .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
 
-      try {
-        // Attempt to sign out from Supabase
-        await supabase.auth.signOut();
-      } catch (signOutError) {
-        console.error('Error during Supabase signOut:', signOutError);
-        // Continue with navigation even if signOut fails
+      // Attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Error during Supabase signOut:', error);
+        toast.dismiss(loadingToast);
+        toast.error('Error during logout. Please try again.');
+      } else {
+        console.log('Logout successful');
+        toast.dismiss(loadingToast);
+        toast.success('Logged out successfully');
       }
 
-      console.log('Logout successful');
-      toast.dismiss(loadingToast);
-      toast.success('Logged out successfully');
-      
       // Always navigate after cleanup
       navigate('/', { replace: true });
 
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('Unexpected logout error:', error);
       toast.dismiss(loadingToast);
       toast.error('Error during logout. Please try again.');
       
