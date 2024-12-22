@@ -36,12 +36,20 @@ export function TripCard({
   
   // Calculate actual traveler count from segments
   const actualTravelerCount = segments?.reduce((count, segment) => {
-    // Check if the segment is a traveler node and has traveler_names array
     if (segment.details?.traveller_names?.length > count) {
       return segment.details.traveller_names.length;
     }
     return count;
-  }, 0) || 0; // Default to 0 if no valid segments found
+  }, 0) || 0;
+
+  // Find earliest date from segments
+  const earliestDate = segments?.reduce((earliest, segment) => {
+    const segmentDate = segment.details?.date || segment.details?.departureDate;
+    if (segmentDate && (!earliest || new Date(segmentDate) < new Date(earliest))) {
+      return segmentDate;
+    }
+    return earliest;
+  }, null) || startDate; // Fallback to startDate if no segment dates found
 
   const handleDelete = async () => {
     try {
@@ -86,6 +94,7 @@ export function TripCard({
           startDate={startDate}
           endDate={endDate}
           travelers={actualTravelerCount}
+          earliestDate={earliestDate}
         />
       </CardContent>
     </Card>
