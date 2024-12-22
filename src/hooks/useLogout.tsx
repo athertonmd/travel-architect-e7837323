@@ -24,7 +24,11 @@ export const useLogout = () => {
     }
 
     isLoggingOutRef.current = true;
-    const toastId = toast.loading('Logging out...');
+    
+    // Show loading toast
+    toast.loading('Logging out...', {
+      duration: Infinity, // Keep showing until we dismiss it
+    });
 
     try {
       // Let Supabase handle session cleanup
@@ -36,11 +40,15 @@ export const useLogout = () => {
       }
 
       console.log('Logout successful');
-      toast.success('Logged out successfully', { id: toastId });
+      // Dismiss all toasts and show success
+      toast.dismiss();
+      toast.success('Logged out successfully');
       
     } catch (error) {
       console.error('Logout error:', error);
-      toast.error('Error during logout', { id: toastId });
+      // Dismiss all toasts and show error
+      toast.dismiss();
+      toast.error('Error during logout');
       
     } finally {
       isLoggingOutRef.current = false;
