@@ -50,15 +50,11 @@ export const useLogout = () => {
         logoutTimeoutRef.current = setTimeout(() => {
           console.log('Logout timeout triggered');
           reject(new Error('Logout timed out'));
-        }, 3000); // Reduced timeout to 3 seconds for faster feedback
+        }, 3000);
       });
 
       console.log('Attempting Supabase signOut...');
-      // First clear the session locally
-      await supabase.auth.setSession(null);
-      console.log('Local session cleared');
-
-      // Then attempt server-side logout
+      // First attempt server-side signOut
       await Promise.race([
         supabase.auth.signOut().then(() => {
           console.log('Server-side signOut completed');
