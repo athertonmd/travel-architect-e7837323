@@ -29,17 +29,25 @@ const Auth = () => {
       
       if (event === 'SIGNED_IN' && session) {
         console.log('Sign in successful, redirecting to dashboard');
-        toast.success('Successfully signed in!');
+        toast.dismiss(); // Dismiss any existing toasts
+        toast.success('Successfully signed in!', {
+          duration: 3000, // Toast will disappear after 3 seconds
+        });
         navigate('/dashboard');
       }
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing session');
-        toast.success('Signed out successfully');
+        toast.dismiss(); // Dismiss any existing toasts
+        toast.success('Signed out successfully', {
+          duration: 3000, // Toast will disappear after 3 seconds
+        });
         navigate('/');
       }
       if (event === 'USER_UPDATED') {
         console.log('User profile updated');
-        toast.success('Profile updated successfully');
+        toast.success('Profile updated successfully', {
+          duration: 3000,
+        });
       }
     });
 
