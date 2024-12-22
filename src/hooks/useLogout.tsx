@@ -4,10 +4,19 @@ import { toast } from "sonner";
 import { useSession } from '@supabase/auth-helpers-react';
 import { useNavigate } from 'react-router-dom';
 
+const LOGOUT_TIMEOUT = 5000; // 5 seconds timeout
+
 export const useLogout = () => {
   const isLoggingOutRef = useRef(false);
   const session = useSession();
   const navigate = useNavigate();
+
+  const logoutWithTimeout = async () => {
+    const timeout = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Logout timed out')), LOGOUT_TIMEOUT)
+    );
+    return Promise.race([supabase.auth.signOut(), timeout]);
+  };
 
   const handleLogout = useCallback(async () => {
     console.log('Logout initiated:', { hasSession: !!session, isLoggingOut: isLoggingOutRef.current });
@@ -31,8 +40,8 @@ export const useLogout = () => {
     });
 
     try {
-      // Let Supabase handle session cleanup
-      const { error } = await supabase.auth.signOut();
+      // Use the timeout-wrapped logout function
+      const { error } = await logoutWithTimeout();
       
       if (error) {
         console.error('Supabase signOut error:', error);
@@ -48,7 +57,11 @@ export const useLogout = () => {
       console.error('Logout error:', error);
       // Dismiss all toasts and show error
       toast.dismiss();
-      toast.error('Error during logout');
+      if (error instanceof Error && error.message === 'Logout timed out') {
+        toast.error('Logout timed out. Please try again.');
+      } else {
+        toast.error('Error during logout');
+      }
       
     } finally {
       isLoggingOutRef.current = false;
