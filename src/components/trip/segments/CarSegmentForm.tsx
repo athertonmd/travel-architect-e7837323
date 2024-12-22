@@ -28,23 +28,39 @@ export function CarSegmentForm({ details, onDetailsChange }: CarSegmentFormProps
       </div>
 
       <div className="grid gap-2">
-        <Label className="text-blue-500">Pick up date</Label>
-        <Input
-          type="date"
-          value={details.pickupDate as string || ""}
-          onChange={(e) => handleInputChange("pickupDate", e.target.value)}
-          className="text-gray-700"
-        />
+        <Label className="text-blue-500">Pick up date and time</Label>
+        <div className="flex gap-2">
+          <Input
+            type="date"
+            value={details.pickupDate as string || ""}
+            onChange={(e) => handleInputChange("pickupDate", e.target.value)}
+            className="text-gray-700"
+          />
+          <Input
+            type="time"
+            value={details.pickupTime as string || ""}
+            onChange={(e) => handleInputChange("pickupTime", e.target.value)}
+            className="text-gray-700"
+          />
+        </div>
       </div>
 
       <div className="grid gap-2">
-        <Label className="text-blue-500">Drop off date</Label>
-        <Input
-          type="date"
-          value={details.dropoffDate as string || ""}
-          onChange={(e) => handleInputChange("dropoffDate", e.target.value)}
-          className="text-gray-700"
-        />
+        <Label className="text-blue-500">Drop off date and time</Label>
+        <div className="flex gap-2">
+          <Input
+            type="date"
+            value={details.dropoffDate as string || ""}
+            onChange={(e) => handleInputChange("dropoffDate", e.target.value)}
+            className="text-gray-700"
+          />
+          <Input
+            type="time"
+            value={details.dropoffTime as string || ""}
+            onChange={(e) => handleInputChange("dropoffTime", e.target.value)}
+            className="text-gray-700"
+          />
+        </div>
       </div>
 
       <div className="grid gap-2">
