@@ -12,12 +12,12 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
   return (
     <>
       <div className="flex items-center space-x-2 mb-4">
+        <Label htmlFor="gds-mode" className="text-blue-500">GDS</Label>
         <Switch
           id="gds-mode"
           checked={details.gdsEnabled as boolean}
           onCheckedChange={(checked) => onDetailsChange("gdsEnabled", checked)}
         />
-        <Label htmlFor="gds-mode" className="text-blue-500">GDS</Label>
       </div>
 
       {details.gdsEnabled && (
