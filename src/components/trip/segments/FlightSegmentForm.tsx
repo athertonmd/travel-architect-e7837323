@@ -4,6 +4,7 @@ import { FlightDetailsSection } from "./flight/FlightDetailsSection";
 import { memo } from "react";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 
 interface FlightSegmentFormProps {
   details: SegmentDetails;
@@ -42,12 +43,11 @@ function FlightSegmentFormComponent({ details, onDetailsChange }: FlightSegmentF
       {details.gdsEnabled && (
         <div className="grid gap-2 mb-4">
           <Label htmlFor="recordLocator" className="text-blue-500">Find Record Locator</Label>
-          <input
+          <Input
             id="recordLocator"
             value={details.recordLocator as string || ""}
             onChange={(e) => handleChange("recordLocator", e.target.value)}
             placeholder="Enter record locator"
-            className="text-gray-700"
           />
         </div>
       )}
