@@ -1,6 +1,5 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { SegmentDetails } from "@/types/segment";
 
 interface FlightDetailsSectionProps {
@@ -11,28 +10,6 @@ interface FlightDetailsSectionProps {
 export function FlightDetailsSection({ details, onDetailsChange }: FlightDetailsSectionProps) {
   return (
     <>
-      <div className="flex items-center space-x-2 mb-4">
-        <Label htmlFor="gds-mode" className="text-blue-500">GDS</Label>
-        <Switch
-          id="gds-mode"
-          checked={details.gdsEnabled as boolean}
-          onCheckedChange={(checked) => onDetailsChange("gdsEnabled", checked)}
-        />
-      </div>
-
-      {details.gdsEnabled && (
-        <div className="grid gap-2 mb-4">
-          <Label htmlFor="recordLocator" className="text-blue-500">Find Record Locator</Label>
-          <Input
-            id="recordLocator"
-            value={details.recordLocator as string || ""}
-            onChange={(e) => onDetailsChange("recordLocator", e.target.value)}
-            placeholder="Enter record locator"
-            className="text-gray-700"
-          />
-        </div>
-      )}
-
       <div className="grid gap-2">
         <Label htmlFor="departureAirport" className="text-blue-500">Departure Airport</Label>
         <Input
