@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { NavigateFunction } from 'react-router-dom';
 
-const MAX_RETRIES = 2;
-const RETRY_DELAY = 800;
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000;
 
 export const useSessionCheck = (navigate: NavigateFunction) => {
   const authCheckTimeoutRef = useRef<NodeJS.Timeout>();
@@ -17,7 +17,6 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
     try {
       clearTimeout(authCheckTimeoutRef.current);
       
-      // Simple local signout without session validation
       await supabase.auth.signOut();
       
       if (isSubscribed) {
@@ -40,21 +39,30 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
 
       if (sessionError) {
         console.error('Session check error:', sessionError);
-        handleAuthError(isSubscribed);
-        return;
-      }
-
-      if (!session) {
-        console.log('No active session found');
         if (retryCountRef.current < MAX_RETRIES) {
           retryCountRef.current++;
+          console.log(`Retrying session check (${retryCountRef.current}/${MAX_RETRIES})`);
           authCheckTimeoutRef.current = setTimeout(
             () => checkSession(isSubscribed), 
             RETRY_DELAY
           );
           return;
         }
-        handleAuthError(isSubscribed);
+        throw sessionError;
+      }
+
+      if (!session) {
+        console.log('No active session found');
+        if (retryCountRef.current < MAX_RETRIES) {
+          retryCountRef.current++;
+          console.log(`Retrying session check (${retryCountRef.current}/${MAX_RETRIES})`);
+          authCheckTimeoutRef.current = setTimeout(
+            () => checkSession(isSubscribed), 
+            RETRY_DELAY
+          );
+          return;
+        }
+        await handleAuthError(isSubscribed);
         return;
       }
 
@@ -63,7 +71,15 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
 
     } catch (error) {
       console.error('Unexpected error during session check:', error);
-      handleAuthError(isSubscribed);
+      if (retryCountRef.current < MAX_RETRIES) {
+        retryCountRef.current++;
+        authCheckTimeoutRef.current = setTimeout(
+          () => checkSession(isSubscribed), 
+          RETRY_DELAY
+        );
+        return;
+      }
+      await handleAuthError(isSubscribed);
     }
   }, [handleAuthError]);
 
