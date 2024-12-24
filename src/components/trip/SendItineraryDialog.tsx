@@ -88,7 +88,7 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
           <div className="space-y-4">
             {travelers.map((traveler) => {
               const isUserEmail = traveler.email === userEmail;
-              const isDisabled = !isUserEmail; // Disable non-user emails
+              const isDisabled = !isUserEmail; // Only enable user's email
 
               return (
                 <div key={traveler.email} className="flex items-center space-x-2">
