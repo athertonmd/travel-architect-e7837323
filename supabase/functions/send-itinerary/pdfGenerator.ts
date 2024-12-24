@@ -7,86 +7,111 @@ export const generatePDF = async (trip: any) => {
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontSize = 12;
   
-  // Fetch and embed the header image
-  const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/eea4357d-4c1b-4221-9da7-35dd2344a1f8.png");
-  const imageArrayBuffer = await imageResponse.arrayBuffer();
-  const headerImage = await pdfDoc.embedPng(new Uint8Array(imageArrayBuffer));
-  
-  // Calculate image dimensions to maintain aspect ratio
-  const imgDims = headerImage.scale(0.5); // Scale down the image
-  const imgWidth = Math.min(width - 100, imgDims.width);
-  const imgHeight = (imgDims.height * imgWidth) / imgDims.width;
-  
-  // Draw the header image
-  page.drawImage(headerImage, {
-    x: (width - imgWidth) / 2,
-    y: height - imgHeight - 50,
-    width: imgWidth,
-    height: imgHeight,
-  });
-  
-  let yOffset = height - imgHeight - 100; // Adjust starting position after image
-  const lineHeight = 20;
-  
-  // Add title
-  page.drawText(`Trip Itinerary: ${trip.title}`, {
-    x: 50,
-    y: yOffset,
-    size: 16,
-    font,
-    color: rgb(0, 0, 0),
-  });
-  yOffset -= lineHeight * 2;
-
-  // Add destination if available
-  if (trip.destination) {
-    page.drawText(`Destination: ${trip.destination}`, {
+  try {
+    // Fetch the header image
+    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/eea4357d-4c1b-4221-9da7-35dd2344a1f8.png");
+    const imageArrayBuffer = await imageResponse.arrayBuffer();
+    const imageBytes = new Uint8Array(imageArrayBuffer);
+    
+    // Try to embed as PNG first, if it fails, try JPEG
+    let headerImage;
+    try {
+      headerImage = await pdfDoc.embedPng(imageBytes);
+    } catch (pngError) {
+      try {
+        headerImage = await pdfDoc.embedJpg(imageBytes);
+      } catch (jpgError) {
+        console.error('Failed to embed image:', { pngError, jpgError });
+        // Continue without the image if both formats fail
+        headerImage = null;
+      }
+    }
+    
+    let yOffset = height - 50;
+    
+    // If we successfully embedded the image, draw it
+    if (headerImage) {
+      // Calculate image dimensions to maintain aspect ratio
+      const imgDims = headerImage.scale(0.5); // Scale down the image
+      const imgWidth = Math.min(width - 100, imgDims.width);
+      const imgHeight = (imgDims.height * imgWidth) / imgDims.width;
+      
+      // Draw the header image
+      page.drawImage(headerImage, {
+        x: (width - imgWidth) / 2,
+        y: height - imgHeight - 50,
+        width: imgWidth,
+        height: imgHeight,
+      });
+      
+      yOffset = height - imgHeight - 100; // Adjust starting position after image
+    }
+    
+    const lineHeight = 20;
+    
+    // Add title
+    page.drawText(`Trip Itinerary: ${trip.title}`, {
       x: 50,
       y: yOffset,
-      size: fontSize,
-      font,
-      color: rgb(0, 0, 0),
-    });
-    yOffset -= lineHeight;
-  }
-
-  // Add dates if available
-  if (trip.start_date || trip.end_date) {
-    const dateText = `Date: ${trip.start_date || ''} ${trip.end_date ? `to ${trip.end_date}` : ''}`;
-    page.drawText(dateText, {
-      x: 50,
-      y: yOffset,
-      size: fontSize,
+      size: 16,
       font,
       color: rgb(0, 0, 0),
     });
     yOffset -= lineHeight * 2;
-  }
 
-  // Add segments
-  const segments = typeof trip.segments === 'string' 
-    ? JSON.parse(trip.segments) 
-    : trip.segments;
+    // Add destination if available
+    if (trip.destination) {
+      page.drawText(`Destination: ${trip.destination}`, {
+        x: 50,
+        y: yOffset,
+        size: fontSize,
+        font,
+        color: rgb(0, 0, 0),
+      });
+      yOffset -= lineHeight;
+    }
 
-  if (segments && segments.length > 0) {
-    page.drawText('Itinerary Details:', {
-      x: 50,
-      y: yOffset,
-      size: 14,
-      font,
-      color: rgb(0, 0, 0),
-    });
-    yOffset -= lineHeight * 1.5;
+    // Add dates if available
+    if (trip.start_date || trip.end_date) {
+      const dateText = `Date: ${trip.start_date || ''} ${trip.end_date ? `to ${trip.end_date}` : ''}`;
+      page.drawText(dateText, {
+        x: 50,
+        y: yOffset,
+        size: fontSize,
+        font,
+        color: rgb(0, 0, 0),
+      });
+      yOffset -= lineHeight * 2;
+    }
 
-    for (const segment of segments) {
-      yOffset = await addSegmentToPDF(page, segment, yOffset, font, fontSize, lineHeight);
-      
-      // Check if we need a new page
-      if (yOffset < 50) {
-        const newPage = pdfDoc.addPage();
-        yOffset = newPage.getSize().height - 50;
+    // Add segments
+    const segments = typeof trip.segments === 'string' 
+      ? JSON.parse(trip.segments) 
+      : trip.segments;
+
+    if (segments && segments.length > 0) {
+      page.drawText('Itinerary Details:', {
+        x: 50,
+        y: yOffset,
+        size: 14,
+        font,
+        color: rgb(0, 0, 0),
+      });
+      yOffset -= lineHeight * 1.5;
+
+      for (const segment of segments) {
+        yOffset = await addSegmentToPDF(page, segment, yOffset, font, fontSize, lineHeight);
+        
+        // Check if we need a new page
+        if (yOffset < 50) {
+          const newPage = pdfDoc.addPage();
+          yOffset = newPage.getSize().height - 50;
+        }
       }
     }
+  } catch (error) {
+    console.error('Error generating PDF:', error);
+    // Continue without the image if there's an error
   }
 
   return pdfDoc.save();
