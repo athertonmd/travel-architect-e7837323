@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { supabase } from "@/integrations/supabase/client";
 
 interface SendItineraryDialogProps {
   tripId: string;
@@ -31,24 +32,17 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
 
     setIsSending(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-itinerary`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-        },
-        body: JSON.stringify({
+      const { data, error } = await supabase.functions.invoke('send-itinerary', {
+        body: {
           tripId,
           to: selectedEmails,
-        }),
+        },
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send itinerary');
-      }
+      if (error) throw error;
 
       toast.success("Itinerary sent successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error sending itinerary:', error);
       toast.error("Failed to send itinerary");
     } finally {
