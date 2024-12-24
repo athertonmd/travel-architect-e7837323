@@ -1,4 +1,4 @@
-import { CalendarDays, Home, Plus, Upload, LogOut, Users, Archive } from "lucide-react";
+import { CalendarDays, Home, Plus, LogOut, Users, Archive } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -17,7 +17,6 @@ import { useLogout } from "@/hooks/useLogout";
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
   { title: "Create Trip", icon: Plus, url: "/trips/create" },
-  { title: "Upload Trips", icon: Upload, url: "/trips/upload" },
   { title: "Manage Travellers", icon: Users, url: "/travellers" },
   { title: "Archive", icon: Archive, url: "/trips/archive" },
 ];

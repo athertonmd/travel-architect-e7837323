@@ -49,14 +49,6 @@ const App = () => (
               }
             />
             <Route
-              path="/trips/upload"
-              element={
-                <ProtectedRoute>
-                  <div className="p-4">Upload Trips Page (Coming Soon)</div>
-                </ProtectedRoute>
-              }
-            />
-            <Route
               path="/trips/archive"
               element={
                 <ProtectedRoute>
