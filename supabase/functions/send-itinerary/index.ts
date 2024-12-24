@@ -83,6 +83,18 @@ const handler = async (req: Request): Promise<Response> => {
     const { tripId, to }: EmailRequest = await req.json();
     console.log("Processing email request for trip:", tripId, "to recipients:", to);
 
+    // Get the authenticated user's email
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      throw new Error('No authorization header');
+    }
+    const token = authHeader.replace('Bearer ', '');
+    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
+    
+    if (userError || !user) {
+      throw new Error('Could not get authenticated user');
+    }
+
     // Fetch trip details
     const { data: trip, error: tripError } = await supabase
       .from('trips')
@@ -101,6 +113,13 @@ const handler = async (req: Request): Promise<Response> => {
 
     const html = formatItinerary(segments);
 
+    // Filter recipients to only include the authenticated user's email in development
+    const filteredTo = to.filter(email => email === user.email);
+    
+    if (filteredTo.length === 0) {
+      throw new Error("In development mode, you can only send emails to your own email address. Please verify a domain at resend.com/domains to send to other recipients.");
+    }
+
     // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -110,7 +129,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Trip Itinerary <onboarding@resend.dev>",
-        to,
+        to: filteredTo,
         subject: `Trip Itinerary: ${trip.title}`,
         html,
       }),
