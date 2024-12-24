@@ -3,6 +3,12 @@ import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface TripHeaderProps {
   title: string;
@@ -48,12 +54,23 @@ export function TripHeader({ title, onTitleChange, travelers, onSave, tripId }: 
       <div className="flex items-center gap-4">
         <TripTitleHeader title={title} onTitleChange={onTitleChange} />
       </div>
-      <Button
-        onClick={handleSave}
-        className="bg-navy hover:bg-navy-light border border-white"
-      >
-        Save Changes
-      </Button>
+      <div className="border-l pl-4 ml-4 border-white/20">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button
+                onClick={handleSave}
+                className="bg-navy hover:bg-navy-light border border-white"
+              >
+                Save Changes
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Save all changes made to this trip</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
     </div>
   );
 }
