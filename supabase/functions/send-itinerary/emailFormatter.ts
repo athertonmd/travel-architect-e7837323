@@ -1,5 +1,16 @@
 export const formatItinerary = (trip: any) => {
   let html = '<div style="font-family: Arial, sans-serif;">';
+  
+  // Add header image
+  html += `
+    <div style="text-align: center; margin-bottom: 20px;">
+      <img src="https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/eea4357d-4c1b-4221-9da7-35dd2344a1f8.png" 
+           alt="Far East Travel Specialists" 
+           style="max-width: 100%; height: auto;"
+      />
+    </div>
+  `;
+  
   html += `<h2>Your Trip Itinerary: ${trip.title}</h2>`;
   
   const segments = typeof trip.segments === 'string' 

@@ -7,7 +7,25 @@ export const generatePDF = async (trip: any) => {
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   const fontSize = 12;
   
-  let yOffset = height - 50;
+  // Fetch and embed the header image
+  const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/eea4357d-4c1b-4221-9da7-35dd2344a1f8.png");
+  const imageArrayBuffer = await imageResponse.arrayBuffer();
+  const headerImage = await pdfDoc.embedPng(new Uint8Array(imageArrayBuffer));
+  
+  // Calculate image dimensions to maintain aspect ratio
+  const imgDims = headerImage.scale(0.5); // Scale down the image
+  const imgWidth = Math.min(width - 100, imgDims.width);
+  const imgHeight = (imgDims.height * imgWidth) / imgDims.width;
+  
+  // Draw the header image
+  page.drawImage(headerImage, {
+    x: (width - imgWidth) / 2,
+    y: height - imgHeight - 50,
+    width: imgWidth,
+    height: imgHeight,
+  });
+  
+  let yOffset = height - imgHeight - 100; // Adjust starting position after image
   const lineHeight = 20;
   
   // Add title
