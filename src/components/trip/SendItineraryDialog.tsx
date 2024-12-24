@@ -26,16 +26,22 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
   const [isSending, setIsSending] = useState(false);
   const session = useSession();
   const userEmail = session?.user?.email;
-
+  
   const handleSend = async () => {
+    if (!userEmail) {
+      toast.error("You must be logged in to send itineraries");
+      return;
+    }
+
     if (selectedEmails.length === 0) {
       toast.error("Please select at least one recipient");
       return;
     }
 
-    // In development, warn if trying to send to emails other than the user's
+    // Ensure only the user's email is selected
     if (selectedEmails.some(email => email !== userEmail)) {
-      toast.warning("In development mode, emails can only be sent to your own email address. Other recipients will be filtered out.");
+      toast.error(`In development mode, you can only send to your email (${userEmail})`);
+      return;
     }
 
     setIsSending(true);
@@ -43,12 +49,11 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
       const { data, error } = await supabase.functions.invoke('send-itinerary', {
         body: {
           tripId,
-          to: selectedEmails,
+          to: [userEmail], // Only send to user's email
         },
       });
 
       if (error) throw error;
-
       toast.success("Itinerary sent successfully!");
     } catch (error: any) {
       console.error('Error sending itinerary:', error);
@@ -73,47 +78,52 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
         <DialogHeader>
           <DialogTitle>Send Itinerary</DialogTitle>
           <DialogDescription>
-            Select the recipients for the trip itinerary
-            {userEmail && (
-              <p className="mt-2 text-sm text-yellow-600">
-                Note: In development mode, emails can only be sent to your address ({userEmail})
-              </p>
-            )}
+            <p className="mb-2">Select recipients for the trip itinerary</p>
+            <div className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
+              Important: In development mode, you can only send to your email address ({userEmail})
+            </div>
           </DialogDescription>
         </DialogHeader>
         <ScrollArea className="h-[300px] w-full pr-4">
           <div className="space-y-4">
-            {travelers.map((traveler) => (
-              <div key={traveler.email} className="flex items-center space-x-2">
-                <Checkbox
-                  id={traveler.email}
-                  checked={selectedEmails.includes(traveler.email)}
-                  onCheckedChange={(checked) => {
-                    setSelectedEmails(prev =>
-                      checked
-                        ? [...prev, traveler.email]
-                        : prev.filter(email => email !== traveler.email)
-                    );
-                  }}
-                />
-                <Label 
-                  htmlFor={traveler.email} 
-                  className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
-                    traveler.email === userEmail ? 'text-green-600' : ''
-                  }`}
-                >
-                  {traveler.name} ({traveler.email})
-                  {traveler.email === userEmail && " (Your email)"}
-                </Label>
-              </div>
-            ))}
+            {travelers.map((traveler) => {
+              const isUserEmail = traveler.email === userEmail;
+              const isDisabled = !isUserEmail; // Disable non-user emails
+
+              return (
+                <div key={traveler.email} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={traveler.email}
+                    checked={selectedEmails.includes(traveler.email)}
+                    disabled={isDisabled}
+                    onCheckedChange={(checked) => {
+                      setSelectedEmails(prev =>
+                        checked
+                          ? [...prev, traveler.email]
+                          : prev.filter(email => email !== traveler.email)
+                      );
+                    }}
+                  />
+                  <Label 
+                    htmlFor={traveler.email} 
+                    className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed ${
+                      isDisabled ? 'text-gray-400' : isUserEmail ? 'text-green-600' : ''
+                    }`}
+                  >
+                    {traveler.name} ({traveler.email})
+                    {isUserEmail && " (Your email)"}
+                    {!isUserEmail && " (Disabled in development)"}
+                  </Label>
+                </div>
+              );
+            })}
           </div>
         </ScrollArea>
         <DialogFooter>
           <Button
             type="submit"
             onClick={handleSend}
-            disabled={isSending}
+            disabled={isSending || selectedEmails.length === 0}
             className="bg-navy hover:bg-navy-light text-white"
           >
             {isSending ? "Sending..." : "Send"}
