@@ -93,7 +93,7 @@ const ManageTravellers = () => {
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-white">Manage Travellers</h1>
-            <p className="text-gray-600 mt-1">Add and manage your travellers</p>
+            <p className="text-gray-400 mt-1">Add and manage your travellers</p>
           </div>
           <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
             <DialogTrigger asChild>
@@ -101,6 +101,7 @@ const ManageTravellers = () => {
                 onClick={() => {
                   setSelectedTraveller(null);
                 }}
+                className="bg-navy border border-white hover:bg-navy/90"
               >
                 <Plus className="h-4 w-4 mr-2" />
                 Add Traveller
