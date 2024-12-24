@@ -95,7 +95,9 @@ const ViewTrip = () => {
             onSave={handleSave}
             tripId={id}
           />
-          {id && <SendItineraryDialog tripId={id} travelers={travelers} />}
+          {id && travelers.length > 0 && (
+            <SendItineraryDialog tripId={id} travelers={travelers} />
+          )}
         </div>
 
         <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-lg border">
