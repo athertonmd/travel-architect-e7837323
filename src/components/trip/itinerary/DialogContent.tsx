@@ -4,6 +4,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -45,7 +46,10 @@ export function DialogContent({
           onSelectionChange={onSelectionChange}
         />
       </ScrollArea>
-      <DialogFooter>
+      <DialogFooter className="flex flex-row justify-between sm:justify-between gap-2">
+        <DialogClose asChild>
+          <Button variant="outline">Close</Button>
+        </DialogClose>
         <Button
           type="submit"
           onClick={onSend}
