@@ -69,12 +69,19 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Check if RESEND_API_KEY is configured
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not configured");
+      throw new Error("Email service is not configured properly");
+    }
+
     const supabase = createClient(
       SUPABASE_URL!,
       SUPABASE_SERVICE_ROLE_KEY!
     );
 
     const { tripId, to }: EmailRequest = await req.json();
+    console.log("Processing email request for trip:", tripId, "to recipients:", to);
 
     // Fetch trip details
     const { data: trip, error: tripError } = await supabase
@@ -83,7 +90,10 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', tripId)
       .single();
 
-    if (tripError) throw tripError;
+    if (tripError) {
+      console.error("Error fetching trip:", tripError);
+      throw tripError;
+    }
 
     const segments = typeof trip.segments === 'string' 
       ? JSON.parse(trip.segments) 
@@ -106,19 +116,25 @@ const handler = async (req: Request): Promise<Response> => {
       }),
     });
 
+    const resendResponse = await res.json();
+    
     if (!res.ok) {
-      const error = await res.text();
-      throw new Error(error);
+      console.error("Resend API error:", resendResponse);
+      throw new Error(resendResponse.message || "Failed to send email");
     }
 
-    const data = await res.json();
-    return new Response(JSON.stringify(data), {
+    console.log("Email sent successfully:", resendResponse);
+
+    return new Response(JSON.stringify(resendResponse), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
     console.error("Error in send-itinerary function:", error);
-    return new Response(JSON.stringify({ error: error.message }), {
+    return new Response(JSON.stringify({ 
+      error: error.message,
+      details: error.response?.data || error.response || error
+    }), {
       status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
