@@ -61,11 +61,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw tripError;
     }
 
-    const segments = typeof trip.segments === 'string' 
-      ? JSON.parse(trip.segments) 
-      : trip.segments;
-
-    const html = formatItinerary(segments);
+    const html = formatItinerary(trip);
     const pdfBytes = await generatePDF(trip);
     const pdfBase64 = btoa(String.fromCharCode(...pdfBytes));
 

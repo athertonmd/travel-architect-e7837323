@@ -1,7 +1,11 @@
-export const formatItinerary = (segments: any[]) => {
+export const formatItinerary = (trip: any) => {
   let html = '<div style="font-family: Arial, sans-serif;">';
-  html += '<h2>Your Trip Itinerary</h2>';
+  html += `<h2>Your Trip Itinerary: ${trip.title}</h2>`;
   
+  const segments = typeof trip.segments === 'string' 
+    ? JSON.parse(trip.segments) 
+    : trip.segments;
+
   segments.forEach((segment: any) => {
     html += formatSegment(segment);
   });
