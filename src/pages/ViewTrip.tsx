@@ -45,7 +45,7 @@ const ViewTrip = () => {
         }
       }));
 
-      const firstSegmentLocation = nodes[0]?.data?.details?.location || "Unknown";
+      const firstSegmentLocation = nodes[0]?.data?.details?.location as string || "Unknown";
 
       const { error } = await supabase
         .from('trips')
@@ -76,7 +76,7 @@ const ViewTrip = () => {
       travellerNames.forEach((name: string, index: number) => {
         const email = travellerEmails[index];
         if (email && !acc.some(t => t.email === email)) {
-          acc.push({ email, name });
+          acc.push({ email: email as string, name });
         }
       });
     }
