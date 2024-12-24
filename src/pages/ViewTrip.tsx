@@ -72,12 +72,14 @@ const ViewTrip = () => {
     const travellerNames = node.data.details?.traveller_names || [];
     const travellerEmails = node.data.details?.emails || [];
     
-    travellerNames.forEach((name: string, index: number) => {
-      const email = travellerEmails[index];
-      if (email && !acc.some(t => t.email === email)) {
-        acc.push({ email, name });
-      }
-    });
+    if (Array.isArray(travellerNames) && Array.isArray(travellerEmails)) {
+      travellerNames.forEach((name: string, index: number) => {
+        const email = travellerEmails[index];
+        if (email && !acc.some(t => t.email === email)) {
+          acc.push({ email, name });
+        }
+      });
+    }
     
     return acc;
   }, []);

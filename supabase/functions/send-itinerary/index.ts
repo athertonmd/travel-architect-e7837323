@@ -1,59 +1,80 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL');
-const SUPABASE_ANON_KEY = Deno.env.get('SUPABASE_ANON_KEY');
+const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
+const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type",
 };
 
 interface EmailRequest {
   tripId: string;
-  recipients: string[];
+  to: string[];
 }
 
 const formatItinerary = (segments: any[]) => {
-  let itinerary = '';
-  segments.forEach((segment, index) => {
-    const details = segment.details || {};
-    const type = segment.type.charAt(0).toUpperCase() + segment.type.slice(1);
-    
-    itinerary += `<div style="margin-bottom: 20px;">
-      <h3 style="color: #1a365d;">${index + 1}. ${type}</h3>`;
+  let html = '<div style="font-family: Arial, sans-serif;">';
+  html += '<h2>Your Trip Itinerary</h2>';
+  
+  segments.forEach((segment: any, index: number) => {
+    html += `
+      <div style="margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px;">
+        <h3 style="margin: 0 0 10px 0;">${segment.type.charAt(0).toUpperCase() + segment.type.slice(1)}</h3>
+    `;
 
-    if (type === 'Flight') {
-      itinerary += `
-        <p>From: ${details.departureAirport || 'N/A'}</p>
-        <p>To: ${details.destinationAirport || 'N/A'}</p>
-        <p>Date: ${details.departureDate || 'N/A'}</p>
-        <p>Flight Number: ${details.flightNumber || 'N/A'}</p>`;
-    } else if (type === 'Hotel') {
-      itinerary += `
-        <p>Hotel: ${details.hotelName || 'N/A'}</p>
-        <p>Check-in: ${details.checkIn || 'N/A'}</p>
-        <p>Check-out: ${details.checkOut || 'N/A'}</p>`;
+    if (segment.details) {
+      const details = segment.details;
+      
+      // Common details
+      if (details.date) html += `<p><strong>Date:</strong> ${details.date}</p>`;
+      if (details.time) html += `<p><strong>Time:</strong> ${details.time}</p>`;
+      
+      // Flight specific details
+      if (segment.type === 'flight') {
+        if (details.departureAirport) html += `<p><strong>From:</strong> ${details.departureAirport}</p>`;
+        if (details.destinationAirport) html += `<p><strong>To:</strong> ${details.destinationAirport}</p>`;
+        if (details.flightNumber) html += `<p><strong>Flight:</strong> ${details.flightNumber}</p>`;
+      }
+      
+      // Hotel specific details
+      if (segment.type === 'hotel') {
+        if (details.hotelName) html += `<p><strong>Hotel:</strong> ${details.hotelName}</p>`;
+        if (details.addressLine1) html += `<p><strong>Address:</strong> ${details.addressLine1}</p>`;
+        if (details.checkInDate) html += `<p><strong>Check-in:</strong> ${details.checkInDate}</p>`;
+        if (details.checkOutDate) html += `<p><strong>Check-out:</strong> ${details.checkOutDate}</p>`;
+      }
+      
+      // Car/Limo specific details
+      if (segment.type === 'car' || segment.type === 'limo') {
+        if (details.provider) html += `<p><strong>Provider:</strong> ${details.provider}</p>`;
+        if (details.pickupDate) html += `<p><strong>Pickup:</strong> ${details.pickupDate}</p>`;
+        if (details.dropoffDate) html += `<p><strong>Drop-off:</strong> ${details.dropoffDate}</p>`;
+      }
     }
     
-    if (details.traveller_names?.length > 0) {
-      itinerary += `<p>Travelers: ${details.traveller_names.join(', ')}</p>`;
-    }
-    
-    itinerary += '</div>';
+    html += '</div>';
   });
-  return itinerary;
+  
+  html += '</div>';
+  return html;
 };
 
 const handler = async (req: Request): Promise<Response> => {
-  if (req.method === 'OPTIONS') {
+  if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_ANON_KEY!);
-    const { tripId, recipients }: EmailRequest = await req.json();
+    const supabase = createClient(
+      SUPABASE_URL!,
+      SUPABASE_SERVICE_ROLE_KEY!
+    );
+
+    const { tripId, to }: EmailRequest = await req.json();
 
     // Fetch trip details
     const { data: trip, error: tripError } = await supabase
@@ -62,44 +83,44 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('id', tripId)
       .single();
 
-    if (tripError) throw new Error('Failed to fetch trip details');
+    if (tripError) throw tripError;
 
-    const segments = Array.isArray(trip.segments) ? trip.segments : [];
-    const itineraryHtml = formatItinerary(segments);
+    const segments = typeof trip.segments === 'string' 
+      ? JSON.parse(trip.segments) 
+      : trip.segments;
 
-    const emailHtml = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h1 style="color: #1a365d;">${trip.title}</h1>
-        <h2 style="color: #2d4a7c;">Destination: ${trip.destination}</h2>
-        ${itineraryHtml}
-      </div>
-    `;
+    const html = formatItinerary(segments);
 
-    const res = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
+    // Send email using Resend
+    const res = await fetch("https://api.resend.com/emails", {
+      method: "POST",
       headers: {
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
         Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: 'Trip Itinerary <onboarding@resend.dev>',
-        to: recipients,
+        from: "Trip Itinerary <onboarding@resend.dev>",
+        to,
         subject: `Trip Itinerary: ${trip.title}`,
-        html: emailHtml,
+        html,
       }),
     });
 
+    if (!res.ok) {
+      const error = await res.text();
+      throw new Error(error);
+    }
+
     const data = await res.json();
-    
     return new Response(JSON.stringify(data), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      status: res.ok ? 200 : 400,
+      status: 200,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (error: any) {
-    console.error('Error sending itinerary:', error);
+    console.error("Error in send-itinerary function:", error);
     return new Response(JSON.stringify({ error: error.message }), {
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 500,
+      headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
 };
