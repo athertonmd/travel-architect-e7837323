@@ -1,4 +1,5 @@
 import { SendItineraryDialog } from "@/components/trip/SendItineraryDialog";
+import { TripHeader } from "@/components/trip/TripHeader";
 
 interface TripToolbarProps {
   title: string;
