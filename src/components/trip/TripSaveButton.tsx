@@ -22,6 +22,11 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
       return;
     }
 
+    if (nodes.length === 0) {
+      toast.error("Please add at least one segment to your trip before saving");
+      return;
+    }
+
     try {
       const { data: profile } = await supabase
         .from('profiles')
@@ -57,7 +62,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
       if (error) throw error;
 
       toast.success("Trip saved successfully!");
-      navigate('/');
+      navigate('/dashboard');
     } catch (error: any) {
       toast.error(error.message);
     }
