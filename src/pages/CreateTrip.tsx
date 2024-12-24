@@ -4,16 +4,13 @@ import { useState } from "react";
 import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
 import { FlowEditor } from "@/components/trip/FlowEditor";
 import { TripSaveButton } from "@/components/trip/TripSaveButton";
-import { TravelersSelect } from "@/components/trip/TravelersSelect";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
-import { Node } from "@xyflow/react";
-import { SegmentNodeData } from "@/types/segment";
 
 const CreateTrip = () => {
   const [tripTitle, setTripTitle] = useState("Create New Trip");
-  const [travelers, setTravelers] = useState(1);
+  const [travelers, setTravelers] = useState(1); // Keep state for data consistency
   const {
     nodes,
     selectedNode,
@@ -23,7 +20,7 @@ const CreateTrip = () => {
     setNodes
   } = useNodeManagement();
 
-  console.log('Selected Node:', selectedNode); // Add this for debugging
+  console.log('Selected Node:', selectedNode);
 
   return (
     <Layout>
@@ -31,7 +28,6 @@ const CreateTrip = () => {
         <div className="flex justify-between items-center">
           <div className="flex items-center gap-4">
             <TripTitleHeader title={tripTitle} onTitleChange={setTripTitle} />
-            <TravelersSelect onChange={setTravelers} />
           </div>
           <TripSaveButton title={tripTitle} nodes={nodes} travelers={travelers} />
         </div>
