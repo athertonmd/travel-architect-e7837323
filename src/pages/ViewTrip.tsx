@@ -10,6 +10,7 @@ import { toast } from "sonner";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
 import { useTripData } from "@/hooks/useTripData";
 import { TripHeader } from "@/components/trip/TripHeader";
+import { SendItineraryDialog } from "@/components/trip/SendItineraryDialog";
 import { Node } from "@xyflow/react";
 import { SegmentNodeData, SupabaseJsonSegment } from "@/types/segment";
 
@@ -44,8 +45,6 @@ const ViewTrip = () => {
         }
       }));
 
-      console.log('Saving segments with positions:', segments);
-
       const firstSegmentLocation = nodes[0]?.data?.details?.location || "Unknown";
 
       const { error } = await supabase
@@ -68,16 +67,34 @@ const ViewTrip = () => {
     }
   };
 
+  // Extract unique travelers from all segments
+  const travelers = nodes.reduce((acc: { email: string; name: string }[], node) => {
+    const travellerNames = node.data.details?.traveller_names || [];
+    const travellerEmails = node.data.details?.emails || [];
+    
+    travellerNames.forEach((name: string, index: number) => {
+      const email = travellerEmails[index];
+      if (email && !acc.some(t => t.email === email)) {
+        acc.push({ email, name });
+      }
+    });
+    
+    return acc;
+  }, []);
+
   return (
     <Layout>
       <div className="h-[calc(100vh-8rem)] flex flex-col space-y-8">
-        <TripHeader 
-          title={title}
-          onTitleChange={setTitle}
-          travelers={trip?.travelers}
-          onSave={handleSave}
-          tripId={id}
-        />
+        <div className="flex justify-between items-center">
+          <TripHeader 
+            title={title}
+            onTitleChange={setTitle}
+            travelers={trip?.travelers}
+            onSave={handleSave}
+            tripId={id}
+          />
+          {id && <SendItineraryDialog tripId={id} travelers={travelers} />}
+        </div>
 
         <ResizablePanelGroup direction="horizontal" className="flex-1 rounded-lg border">
           <ResizablePanel defaultSize={20} minSize={15}>
