@@ -35,10 +35,10 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
 
     setIsSending(true);
     try {
-      const { data, error } = await supabase.functions.invoke('send-itinerary', {
+      const { error } = await supabase.functions.invoke('send-itinerary', {
         body: {
           tripId,
-          to: [userEmail],
+          to: selectedEmails,
         },
       });
 
