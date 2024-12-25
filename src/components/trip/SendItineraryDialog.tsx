@@ -35,7 +35,7 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
 
     setIsSending(true);
     try {
-      const { error } = await supabase.functions.invoke("send-itinerary", {
+      const { data, error } = await supabase.functions.invoke("send-itinerary", {
         body: {
           tripId,
           to: selectedEmails,
@@ -43,6 +43,8 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
       });
 
       if (error) throw error;
+      
+      console.log("Response from send-itinerary function:", data);
       toast.success("Itinerary sent successfully!");
     } catch (error: any) {
       console.error('Error sending itinerary:', error);
