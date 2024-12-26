@@ -1,1 +1,4 @@
 project_id = "fakwoguybbzfpwokzhvj"
+
+[functions.send-itinerary]
+verify_jwt = true

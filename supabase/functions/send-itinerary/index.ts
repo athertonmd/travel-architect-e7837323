@@ -1,7 +1,5 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { generatePDF } from "./pdfGenerator.ts";
-import { formatItinerary } from "./emailFormatter.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -19,6 +17,9 @@ interface EmailRequest {
 }
 
 const handler = async (req: Request): Promise<Response> => {
+  console.log("Received request to send-itinerary function");
+  
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -37,18 +38,6 @@ const handler = async (req: Request): Promise<Response> => {
     const { tripId, to }: EmailRequest = await req.json();
     console.log("Processing email request for trip:", tripId, "to recipients:", to);
 
-    // Get the authenticated user's email
-    const authHeader = req.headers.get('Authorization');
-    if (!authHeader) {
-      throw new Error('No authorization header');
-    }
-    const token = authHeader.replace('Bearer ', '');
-    const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-    
-    if (userError || !user) {
-      throw new Error('Could not get authenticated user');
-    }
-
     // Fetch trip details
     const { data: trip, error: tripError } = await supabase
       .from('trips')
@@ -61,18 +50,19 @@ const handler = async (req: Request): Promise<Response> => {
       throw tripError;
     }
 
-    const html = formatItinerary(trip);
-    const pdfBytes = await generatePDF(trip);
-    const pdfBase64 = btoa(String.fromCharCode(...pdfBytes));
+    // Create email HTML content
+    const html = `
+      <h1>Trip Itinerary: ${trip.title}</h1>
+      <p>Destination: ${trip.destination || 'Not specified'}</p>
+      <p>Start Date: ${trip.start_date || 'Not specified'}</p>
+      <p>End Date: ${trip.end_date || 'Not specified'}</p>
+      <p>Number of Travelers: ${trip.travelers}</p>
+      
+      <h2>Segments:</h2>
+      ${trip.segments ? JSON.stringify(trip.segments, null, 2) : 'No segments added yet'}
+    `;
 
-    // Filter recipients to only include the authenticated user's email in development
-    const filteredTo = to.filter(email => email === user.email);
-    
-    if (filteredTo.length === 0) {
-      throw new Error("In development mode, you can only send emails to your own email address.");
-    }
-
-    // Send email using Resend with PDF attachment
+    // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -81,18 +71,15 @@ const handler = async (req: Request): Promise<Response> => {
       },
       body: JSON.stringify({
         from: "Trip Itinerary <onboarding@resend.dev>",
-        to: filteredTo,
+        to,
         subject: `Trip Itinerary: ${trip.title}`,
         html,
-        attachments: [{
-          filename: `${trip.title.toLowerCase().replace(/\s+/g, '-')}-itinerary.pdf`,
-          content: pdfBase64,
-        }],
       }),
     });
 
     if (!res.ok) {
       const error = await res.text();
+      console.error("Error from Resend API:", error);
       return new Response(JSON.stringify({ error }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
