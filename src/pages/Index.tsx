@@ -25,6 +25,7 @@ const Index = () => {
         const { data, error: fetchError } = await supabase
           .from('trips')
           .select('*')
+          .eq('user_id', user.id)  // Add this line to filter by user_id
           .eq('archived', false)
           .order('created_at', { ascending: false });
         
