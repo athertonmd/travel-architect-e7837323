@@ -75,6 +75,28 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           className="text-gray-700"
         />
       </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="meal" className="text-blue-500">Meal Preference</Label>
+        <Input
+          id="meal"
+          value={details.meal as string || ""}
+          onChange={(e) => onDetailsChange("meal", e.target.value)}
+          placeholder="e.g., Vegetarian"
+          className="text-gray-700"
+        />
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="notes" className="text-blue-500">Notes</Label>
+        <Input
+          id="notes"
+          value={details.notes as string || ""}
+          onChange={(e) => onDetailsChange("notes", e.target.value)}
+          placeholder="Any additional notes..."
+          className="text-gray-700"
+        />
+      </div>
     </>
   );
 }
