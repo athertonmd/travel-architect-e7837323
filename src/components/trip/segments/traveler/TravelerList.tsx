@@ -17,7 +17,7 @@ export function TravelerList({
   onRemove 
 }: TravelerListProps) {
   return (
-    <ScrollArea className="h-[200px] w-full rounded-md border p-4">
+    <ScrollArea className="h-[300px] w-full rounded-md border p-4">
       <div className="space-y-4">
         {travelerNames.map((name, index) => (
           <div key={index} className="flex items-start justify-between space-x-4 text-sm">
