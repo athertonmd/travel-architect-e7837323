@@ -66,6 +66,16 @@ const Auth = () => {
         }}
       >
         <div className="absolute inset-0 bg-black/40" />
+        
+        {/* Logo in top right */}
+        <div className="absolute top-4 right-4 z-20">
+          <img 
+            src="/lovable-uploads/d000b7aa-c2ab-4d9e-ac92-9b1e6411fb53.png" 
+            alt="TripBuilder Logo" 
+            className="w-32 h-auto"
+          />
+        </div>
+
         <div className="absolute inset-0 flex items-center justify-center">
           <div className="max-w-md w-full mx-4 p-8 bg-white/90 backdrop-blur-sm rounded-lg shadow-xl relative z-10">
             <h1 className="text-2xl font-bold text-center mb-6 text-navy">Welcome to TripBuilder</h1>
