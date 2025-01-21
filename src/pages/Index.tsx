@@ -31,7 +31,6 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
   }
 
   try {
-    // Check if we have a valid session before making the request
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
     if (sessionError) {
       console.error('Session error:', sessionError);
@@ -61,8 +60,6 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       return [];
     }
 
-    console.log('Raw trips data:', rawTrips);
-
     const transformedTrips: Trip[] = rawTrips.map(trip => ({
       id: trip.id,
       title: trip.title || '',
@@ -88,19 +85,29 @@ const Index = () => {
   const navigate = useNavigate();
   const authCheckRef = useRef(false);
 
+  useEffect(() => {
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
+      if (error || !session) {
+        console.log('No valid session found, redirecting to auth');
+        navigate('/', { replace: true });
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
+
   const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', user?.id],
     queryFn: () => fetchTrips(user?.id),
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
-    refetchOnWindowFocus: false,
-    retry: 2,
+    retry: 1,
     retryDelay: 1000,
   });
 
   useEffect(() => {
-    // Check if user exists and redirect if not
     if (!user && !authCheckRef.current) {
       console.log('No user found, redirecting to auth page');
       navigate('/', { replace: true });
@@ -112,7 +119,7 @@ const Index = () => {
     console.log('Setting up auth listener for user:', user.id);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        console.log('User signed out, cleaning up...');
+        console.log('User signed out, redirecting to auth page');
         navigate('/', { replace: true });
       }
     });
