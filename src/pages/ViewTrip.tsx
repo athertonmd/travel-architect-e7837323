@@ -5,7 +5,7 @@ import { useNodeManagement } from "@/hooks/useNodeManagement";
 import { useTripData } from "@/hooks/useTripData";
 import { useTripUpdates } from "@/hooks/useTripUpdates";
 import { useState } from "react";
-import { JsonValue } from "@/types/segment";
+import { Layout } from "@/components/Layout";
 
 export default function ViewTrip() {
   const { id } = useParams<{ id: string }>();
@@ -35,7 +35,7 @@ export default function ViewTrip() {
     await refetch();
   };
 
-  // Extract email recipients from nodes, safely handling undefined values and ensuring string types
+  // Extract email recipients from nodes
   const emailRecipients = nodes.flatMap(node => {
     const details = node.data?.details || {};
     const names = Array.isArray(details.traveller_names) ? details.traveller_names : [];
@@ -43,7 +43,6 @@ export default function ViewTrip() {
     
     return names.map((name: string, index: number) => {
       const email = emails[index];
-      // Only include if email is a string and not empty
       return typeof email === 'string' && email
         ? { name, email }
         : null;
@@ -53,21 +52,23 @@ export default function ViewTrip() {
   });
 
   return (
-    <div className="space-y-8">
-      <TripToolbar
-        title={title}
-        onTitleChange={setTitle}
-        onSave={handleSave}
-        tripId={id}
-        emailRecipients={emailRecipients}
-      />
-      <TripContent
-        nodes={nodes}
-        selectedNode={selectedNode}
-        onNodesChange={handleNodesChange}
-        onNodeSelect={handleNodeSelect}
-        onDetailsChange={handleDetailsChange}
-      />
-    </div>
+    <Layout>
+      <div className="h-[calc(100vh-8rem)] flex flex-col space-y-8">
+        <TripToolbar
+          title={title}
+          onTitleChange={setTitle}
+          onSave={handleSave}
+          tripId={id}
+          emailRecipients={emailRecipients}
+        />
+        <TripContent
+          nodes={nodes}
+          selectedNode={selectedNode}
+          onNodesChange={handleNodesChange}
+          onNodeSelect={handleNodeSelect}
+          onDetailsChange={handleDetailsChange}
+        />
+      </div>
+    </Layout>
   );
 }
