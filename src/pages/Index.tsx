@@ -41,10 +41,6 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
     if (error) {
       console.error('Supabase error:', error);
-      console.log('Request details:', {
-        userId,
-        requestUrl: 'https://fakwoguybbzfpwokzhvj.supabase.co/rest/v1/trips'
-      });
       throw new Error(error.message);
     }
 
@@ -90,6 +86,8 @@ const Index = () => {
   });
 
   useEffect(() => {
+    if (!user) return;
+    
     // Only set up the listener if it hasn't been set up yet
     if (authCheckRef.current) return;
     
@@ -108,7 +106,7 @@ const Index = () => {
       subscription.unsubscribe();
       authCheckRef.current = false;
     };
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     if (error) {
