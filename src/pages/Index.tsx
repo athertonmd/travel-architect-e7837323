@@ -29,8 +29,6 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
     return [];
   }
 
-  console.log('Fetching trips for user:', userId);
-  
   try {
     const { data: rawTrips, error } = await supabase
       .from('trips')
@@ -41,15 +39,13 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
     if (error) {
       console.error('Supabase error:', error);
-      throw new Error(error.message);
+      throw error;
     }
 
     if (!rawTrips) {
       console.log('No trips found');
       return [];
     }
-
-    console.log('Raw trips data:', rawTrips);
 
     const transformedTrips: Trip[] = rawTrips.map(trip => ({
       id: trip.id,
@@ -63,7 +59,6 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       segments: Array.isArray(trip.segments) ? trip.segments : []
     }));
 
-    console.log('Transformed trips:', transformedTrips);
     return transformedTrips;
   } catch (error) {
     console.error('Error in fetchTrips:', error);
@@ -80,33 +75,26 @@ const Index = () => {
     queryFn: () => fetchTrips(user?.id),
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    cacheTime: 1000 * 60 * 30, // 30 minutes
     refetchOnWindowFocus: false,
-    retry: 1,
+    retry: 2,
     retryDelay: 1000,
   });
 
   useEffect(() => {
     if (!user) return;
     
-    // Prevent multiple subscriptions
     if (authCheckRef.current) return;
     
-    console.log('Setting up auth state listener');
-    
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session?.user?.id);
-      
-      // Only handle specific events to prevent loops
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
-        console.log('User signed out');
+        console.log('User signed out, cleaning up...');
       }
     });
 
     authCheckRef.current = true;
 
-    // Cleanup subscription
     return () => {
-      console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
       authCheckRef.current = false;
     };
