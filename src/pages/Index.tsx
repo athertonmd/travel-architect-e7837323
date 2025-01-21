@@ -43,8 +43,11 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       console.error('Supabase error:', error);
       console.log('Request details:', {
         userId,
-        url: SUPABASE_URL + '/rest/v1/trips',
-        headers: supabase.rest.headers
+        requestUrl: `${supabase.getUrl()}/rest/v1/trips`,
+        headers: {
+          apikey: supabase.supabaseKey,
+          authorization: `Bearer ${supabase.supabaseKey}`
+        }
       });
       throw new Error(error.message);
     }
