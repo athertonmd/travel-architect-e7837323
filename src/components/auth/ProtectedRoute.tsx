@@ -13,6 +13,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const isInitialCheckDoneRef = useRef(false);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const isMountedRef = useRef(true);
+  const isSessionCheckRunningRef = useRef(false);
   
   useEffect(() => {
     isMountedRef.current = true;
@@ -20,7 +21,12 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     const checkSession = async () => {
       try {
-        if (!isMountedRef.current || isInitialCheckDoneRef.current) return;
+        if (!isMountedRef.current || isInitialCheckDoneRef.current || isSessionCheckRunningRef.current) {
+          console.log('Skipping session check - already running or component unmounted');
+          return;
+        }
+
+        isSessionCheckRunningRef.current = true;
         isInitialCheckDoneRef.current = true;
 
         const { data: { session } } = await supabase.auth.getSession();
@@ -36,6 +42,8 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
           navigationAttemptedRef.current = true;
           navigate('/', { replace: true });
         }
+      } finally {
+        isSessionCheckRunningRef.current = false;
       }
     };
 

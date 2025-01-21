@@ -9,6 +9,7 @@ const RETRY_DELAY = 1000;
 export const useSessionCheck = (navigate: NavigateFunction) => {
   const authCheckTimeoutRef = useRef<NodeJS.Timeout>();
   const retryCountRef = useRef(0);
+  const isSessionCheckRunningRef = useRef(false);
 
   const handleAuthError = useCallback(async (isSubscribed: boolean) => {
     if (!isSubscribed) return;
@@ -32,7 +33,13 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
   }, [navigate]);
 
   const checkSession = useCallback(async (isSubscribed: boolean) => {
-    if (!isSubscribed) return;
+    if (!isSubscribed || isSessionCheckRunningRef.current) {
+      console.log('Session check already running or component unmounted');
+      return;
+    }
+
+    isSessionCheckRunningRef.current = true;
+    console.log('Starting session check');
 
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
@@ -80,12 +87,15 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
         return;
       }
       await handleAuthError(isSubscribed);
+    } finally {
+      isSessionCheckRunningRef.current = false;
     }
   }, [handleAuthError]);
 
   return {
     checkSession,
     handleAuthError,
-    authCheckTimeoutRef
+    authCheckTimeoutRef,
+    isSessionCheckRunning: isSessionCheckRunningRef.current
   };
 };
