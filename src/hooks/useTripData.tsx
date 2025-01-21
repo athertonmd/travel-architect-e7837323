@@ -44,20 +44,10 @@ export function useTripData(
       console.log('Raw trip data from Supabase:', data);
       setTitle(data.title);
       
-      if (data.segments) {
-        let segments: SupabaseJsonSegment[];
-        try {
-          segments = typeof data.segments === 'string' 
-            ? JSON.parse(data.segments) 
-            : data.segments;
-
-          console.log('Parsed segments:', segments);
-        } catch (e) {
-          console.error('Error parsing segments:', e);
-          segments = [];
-        }
+      if (data.segments && Array.isArray(data.segments)) {
+        console.log('Processing segments:', data.segments);
         
-        const initialNodes: Node<SegmentNodeData>[] = segments.map((segment, index) => {
+        const initialNodes: Node<SegmentNodeData>[] = data.segments.map((segment: SupabaseJsonSegment, index: number) => {
           const node: Node<SegmentNodeData> = {
             id: `${segment.type}-${index + 1}`,
             type: 'segment',
@@ -79,12 +69,14 @@ export function useTripData(
         console.log('Setting nodes:', initialNodes);
         setNodes(initialNodes);
       } else {
-        console.log('No segments found or invalid segments data');
+        console.log('No segments found or invalid segments data:', data.segments);
         setNodes([]);
       }
 
       return data;
     },
     refetchOnWindowFocus: false,
+    staleTime: 0, // This ensures we always get fresh data when entering the trip
+    cacheTime: 0, // This ensures the data is not cached
   });
 }
