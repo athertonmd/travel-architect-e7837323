@@ -32,9 +32,11 @@ const Index = () => {
     queryFn: () => user ? fetchTrips(user.id) : Promise.resolve([]),
     enabled: !!user,
     retry: 2,
-    onError: (error: any) => {
-      console.error('Error in trips query:', error);
-      toast.error('Failed to load trips. Please try again.');
+    meta: {
+      onError: (error: any) => {
+        console.error('Error in trips query:', error);
+        toast.error('Failed to load trips. Please try again.');
+      }
     }
   });
 
