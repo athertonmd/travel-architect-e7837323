@@ -16,37 +16,24 @@ const Auth = () => {
 
     const checkSession = async () => {
       try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session check error:', error);
-          toast.error('Error checking session');
-          return;
-        }
-        
-        if (session) {
-          console.log('Active session found, redirecting to dashboard');
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
           navigate('/dashboard', { replace: true });
         }
       } catch (error) {
-        console.error('Unexpected error during session check:', error);
+        console.error('Session check error:', error);
       }
     };
 
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state changed:', event);
-      
       if (event === 'SIGNED_IN' && session) {
-        console.log('Sign in successful, redirecting to dashboard');
-        toast.success('Successfully signed in!');
         navigate('/dashboard', { replace: true });
       }
     });
 
     return () => {
-      console.log('Cleaning up auth subscriptions');
       subscription.unsubscribe();
       authCheckRef.current = false;
     };
