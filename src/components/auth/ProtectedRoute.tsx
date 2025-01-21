@@ -66,7 +66,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       subscriptionRef.current = subscription;
     }
 
-    // Cleanup function
     return () => {
       isMountedRef.current = false;
       clearTimeout(sessionCheckTimeout);
@@ -75,7 +74,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         subscriptionRef.current = null;
       }
     };
-  }, [navigate]);
+  }, [navigate]); // Only depend on navigate function
 
   return <ProtectedContent>{children}</ProtectedContent>;
 };

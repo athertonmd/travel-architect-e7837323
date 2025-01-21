@@ -24,7 +24,6 @@ export const useAuthStateChange = (
       if (!isMountedRef.current) return;
       
       const now = Date.now();
-      // Prevent same event from firing within 1 second
       if (lastEventRef.current === event && now - lastEventTimeRef.current < 1000) {
         console.log('Debouncing event:', event);
         return;
@@ -48,7 +47,6 @@ export const useAuthStateChange = (
             debounceEvent(event, () => {
               console.log('Auth event:', event, session ? 'Session exists' : 'No session');
               
-              // Only handle specific events to reduce rerenders
               if (event === 'SIGNED_OUT') {
                 clearTimeout(authCheckTimeoutRef.current);
                 handleAuthError(isSubscribed).catch(console.error);
@@ -68,7 +66,6 @@ export const useAuthStateChange = (
 
     setupAuthListener();
 
-    // Initial session check with delay
     if (!isInitialCheckDoneRef.current && isMountedRef.current) {
       const initialCheckTimeout = setTimeout(() => {
         if (isSubscribed && isMountedRef.current) {
@@ -85,7 +82,6 @@ export const useAuthStateChange = (
       return () => clearTimeout(initialCheckTimeout);
     }
 
-    // Cleanup function
     return () => {
       console.log('Cleaning up auth subscriptions');
       isMountedRef.current = false;
@@ -97,5 +93,5 @@ export const useAuthStateChange = (
         isListenerSetup = false;
       }
     };
-  }, [checkSession, handleAuthError, isSubscribed, authCheckTimeoutRef]);
+  }, [isSubscribed, checkSession, handleAuthError, authCheckTimeoutRef]); // Only depend on required props
 };

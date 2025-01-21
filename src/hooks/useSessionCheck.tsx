@@ -44,22 +44,9 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
     try {
       const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
-      if (sessionError) {
-        console.error('Session check error:', sessionError);
-        if (retryCountRef.current < MAX_RETRIES) {
-          retryCountRef.current++;
-          console.log(`Retrying session check (${retryCountRef.current}/${MAX_RETRIES})`);
-          authCheckTimeoutRef.current = setTimeout(
-            () => checkSession(isSubscribed), 
-            RETRY_DELAY
-          );
-          return;
-        }
-        throw sessionError;
-      }
+      if (sessionError) throw sessionError;
 
       if (!session) {
-        console.log('No active session found');
         if (retryCountRef.current < MAX_RETRIES) {
           retryCountRef.current++;
           console.log(`Retrying session check (${retryCountRef.current}/${MAX_RETRIES})`);
@@ -77,7 +64,7 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
       retryCountRef.current = 0;
 
     } catch (error) {
-      console.error('Unexpected error during session check:', error);
+      console.error('Session check error:', error);
       if (retryCountRef.current < MAX_RETRIES) {
         retryCountRef.current++;
         authCheckTimeoutRef.current = setTimeout(
@@ -90,7 +77,7 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
     } finally {
       isSessionCheckRunningRef.current = false;
     }
-  }, [handleAuthError]);
+  }, [handleAuthError]); // Only depend on handleAuthError
 
   return {
     checkSession,
