@@ -34,18 +34,16 @@ export default function ViewTrip() {
     await refetch();
   };
 
-  // Extract email recipients from nodes
-  const emailRecipients = nodes
-    .flatMap(node => {
-      const details = node.data.details || {};
-      const names = details.traveller_names || [];
-      const emails = details.emails || [];
-      return names.map((name: string, index: number) => ({
-        name,
-        email: emails[index] || ''
-      }));
-    })
-    .filter(recipient => recipient.email);
+  // Extract email recipients from nodes, safely handling undefined values
+  const emailRecipients = nodes.flatMap(node => {
+    const details = node.data?.details || {};
+    const names = Array.isArray(details.traveller_names) ? details.traveller_names : [];
+    const emails = Array.isArray(details.emails) ? details.emails : [];
+    return names.map((name: string, index: number) => ({
+      name,
+      email: emails[index] || ''
+    })).filter(recipient => recipient.email);
+  });
 
   return (
     <div className="space-y-8">

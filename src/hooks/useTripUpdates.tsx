@@ -11,6 +11,17 @@ interface UpdateTripParams {
   nodes: Node<SegmentNodeData>[];
 }
 
+// Helper function to transform React Flow nodes to database segments
+const transformNodesToSegments = (nodes: Node<SegmentNodeData>[]) => {
+  return nodes.map(node => ({
+    id: node.id,
+    type: node.data.label,
+    icon: node.data.icon,
+    position: node.position,
+    details: node.data.details || {}
+  }));
+};
+
 export function useTripUpdates() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -19,11 +30,13 @@ export function useTripUpdates() {
     mutationFn: async ({ tripId, title, nodes }: UpdateTripParams) => {
       console.log('Updating trip:', { tripId, title, nodes });
       
+      const segments = transformNodesToSegments(nodes);
+      
       const { error } = await supabase
         .from('trips')
         .update({
           title,
-          segments: nodes,
+          segments,
           updated_at: new Date().toISOString()
         })
         .eq('id', tripId);

@@ -19,6 +19,22 @@ interface TripData {
   user_id: string;
 }
 
+// Helper function to transform database segments to React Flow nodes
+const transformSegmentsToNodes = (segments: any[]): Node<SegmentNodeData>[] => {
+  if (!Array.isArray(segments)) return [];
+  
+  return segments.map((segment: any) => ({
+    id: segment.id || crypto.randomUUID(),
+    type: 'segment',
+    position: segment.position || { x: 0, y: 0 },
+    data: {
+      label: segment.type || 'Unknown',
+      icon: segment.icon || '📍',
+      details: segment.details || {}
+    }
+  }));
+};
+
 export function useTripData(
   tripId: string | undefined,
   setNodes: (nodes: Node<SegmentNodeData>[]) => void,
@@ -35,7 +51,7 @@ export function useTripData(
         .from('trips')
         .select('*')
         .eq('id', tripId)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error('Error fetching trip:', error);
@@ -54,7 +70,8 @@ export function useTripData(
       // Update nodes if segments exist
       if (trip.segments && Array.isArray(trip.segments)) {
         console.log('Setting nodes from segments:', trip.segments);
-        setNodes(trip.segments);
+        const nodes = transformSegmentsToNodes(trip.segments);
+        setNodes(nodes);
       }
 
       // Update title
@@ -66,8 +83,8 @@ export function useTripData(
       return trip as TripData;
     },
     enabled: !!tripId,
-    staleTime: 0,
     gcTime: 0,
+    staleTime: 0,
     meta: {
       errorMessage: 'Failed to load trip data'
     }
