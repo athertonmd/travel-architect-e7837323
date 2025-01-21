@@ -5,7 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 interface Trip {
   id: string;
@@ -74,6 +74,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
 const Index = () => {
   const user = useUser();
+  const lastEventTimeRef = useRef<number>(0);
 
   const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', user?.id],
@@ -81,12 +82,30 @@ const Index = () => {
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     refetchOnWindowFocus: false, // Prevent refetch on window focus
-    retry: 3, // Retry failed requests 3 times
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    retry: 3,
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
   });
 
   useEffect(() => {
-    // Log any errors that occur during data fetching
+    // Set up auth state change listener with debouncing
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      const now = Date.now();
+      if (now - lastEventTimeRef.current < 1000) {
+        console.log('Debouncing auth state change event:', event);
+        return; // Debounce events that fire too quickly
+      }
+      lastEventTimeRef.current = now;
+      console.log('Auth state change event:', event);
+    });
+
+    // Cleanup subscription on unmount
+    return () => {
+      console.log('Cleaning up auth subscription');
+      subscription.unsubscribe();
+    };
+  }, []);
+
+  useEffect(() => {
     if (error) {
       console.error('Error fetching trips:', error);
       toast.error('Error loading trips. Please refresh the page.');
