@@ -40,7 +40,12 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Supabase error fetching trips:', error);
+      console.error('Supabase error:', error);
+      console.log('Request details:', {
+        userId,
+        url: SUPABASE_URL + '/rest/v1/trips',
+        headers: supabase.rest.headers
+      });
       throw new Error(error.message);
     }
 
