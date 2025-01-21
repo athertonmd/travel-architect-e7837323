@@ -77,6 +77,6 @@ export function useTripData(
     },
     refetchOnWindowFocus: false,
     staleTime: 0, // This ensures we always get fresh data when entering the trip
-    cacheTime: 0, // This ensures the data is not cached
+    gcTime: 0, // This ensures the data is not cached (previously cacheTime)
   });
 }
