@@ -30,34 +30,39 @@ const fetchTrips = async (userId: string): Promise<Trip[]> => {
 
   console.log('Fetching trips for user:', userId);
   
-  const { data: rawTrips, error } = await supabase
-    .from('trips')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('archived', false)
-    .order('created_at', { ascending: false });
+  try {
+    const { data: rawTrips, error } = await supabase
+      .from('trips')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('archived', false)
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching trips:', error);
+    if (error) {
+      console.error('Error fetching trips:', error);
+      throw error;
+    }
+
+    console.log('Raw trips data:', rawTrips);
+
+    const transformedTrips: Trip[] = (rawTrips || []).map(trip => ({
+      id: trip.id,
+      title: trip.title || '',
+      destination: trip.destination || '',
+      startDate: trip.start_date || '',
+      endDate: trip.end_date || '',
+      travelers: trip.travelers || 0,
+      status: isValidStatus(trip.status) ? trip.status : 'draft',
+      archived: trip.archived || false,
+      segments: Array.isArray(trip.segments) ? trip.segments : []
+    }));
+
+    console.log('Transformed trips:', transformedTrips);
+    return transformedTrips;
+  } catch (error) {
+    console.error('Error in fetchTrips:', error);
     throw error;
   }
-
-  console.log('Raw trips data:', rawTrips);
-
-  const transformedTrips: Trip[] = (rawTrips || []).map(trip => ({
-    id: trip.id,
-    title: trip.title || '',
-    destination: trip.destination || '',
-    startDate: trip.start_date || '',
-    endDate: trip.end_date || '',
-    travelers: trip.travelers || 0,
-    status: isValidStatus(trip.status) ? trip.status : 'draft',
-    archived: trip.archived || false,
-    segments: Array.isArray(trip.segments) ? trip.segments : []
-  }));
-
-  console.log('Transformed trips:', transformedTrips);
-  return transformedTrips;
 };
 
 const Index = () => {
@@ -67,9 +72,11 @@ const Index = () => {
     queryKey: ['trips', user?.id],
     queryFn: () => user ? fetchTrips(user.id) : Promise.resolve([]),
     enabled: !!user,
-    retry: 2,
+    retry: 1,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    refetchOnWindowFocus: false // Prevent refetch on window focus
+    refetchOnWindowFocus: false, // Prevent refetch on window focus
+    refetchInterval: false, // Disable automatic refetching
+    gcTime: 1000 * 60 * 10 // Keep cached data for 10 minutes
   });
 
   if (error) {
