@@ -76,16 +76,16 @@ const Index = () => {
     gcTime: 1000 * 60 * 30, // 30 minutes
     retry: 3, // Retry failed requests 3 times
     retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
-    onError: (error: any) => {
-      console.error('Error fetching trips:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code
-      });
-      toast.error('Unable to load trips. Please try again.');
+    meta: {
+      errorMessage: 'Unable to load trips. Please try again.'
     }
   });
+
+  // Handle error state
+  if (error) {
+    console.error('Error fetching trips:', error);
+    toast.error('Unable to load trips. Please try again.');
+  }
 
   return (
     <Layout>
