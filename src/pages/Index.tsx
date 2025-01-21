@@ -40,8 +40,8 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching trips:', error);
-      throw error;
+      console.error('Supabase error fetching trips:', error);
+      throw new Error(error.message);
     }
 
     if (!rawTrips) {
@@ -67,8 +67,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
     return transformedTrips;
   } catch (error) {
     console.error('Error in fetchTrips:', error);
-    toast.error('Failed to load trips. Please try again.');
-    return [];
+    throw error;
   }
 };
 
@@ -80,27 +79,24 @@ const Index = () => {
     queryKey: ['trips', user?.id],
     queryFn: () => fetchTrips(user?.id),
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
-    refetchOnWindowFocus: false, // Prevent refetch on window focus
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+    retry: 1,
+    retryDelay: 1000,
   });
 
   useEffect(() => {
-    // Set up auth state change listener with debouncing
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       const now = Date.now();
       if (now - lastEventTimeRef.current < 1000) {
         console.log('Debouncing auth state change event:', event);
-        return; // Debounce events that fire too quickly
+        return;
       }
       lastEventTimeRef.current = now;
-      console.log('Auth state change event:', event);
+      console.log('Auth state change event:', event, 'Session:', session?.user?.id);
     });
 
-    // Cleanup subscription on unmount
     return () => {
-      console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []);
@@ -108,7 +104,7 @@ const Index = () => {
   useEffect(() => {
     if (error) {
       console.error('Error fetching trips:', error);
-      toast.error('Error loading trips. Please refresh the page.');
+      toast.error('Unable to load trips. Please check your connection and try again.');
     }
   }, [error]);
 
