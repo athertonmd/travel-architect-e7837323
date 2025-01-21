@@ -1,82 +1,75 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { Node } from "@xyflow/react";
-import { SegmentNodeData, SupabaseJsonSegment } from "@/types/segment";
-import { segmentIcons } from "@/utils/segmentIcons";
+import { SegmentNodeData } from "@/types/segment";
+import { toast } from "sonner";
 
-const CANVAS_CENTER = 400;
-const VERTICAL_SPACING = 60;
-const TOP_MARGIN = 20;
+interface TripData {
+  id: string;
+  title: string;
+  destination: string;
+  start_date: string;
+  end_date: string;
+  travelers: number;
+  status: string;
+  segments: any;
+  archived: boolean;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+}
 
 export function useTripData(
-  id: string | undefined, 
-  setNodes: (nodes: Node<SegmentNodeData>[]) => void, 
+  tripId: string | undefined,
+  setNodes: (nodes: Node<SegmentNodeData>[]) => void,
   setTitle: (title: string) => void
 ) {
   return useQuery({
-    queryKey: ['trip', id],
+    queryKey: ['trip', tripId],
     queryFn: async () => {
-      if (!id) {
-        toast.error('Invalid trip ID');
-        return null;
-      }
+      if (!tripId) throw new Error('Trip ID is required');
 
-      console.log('Fetching trip data for ID:', id);
-
-      const { data, error } = await supabase
+      console.log('Fetching trip data for ID:', tripId);
+      
+      const { data: trip, error } = await supabase
         .from('trips')
         .select('*')
-        .eq('id', id)
-        .maybeSingle();
+        .eq('id', tripId)
+        .single();
 
       if (error) {
         console.error('Error fetching trip:', error);
-        toast.error('Error loading trip');
-        return null;
+        toast.error('Failed to load trip data');
+        throw error;
       }
 
-      if (!data) {
+      if (!trip) {
+        console.error('No trip found with ID:', tripId);
         toast.error('Trip not found');
-        return null;
+        throw new Error('Trip not found');
       }
 
-      console.log('Raw trip data from Supabase:', data);
-      setTitle(data.title);
-      
-      if (data.segments && Array.isArray(data.segments)) {
-        console.log('Processing segments:', data.segments);
-        
-        const initialNodes: Node<SegmentNodeData>[] = data.segments.map((segment: SupabaseJsonSegment, index: number) => {
-          const node: Node<SegmentNodeData> = {
-            id: `${segment.type}-${index + 1}`,
-            type: 'segment',
-            position: segment.position || {
-              x: CANVAS_CENTER - 100,
-              y: TOP_MARGIN + (index * VERTICAL_SPACING)
-            },
-            data: {
-              label: segment.type.charAt(0).toUpperCase() + segment.type.slice(1),
-              icon: segmentIcons[segment.type as keyof typeof segmentIcons],
-              details: segment.details || {},
-            },
-            dragHandle: '.drag-handle',
-          };
-          console.log('Created node:', node);
-          return node;
-        });
-        
-        console.log('Setting nodes:', initialNodes);
-        setNodes(initialNodes);
-      } else {
-        console.log('No segments found or invalid segments data:', data.segments);
-        setNodes([]);
+      console.log('Fetched trip data:', trip);
+
+      // Update nodes if segments exist
+      if (trip.segments && Array.isArray(trip.segments)) {
+        console.log('Setting nodes from segments:', trip.segments);
+        setNodes(trip.segments);
       }
 
-      return data;
+      // Update title
+      if (trip.title) {
+        console.log('Setting title:', trip.title);
+        setTitle(trip.title);
+      }
+
+      return trip as TripData;
     },
-    refetchOnWindowFocus: false,
-    staleTime: 0, // This ensures we always get fresh data when entering the trip
-    gcTime: 0, // This ensures the data is not cached (previously cacheTime)
+    enabled: !!tripId,
+    staleTime: 0,
+    gcTime: 0,
+    meta: {
+      errorMessage: 'Failed to load trip data'
+    }
   });
 }
