@@ -6,7 +6,19 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 
-const fetchTrips = async (userId: string) => {
+interface Trip {
+  id: string;
+  title: string;
+  destination: string;
+  start_date: string;
+  end_date: string;
+  travelers: number;
+  status: "draft" | "in-progress" | "confirmed";
+  archived: boolean;
+  segments?: any[];
+}
+
+const fetchTrips = async (userId: string): Promise<Trip[]> => {
   console.log('Fetching trips for user:', userId);
   const { data, error } = await supabase
     .from('trips')
@@ -31,14 +43,14 @@ const Index = () => {
     queryKey: ['trips', user?.id],
     queryFn: () => user ? fetchTrips(user.id) : Promise.resolve([]),
     enabled: !!user,
-    retry: 2,
-    meta: {
-      onError: (error: any) => {
-        console.error('Error in trips query:', error);
-        toast.error('Failed to load trips. Please try again.');
-      }
-    }
+    retry: 2
   });
+
+  // Handle query errors
+  if (error) {
+    console.error('Error loading trips:', error);
+    toast.error('Failed to load trips. Please try again.');
+  }
 
   return (
     <Layout>
