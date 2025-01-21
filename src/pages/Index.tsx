@@ -16,6 +16,9 @@ interface Trip {
   status: "draft" | "in-progress" | "confirmed";
   archived: boolean;
   segments?: any[];
+  created_at: string;
+  updated_at: string;
+  user_id: string;
 }
 
 const fetchTrips = async (userId: string): Promise<Trip[]> => {
@@ -32,7 +35,7 @@ const fetchTrips = async (userId: string): Promise<Trip[]> => {
     throw error;
   }
 
-  // Transform the data to ensure status is of the correct type
+  // Transform the data to ensure status is of the correct type and handle segments
   const transformedData: Trip[] = (data || []).map(trip => ({
     ...trip,
     status: trip.status as "draft" | "in-progress" | "confirmed",
@@ -40,7 +43,10 @@ const fetchTrips = async (userId: string): Promise<Trip[]> => {
     end_date: trip.end_date || '',
     destination: trip.destination || '',
     travelers: trip.travelers || 0,
-    archived: trip.archived || false
+    archived: trip.archived || false,
+    segments: Array.isArray(trip.segments) ? trip.segments : 
+             typeof trip.segments === 'string' ? JSON.parse(trip.segments) : 
+             trip.segments ? [trip.segments] : []
   }));
 
   console.log('Fetched trips:', transformedData);
