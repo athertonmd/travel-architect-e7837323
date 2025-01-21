@@ -34,7 +34,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
   try {
     const { data: rawTrips, error } = await supabase
       .from('trips')
-      .select('*')
+      .select('id, title, destination, start_date, end_date, travelers, status, archived, segments')
       .eq('user_id', userId)
       .eq('archived', false)
       .order('created_at', { ascending: false });
