@@ -30,6 +30,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
   }
 
   try {
+    console.log('Fetching trips for user:', userId);
     const { data: rawTrips, error } = await supabase
       .from('trips')
       .select('id, title, destination, start_date, end_date, travelers, status, archived, segments')
@@ -47,6 +48,8 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       return [];
     }
 
+    console.log('Raw trips data:', rawTrips);
+
     const transformedTrips: Trip[] = rawTrips.map(trip => ({
       id: trip.id,
       title: trip.title || '',
@@ -59,6 +62,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       segments: Array.isArray(trip.segments) ? trip.segments : []
     }));
 
+    console.log('Transformed trips:', transformedTrips);
     return transformedTrips;
   } catch (error) {
     console.error('Error in fetchTrips:', error);
@@ -82,10 +86,9 @@ const Index = () => {
   });
 
   useEffect(() => {
-    if (!user) return;
+    if (!user || authCheckRef.current) return;
     
-    if (authCheckRef.current) return;
-    
+    console.log('Setting up auth listener for user:', user.id);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, cleaning up...');
@@ -95,6 +98,7 @@ const Index = () => {
     authCheckRef.current = true;
 
     return () => {
+      console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
       authCheckRef.current = false;
     };
