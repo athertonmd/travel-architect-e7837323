@@ -22,7 +22,7 @@ const ViewTrip = () => {
     setNodes
   } = useNodeManagement([]);
 
-  const { data: trip } = useTripData(id, setNodes, setTitle);
+  const { data: trip, refetch } = useTripData(id, setNodes, setTitle);
 
   const handleSave = async () => {
     try {
@@ -54,6 +54,7 @@ const ViewTrip = () => {
 
       if (error) throw error;
       
+      await refetch(); // Refetch the trip data after saving
       toast.success("Trip updated successfully!");
       navigate('/dashboard');
     } catch (error: any) {
