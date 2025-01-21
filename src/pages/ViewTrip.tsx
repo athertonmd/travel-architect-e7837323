@@ -5,6 +5,7 @@ import { useNodeManagement } from "@/hooks/useNodeManagement";
 import { useTripData } from "@/hooks/useTripData";
 import { useTripUpdates } from "@/hooks/useTripUpdates";
 import { useState } from "react";
+import { JsonValue } from "@/types/segment";
 
 export default function ViewTrip() {
   const { id } = useParams<{ id: string }>();
@@ -34,15 +35,21 @@ export default function ViewTrip() {
     await refetch();
   };
 
-  // Extract email recipients from nodes, safely handling undefined values
+  // Extract email recipients from nodes, safely handling undefined values and ensuring string types
   const emailRecipients = nodes.flatMap(node => {
     const details = node.data?.details || {};
     const names = Array.isArray(details.traveller_names) ? details.traveller_names : [];
     const emails = Array.isArray(details.emails) ? details.emails : [];
-    return names.map((name: string, index: number) => ({
-      name,
-      email: emails[index] || ''
-    })).filter(recipient => recipient.email);
+    
+    return names.map((name: string, index: number) => {
+      const email = emails[index];
+      // Only include if email is a string and not empty
+      return typeof email === 'string' && email
+        ? { name, email }
+        : null;
+    }).filter((recipient): recipient is { name: string; email: string } => 
+      recipient !== null
+    );
   });
 
   return (
