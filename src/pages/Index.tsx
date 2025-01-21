@@ -43,11 +43,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       throw error;
     }
 
-    if (!trips) {
-      return [];
-    }
-
-    return trips.map(trip => ({
+    return trips?.map(trip => ({
       id: trip.id,
       title: trip.title || '',
       destination: trip.destination || '',
@@ -57,7 +53,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       status: isValidStatus(trip.status) ? trip.status : 'draft',
       archived: trip.archived || false,
       segments: Array.isArray(trip.segments) ? trip.segments : []
-    }));
+    })) || [];
   } catch (error) {
     console.error('Error in fetchTrips:', error);
     throw error;
@@ -67,28 +63,44 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 const Index = () => {
   const user = useUser();
   const navigate = useNavigate();
-  const authCheckRef = useRef(false);
+  const navigationAttemptedRef = useRef(false);
 
   useEffect(() => {
-    if (!user && !authCheckRef.current) {
-      authCheckRef.current = true;
-      navigate('/', { replace: true });
-      return;
-    }
+    const checkAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Session check in Index:', !!session);
+        
+        if (!session && !navigationAttemptedRef.current) {
+          navigationAttemptedRef.current = true;
+          console.log('No session found, navigating to auth');
+          navigate('/', { replace: true });
+        }
+      } catch (error) {
+        console.error('Auth check error:', error);
+        if (!navigationAttemptedRef.current) {
+          navigationAttemptedRef.current = true;
+          navigate('/', { replace: true });
+        }
+      }
+    };
 
-    if (!user) return;
+    checkAuth();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_OUT') {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change in Index:', event, !!session);
+      
+      if (event === 'SIGNED_OUT' && !navigationAttemptedRef.current) {
+        navigationAttemptedRef.current = true;
+        console.log('User signed out, navigating to auth');
         navigate('/', { replace: true });
       }
     });
 
     return () => {
       subscription.unsubscribe();
-      authCheckRef.current = false;
     };
-  }, [user, navigate]);
+  }, [navigate]);
 
   const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', user?.id],

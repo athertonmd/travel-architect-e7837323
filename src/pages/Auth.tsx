@@ -8,16 +8,17 @@ import { toast } from "sonner";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const authCheckRef = useRef(false);
+  const navigationAttemptedRef = useRef(false);
 
   useEffect(() => {
-    if (authCheckRef.current) return;
-    authCheckRef.current = true;
-
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user) {
+        console.log('Initial session check:', !!session);
+        
+        if (session?.user && !navigationAttemptedRef.current) {
+          navigationAttemptedRef.current = true;
+          console.log('Navigating to dashboard from Auth');
           navigate('/dashboard', { replace: true });
         }
       } catch (error) {
@@ -28,14 +29,17 @@ const Auth = () => {
     checkSession();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
+      console.log('Auth state change in Auth.tsx:', event, !!session);
+      
+      if (event === 'SIGNED_IN' && session && !navigationAttemptedRef.current) {
+        navigationAttemptedRef.current = true;
+        console.log('Navigating to dashboard after sign in');
         navigate('/dashboard', { replace: true });
       }
     });
 
     return () => {
       subscription.unsubscribe();
-      authCheckRef.current = false;
     };
   }, [navigate]);
 

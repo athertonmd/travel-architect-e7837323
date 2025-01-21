@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
 import { ProtectedContent } from './ProtectedContent';
-import { useSessionCheck } from '@/hooks/useSessionCheck';
-import { useAuthStateChange } from '@/hooks/useAuthStateChange';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from "sonner";
 
 interface ProtectedRouteProps {
@@ -11,32 +10,46 @@ interface ProtectedRouteProps {
 
 export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigate = useNavigate();
-  const { checkSession, handleAuthError, authCheckTimeoutRef } = useSessionCheck(navigate);
-  
-  // Use ref to track component mounted state
-  const isSubscribed = useRef(true);
+  const navigationAttemptedRef = useRef(false);
   
   useEffect(() => {
-    // Set up error boundary
-    const handleError = (event: ErrorEvent) => {
-      console.error('Error caught by error boundary:', event.error);
-      toast.error("An error occurred. Please refresh the page.");
+    const checkSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        console.log('Session check in ProtectedRoute:', !!session);
+
+        if (error || !session) {
+          if (!navigationAttemptedRef.current) {
+            navigationAttemptedRef.current = true;
+            console.log('No valid session, navigating to auth');
+            navigate('/', { replace: true });
+          }
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        if (!navigationAttemptedRef.current) {
+          navigationAttemptedRef.current = true;
+          navigate('/', { replace: true });
+        }
+      }
     };
 
-    window.addEventListener('error', handleError);
-    
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change in ProtectedRoute:', event, !!session);
+      
+      if (!session && !navigationAttemptedRef.current) {
+        navigationAttemptedRef.current = true;
+        console.log('Session ended, navigating to auth');
+        navigate('/', { replace: true });
+      }
+    });
+
     return () => {
-      isSubscribed.current = false;
-      window.removeEventListener('error', handleError);
+      subscription.unsubscribe();
     };
-  }, []);
-  
-  useAuthStateChange(
-    isSubscribed.current,
-    checkSession,
-    handleAuthError,
-    authCheckTimeoutRef
-  );
+  }, [navigate]);
 
   return <ProtectedContent>{children}</ProtectedContent>;
 };
