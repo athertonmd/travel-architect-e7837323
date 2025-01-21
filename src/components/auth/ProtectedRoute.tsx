@@ -14,6 +14,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   
   useEffect(() => {
     let isMounted = true;
+    let sessionCheckTimeout: NodeJS.Timeout;
 
     const checkSession = async () => {
       try {
@@ -32,13 +33,14 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     };
 
-    // Initial session check
-    checkSession();
+    // Initial session check with a small delay to prevent race conditions
+    sessionCheckTimeout = setTimeout(checkSession, 100);
 
     // Set up auth state change listener only if not already set up
     if (!subscriptionRef.current) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (!session && !navigationAttemptedRef.current && isMounted) {
+        // Only handle actual session changes
+        if (event === 'SIGNED_OUT' && !navigationAttemptedRef.current && isMounted) {
           navigationAttemptedRef.current = true;
           navigate('/', { replace: true });
         }
@@ -50,6 +52,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     // Cleanup function
     return () => {
       isMounted = false;
+      clearTimeout(sessionCheckTimeout);
       if (subscriptionRef.current) {
         subscriptionRef.current.unsubscribe();
         subscriptionRef.current = null;

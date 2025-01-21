@@ -2,15 +2,10 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
-import { useEffect } from "react";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
   const session = useSession();
-
-  useEffect(() => {
-    console.log('DashboardHeader mounted, session:', !!session);
-  }, [session]);
 
   return (
     <div className="flex justify-between items-center">
