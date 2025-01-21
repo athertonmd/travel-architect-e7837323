@@ -5,8 +5,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
 
 interface Trip {
   id: string;
@@ -62,62 +60,20 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
 const Index = () => {
   const user = useUser();
-  const navigate = useNavigate();
-  const navigationAttemptedRef = useRef(false);
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Session check in Index:', !!session);
-        
-        if (!session && !navigationAttemptedRef.current) {
-          navigationAttemptedRef.current = true;
-          console.log('No session found, navigating to auth');
-          navigate('/', { replace: true });
-        }
-      } catch (error) {
-        console.error('Auth check error:', error);
-        if (!navigationAttemptedRef.current) {
-          navigationAttemptedRef.current = true;
-          navigate('/', { replace: true });
-        }
-      }
-    };
-
-    checkAuth();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change in Index:', event, !!session);
-      
-      if (event === 'SIGNED_OUT' && !navigationAttemptedRef.current) {
-        navigationAttemptedRef.current = true;
-        console.log('User signed out, navigating to auth');
-        navigate('/', { replace: true });
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
 
   const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', user?.id],
     queryFn: () => fetchTrips(user?.id),
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5,
-    gcTime: 1000 * 60 * 30,
-    retry: 1,
-    retryDelay: 1000,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+    gcTime: 1000 * 60 * 30, // 30 minutes
+    retry: false,
   });
 
-  useEffect(() => {
-    if (error) {
-      console.error('Error fetching trips:', error);
-      toast.error('Unable to load trips. Please try again.');
-    }
-  }, [error]);
+  if (error) {
+    console.error('Error fetching trips:', error);
+    toast.error('Unable to load trips. Please try again.');
+  }
 
   return (
     <Layout>
