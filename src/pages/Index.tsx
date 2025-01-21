@@ -6,6 +6,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 
 interface Trip {
   id: string;
@@ -72,6 +73,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
 const Index = () => {
   const user = useUser();
+  const navigate = useNavigate();
   const authCheckRef = useRef(false);
 
   const { data: trips = [], isLoading, error } = useQuery({
@@ -86,12 +88,20 @@ const Index = () => {
   });
 
   useEffect(() => {
+    // Check if user exists and redirect if not
+    if (!user && !authCheckRef.current) {
+      console.log('No user found, redirecting to auth page');
+      navigate('/', { replace: true });
+      return;
+    }
+
     if (!user || authCheckRef.current) return;
     
     console.log('Setting up auth listener for user:', user.id);
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, cleaning up...');
+        navigate('/', { replace: true });
       }
     });
 
@@ -102,7 +112,7 @@ const Index = () => {
       subscription.unsubscribe();
       authCheckRef.current = false;
     };
-  }, [user]);
+  }, [user, navigate]);
 
   useEffect(() => {
     if (error) {

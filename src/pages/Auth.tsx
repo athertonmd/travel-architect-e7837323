@@ -1,17 +1,21 @@
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useNavigate } from 'react-router-dom';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
 import { toast } from "sonner";
 
 const Auth = () => {
   const navigate = useNavigate();
+  const authCheckRef = useRef(false);
 
   useEffect(() => {
-    // Check if there's already a session
-    supabase.auth.getSession().then(({ data: { session }, error }) => {
+    if (authCheckRef.current) return;
+
+    // Initial session check
+    const checkSession = async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
       if (error) {
         console.error('Session check error:', error);
         toast.error('Error checking session');
@@ -20,40 +24,34 @@ const Auth = () => {
       
       if (session) {
         console.log('Active session found, redirecting to dashboard');
-        navigate('/dashboard');
+        navigate('/dashboard', { replace: true });
       }
-    });
+    };
+
+    checkSession();
+    authCheckRef.current = true;
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session ? 'Session exists' : 'No session');
       
       if (event === 'SIGNED_IN' && session) {
         console.log('Sign in successful, redirecting to dashboard');
-        toast.dismiss(); // Dismiss any existing toasts
-        toast.success('Successfully signed in!', {
-          duration: 3000, // Toast will disappear after 3 seconds
-        });
-        navigate('/dashboard');
+        toast.dismiss();
+        toast.success('Successfully signed in!');
+        navigate('/dashboard', { replace: true });
       }
       if (event === 'SIGNED_OUT') {
         console.log('User signed out, clearing session');
-        toast.dismiss(); // Dismiss any existing toasts
-        toast.success('Signed out successfully', {
-          duration: 3000, // Toast will disappear after 3 seconds
-        });
-        navigate('/');
-      }
-      if (event === 'USER_UPDATED') {
-        console.log('User profile updated');
-        toast.success('Profile updated successfully', {
-          duration: 3000,
-        });
+        toast.dismiss();
+        toast.success('Signed out successfully');
+        navigate('/', { replace: true });
       }
     });
 
     return () => {
       console.log('Cleaning up auth subscriptions');
       subscription.unsubscribe();
+      authCheckRef.current = false;
     };
   }, [navigate]);
 
@@ -67,7 +65,6 @@ const Auth = () => {
       >
         <div className="absolute inset-0 bg-black/40" />
         
-        {/* Logo in top right */}
         <div className="absolute top-4 right-4 z-20">
           <img 
             src="/lovable-uploads/d000b7aa-c2ab-4d9e-ac92-9b1e6411fb53.png" 
