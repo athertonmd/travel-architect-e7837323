@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 interface Trip {
   id: string;
@@ -22,7 +23,7 @@ const isValidStatus = (status: string): status is "draft" | "in-progress" | "con
   return ["draft", "in-progress", "confirmed"].includes(status);
 };
 
-const fetchTrips = async (userId: string): Promise<Trip[]> => {
+const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
   if (!userId) {
     console.log('No user ID provided for fetching trips');
     return [];
@@ -40,8 +41,7 @@ const fetchTrips = async (userId: string): Promise<Trip[]> => {
 
     if (error) {
       console.error('Error fetching trips:', error);
-      toast.error('Failed to load trips. Please try again.');
-      return [];
+      throw error;
     }
 
     if (!rawTrips) {
@@ -75,16 +75,23 @@ const fetchTrips = async (userId: string): Promise<Trip[]> => {
 const Index = () => {
   const user = useUser();
 
-  const { data: trips = [], isLoading } = useQuery({
+  const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', user?.id],
-    queryFn: () => user ? fetchTrips(user.id) : Promise.resolve([]),
-    enabled: !!user,
-    retry: 2,
+    queryFn: () => fetchTrips(user?.id),
+    enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
     refetchOnWindowFocus: false, // Prevent refetch on window focus
-    refetchInterval: false, // Disable automatic refetching
-    gcTime: 1000 * 60 * 10 // Keep cached data for 10 minutes
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
   });
+
+  useEffect(() => {
+    // Log any errors that occur during data fetching
+    if (error) {
+      console.error('Error fetching trips:', error);
+      toast.error('Error loading trips. Please refresh the page.');
+    }
+  }, [error]);
 
   return (
     <Layout>
