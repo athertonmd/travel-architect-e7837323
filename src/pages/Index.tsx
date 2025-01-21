@@ -21,6 +21,12 @@ interface Trip {
   user_id: string;
 }
 
+type TripStatus = "draft" | "in-progress" | "confirmed";
+
+const isValidStatus = (status: string): status is TripStatus => {
+  return ["draft", "in-progress", "confirmed"].includes(status);
+};
+
 const fetchTrips = async (userId: string): Promise<Trip[]> => {
   console.log('Fetching trips for user:', userId);
   const { data, error } = await supabase
@@ -36,18 +42,38 @@ const fetchTrips = async (userId: string): Promise<Trip[]> => {
   }
 
   // Transform the data to ensure status is of the correct type and handle segments
-  const transformedData: Trip[] = (data || []).map(trip => ({
-    ...trip,
-    status: trip.status as "draft" | "in-progress" | "confirmed",
-    start_date: trip.start_date || '',
-    end_date: trip.end_date || '',
-    destination: trip.destination || '',
-    travelers: trip.travelers || 0,
-    archived: trip.archived || false,
-    segments: Array.isArray(trip.segments) ? trip.segments : 
-             typeof trip.segments === 'string' ? JSON.parse(trip.segments) : 
-             trip.segments ? [trip.segments] : []
-  }));
+  const transformedData: Trip[] = (data || []).map(trip => {
+    // Ensure status is one of the valid types
+    const status = isValidStatus(trip.status) ? trip.status : "draft";
+
+    // Parse segments if they're stored as a string
+    let segments;
+    try {
+      if (Array.isArray(trip.segments)) {
+        segments = trip.segments;
+      } else if (typeof trip.segments === 'string') {
+        segments = JSON.parse(trip.segments);
+      } else if (trip.segments) {
+        segments = [trip.segments];
+      } else {
+        segments = [];
+      }
+    } catch (e) {
+      console.error('Error parsing segments:', e);
+      segments = [];
+    }
+
+    return {
+      ...trip,
+      status,
+      start_date: trip.start_date || '',
+      end_date: trip.end_date || '',
+      destination: trip.destination || '',
+      travelers: trip.travelers || 0,
+      archived: trip.archived || false,
+      segments
+    };
+  });
 
   console.log('Fetched trips:', transformedData);
   return transformedData;
