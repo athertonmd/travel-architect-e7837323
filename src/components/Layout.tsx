@@ -1,10 +1,17 @@
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useSession } from '@supabase/auth-helpers-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
+  const session = useSession();
   const isAuthPage = location.pathname === "/";
+
+  useEffect(() => {
+    console.log('Layout mounted, session:', !!session);
+  }, [session]);
 
   if (isAuthPage) {
     return (
