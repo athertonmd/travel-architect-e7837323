@@ -88,21 +88,25 @@ const Index = () => {
   useEffect(() => {
     if (!user) return;
     
-    // Only set up the listener if it hasn't been set up yet
+    // Prevent multiple subscriptions
     if (authCheckRef.current) return;
     
+    console.log('Setting up auth state listener');
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change event:', event, 'Session:', session?.user?.id);
+      console.log('Auth state change:', event, session?.user?.id);
       
-      // Don't do anything for these events to prevent loops
-      if (['INITIAL_SESSION', 'TOKEN_REFRESHED'].includes(event)) {
-        return;
+      // Only handle specific events to prevent loops
+      if (event === 'SIGNED_OUT') {
+        console.log('User signed out');
       }
     });
 
     authCheckRef.current = true;
 
+    // Cleanup subscription
     return () => {
+      console.log('Cleaning up auth subscription');
       subscription.unsubscribe();
       authCheckRef.current = false;
     };
