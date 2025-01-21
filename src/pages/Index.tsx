@@ -32,8 +32,19 @@ const fetchTrips = async (userId: string): Promise<Trip[]> => {
     throw error;
   }
 
-  console.log('Fetched trips:', data);
-  return data || [];
+  // Transform the data to ensure status is of the correct type
+  const transformedData: Trip[] = (data || []).map(trip => ({
+    ...trip,
+    status: trip.status as "draft" | "in-progress" | "confirmed",
+    start_date: trip.start_date || '',
+    end_date: trip.end_date || '',
+    destination: trip.destination || '',
+    travelers: trip.travelers || 0,
+    archived: trip.archived || false
+  }));
+
+  console.log('Fetched trips:', transformedData);
+  return transformedData;
 };
 
 const Index = () => {
