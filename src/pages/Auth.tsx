@@ -9,16 +9,15 @@ import { toast } from "sonner";
 const Auth = () => {
   const navigate = useNavigate();
   const navigationAttemptedRef = useRef(false);
+  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   useEffect(() => {
     const checkSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        console.log('Initial session check:', !!session);
         
         if (session?.user && !navigationAttemptedRef.current) {
           navigationAttemptedRef.current = true;
-          console.log('Navigating to dashboard from Auth');
           navigate('/dashboard', { replace: true });
         }
       } catch (error) {
@@ -26,20 +25,25 @@ const Auth = () => {
       }
     };
 
+    // Only set up the subscription if we haven't already
+    if (!subscriptionRef.current) {
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+        if (event === 'SIGNED_IN' && session && !navigationAttemptedRef.current) {
+          navigationAttemptedRef.current = true;
+          navigate('/dashboard', { replace: true });
+        }
+      });
+
+      subscriptionRef.current = subscription;
+    }
+
     checkSession();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change in Auth.tsx:', event, !!session);
-      
-      if (event === 'SIGNED_IN' && session && !navigationAttemptedRef.current) {
-        navigationAttemptedRef.current = true;
-        console.log('Navigating to dashboard after sign in');
-        navigate('/dashboard', { replace: true });
-      }
-    });
-
     return () => {
-      subscription.unsubscribe();
+      if (subscriptionRef.current) {
+        subscriptionRef.current.unsubscribe();
+        subscriptionRef.current = null;
+      }
     };
   }, [navigate]);
 
