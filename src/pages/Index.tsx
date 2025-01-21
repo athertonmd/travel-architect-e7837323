@@ -29,6 +29,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
   }
 
   try {
+    console.log('Fetching trips for user:', userId);
     const { data: trips, error } = await supabase
       .from('trips')
       .select('id, title, destination, start_date, end_date, travelers, status, archived, segments')
@@ -37,10 +38,11 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       .order('created_at', { ascending: false });
 
     if (error) {
-      console.error('Error fetching trips:', error);
+      console.error('Supabase error fetching trips:', error);
       throw error;
     }
 
+    console.log('Trips fetched successfully:', trips);
     return trips?.map(trip => ({
       id: trip.id,
       title: trip.title || '',
@@ -52,8 +54,13 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
       archived: trip.archived || false,
       segments: Array.isArray(trip.segments) ? trip.segments : []
     })) || [];
-  } catch (error) {
-    console.error('Error in fetchTrips:', error);
+  } catch (error: any) {
+    console.error('Error in fetchTrips:', {
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+      code: error.code
+    });
     throw error;
   }
 };
@@ -67,14 +74,18 @@ const Index = () => {
     enabled: !!user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
-    retry: false,
-    refetchOnWindowFocus: false,
+    retry: 3, // Retry failed requests 3 times
+    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000), // Exponential backoff
+    onError: (error: any) => {
+      console.error('Error fetching trips:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code
+      });
+      toast.error('Unable to load trips. Please try again.');
+    }
   });
-
-  if (error) {
-    console.error('Error fetching trips:', error);
-    toast.error('Unable to load trips. Please try again.');
-  }
 
   return (
     <Layout>
