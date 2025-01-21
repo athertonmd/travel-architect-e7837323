@@ -77,7 +77,7 @@ export const useSessionCheck = (navigate: NavigateFunction) => {
     } finally {
       isSessionCheckRunningRef.current = false;
     }
-  }, [handleAuthError]); // Only depend on handleAuthError
+  }, [handleAuthError]);
 
   return {
     checkSession,

@@ -15,47 +15,44 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const isMountedRef = useRef(true);
   const isSessionCheckRunningRef = useRef(false);
   
+  const handleSessionCheck = async () => {
+    try {
+      if (!isMountedRef.current || isInitialCheckDoneRef.current || isSessionCheckRunningRef.current) {
+        console.log('Skipping session check - already running or component unmounted');
+        return;
+      }
+
+      isSessionCheckRunningRef.current = true;
+      isInitialCheckDoneRef.current = true;
+
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session && !navigationAttemptedRef.current && isMountedRef.current) {
+        console.log('No session found, navigating to auth page');
+        navigationAttemptedRef.current = true;
+        navigate('/', { replace: true });
+      }
+    } catch (error) {
+      console.error('Session check error:', error);
+      if (!navigationAttemptedRef.current && isMountedRef.current) {
+        navigationAttemptedRef.current = true;
+        navigate('/', { replace: true });
+      }
+    } finally {
+      isSessionCheckRunningRef.current = false;
+    }
+  };
+
   useEffect(() => {
     isMountedRef.current = true;
     let sessionCheckTimeout: NodeJS.Timeout;
 
-    const checkSession = async () => {
-      try {
-        if (!isMountedRef.current || isInitialCheckDoneRef.current || isSessionCheckRunningRef.current) {
-          console.log('Skipping session check - already running or component unmounted');
-          return;
-        }
+    sessionCheckTimeout = setTimeout(handleSessionCheck, 1000);
 
-        isSessionCheckRunningRef.current = true;
-        isInitialCheckDoneRef.current = true;
-
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (!session && !navigationAttemptedRef.current && isMountedRef.current) {
-          console.log('No session found, navigating to auth page');
-          navigationAttemptedRef.current = true;
-          navigate('/', { replace: true });
-        }
-      } catch (error) {
-        console.error('Session check error:', error);
-        if (!navigationAttemptedRef.current && isMountedRef.current) {
-          navigationAttemptedRef.current = true;
-          navigate('/', { replace: true });
-        }
-      } finally {
-        isSessionCheckRunningRef.current = false;
-      }
-    };
-
-    // Initial session check with a delay to prevent race conditions
-    sessionCheckTimeout = setTimeout(checkSession, 1000);
-
-    // Set up auth state change listener only if not already set up
     if (!subscriptionRef.current && isMountedRef.current) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
         if (!isMountedRef.current) return;
         
-        // Only handle SIGNED_OUT events to prevent unnecessary rerenders
         if (event === 'SIGNED_OUT' && !navigationAttemptedRef.current) {
           console.log('User signed out, navigating to auth page');
           navigationAttemptedRef.current = true;
@@ -74,7 +71,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
         subscriptionRef.current = null;
       }
     };
-  }, [navigate]); // Only depend on navigate function
+  }, [navigate]);
 
   return <ProtectedContent>{children}</ProtectedContent>;
 };
