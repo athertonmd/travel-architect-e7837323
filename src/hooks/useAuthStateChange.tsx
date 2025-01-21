@@ -2,9 +2,7 @@ import { useEffect, useRef } from 'react';
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-const INITIAL_CHECK_DELAY = 1000; // Increased for better stability
-
-// Singleton to track if listener is already set up
+const INITIAL_CHECK_DELAY = 1000;
 let isListenerSetup = false;
 
 export const useAuthStateChange = (
@@ -13,17 +11,18 @@ export const useAuthStateChange = (
   handleAuthError: (isSubscribed: boolean) => Promise<void>,
   authCheckTimeoutRef: React.RefObject<NodeJS.Timeout>
 ) => {
-  // Keep track of the subscription
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
   const lastEventRef = useRef<string | null>(null);
   const lastEventTimeRef = useRef<number>(0);
+  const isInitialCheckDoneRef = useRef(false);
 
   useEffect(() => {
-    // Debounce function to prevent rapid event firing
     const debounceEvent = (event: string, callback: () => void) => {
       const now = Date.now();
+      // Prevent same event from firing within 1 second
       if (lastEventRef.current === event && now - lastEventTimeRef.current < 1000) {
-        return; // Skip if same event fired within last second
+        console.log('Debouncing event:', event);
+        return;
       }
       lastEventRef.current = event;
       lastEventTimeRef.current = now;
@@ -44,13 +43,7 @@ export const useAuthStateChange = (
             debounceEvent(event, () => {
               console.log('Auth event:', event, session ? 'Session exists' : 'No session');
               
-              if (event === 'TOKEN_REFRESHED' || event === 'SIGNED_IN') {
-                checkSession(isSubscribed).catch(error => {
-                  console.error('Session check failed:', error);
-                  toast.error("Session check failed. Please try again.");
-                });
-              }
-              
+              // Only handle specific events to reduce rerenders
               if (event === 'SIGNED_OUT') {
                 clearTimeout(authCheckTimeoutRef.current);
                 handleAuthError(isSubscribed).catch(console.error);
@@ -69,20 +62,24 @@ export const useAuthStateChange = (
     setupAuthListener();
 
     // Initial session check with delay
-    const initialCheckTimeout = setTimeout(() => {
-      if (isSubscribed) {
-        checkSession(isSubscribed).catch(error => {
-          console.error('Initial session check failed:', error);
-          toast.error("Failed to check session. Please refresh the page.");
-        });
-      }
-    }, INITIAL_CHECK_DELAY);
+    if (!isInitialCheckDoneRef.current) {
+      const initialCheckTimeout = setTimeout(() => {
+        if (isSubscribed) {
+          isInitialCheckDoneRef.current = true;
+          checkSession(isSubscribed).catch(error => {
+            console.error('Initial session check failed:', error);
+            toast.error("Failed to check session. Please refresh the page.");
+          });
+        }
+      }, INITIAL_CHECK_DELAY);
+
+      return () => clearTimeout(initialCheckTimeout);
+    }
 
     // Cleanup function
     return () => {
       console.log('Cleaning up auth subscriptions');
       clearTimeout(authCheckTimeoutRef.current);
-      clearTimeout(initialCheckTimeout);
       
       if (subscriptionRef.current) {
         subscriptionRef.current.unsubscribe();
