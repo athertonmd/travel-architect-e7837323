@@ -1,47 +1,21 @@
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
-import { toast } from "sonner";
+import { useSession } from '@supabase/auth-helpers-react';
 
 const Auth = () => {
   const navigate = useNavigate();
-  const navigationAttemptedRef = useRef(false);
+  const session = useSession();
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Initial session check:', !!session);
-        
-        if (session?.user && !navigationAttemptedRef.current) {
-          navigationAttemptedRef.current = true;
-          console.log('Navigating to dashboard from Auth');
-          navigate('/dashboard', { replace: true });
-        }
-      } catch (error) {
-        console.error('Session check error:', error);
-      }
-    };
-
-    checkSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change in Auth.tsx:', event, !!session);
-      
-      if (event === 'SIGNED_IN' && session && !navigationAttemptedRef.current) {
-        navigationAttemptedRef.current = true;
-        console.log('Navigating to dashboard after sign in');
-        navigate('/dashboard', { replace: true });
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-    };
-  }, [navigate]);
+    if (session) {
+      console.log('Session exists, navigating to dashboard');
+      navigate('/dashboard', { replace: true });
+    }
+  }, [session, navigate]);
 
   return (
     <Layout>
