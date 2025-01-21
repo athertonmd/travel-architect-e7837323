@@ -12,26 +12,27 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const navigationAttemptedRef = useRef(false);
   const isInitialCheckDoneRef = useRef(false);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const isMountedRef = useRef(true);
   
   useEffect(() => {
-    let isMounted = true;
+    isMountedRef.current = true;
     let sessionCheckTimeout: NodeJS.Timeout;
 
     const checkSession = async () => {
       try {
-        if (isInitialCheckDoneRef.current) return;
+        if (!isMountedRef.current || isInitialCheckDoneRef.current) return;
         isInitialCheckDoneRef.current = true;
 
         const { data: { session } } = await supabase.auth.getSession();
         
-        if (!session && !navigationAttemptedRef.current && isMounted) {
+        if (!session && !navigationAttemptedRef.current && isMountedRef.current) {
           console.log('No session found, navigating to auth page');
           navigationAttemptedRef.current = true;
           navigate('/', { replace: true });
         }
       } catch (error) {
         console.error('Session check error:', error);
-        if (!navigationAttemptedRef.current && isMounted) {
+        if (!navigationAttemptedRef.current && isMountedRef.current) {
           navigationAttemptedRef.current = true;
           navigate('/', { replace: true });
         }
@@ -42,10 +43,12 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     sessionCheckTimeout = setTimeout(checkSession, 1000);
 
     // Set up auth state change listener only if not already set up
-    if (!subscriptionRef.current) {
+    if (!subscriptionRef.current && isMountedRef.current) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+        if (!isMountedRef.current) return;
+        
         // Only handle SIGNED_OUT events to prevent unnecessary rerenders
-        if (event === 'SIGNED_OUT' && !navigationAttemptedRef.current && isMounted) {
+        if (event === 'SIGNED_OUT' && !navigationAttemptedRef.current) {
           console.log('User signed out, navigating to auth page');
           navigationAttemptedRef.current = true;
           navigate('/', { replace: true });
@@ -57,7 +60,7 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
     // Cleanup function
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
       clearTimeout(sessionCheckTimeout);
       if (subscriptionRef.current) {
         subscriptionRef.current.unsubscribe();

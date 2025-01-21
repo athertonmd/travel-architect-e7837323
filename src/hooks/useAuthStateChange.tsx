@@ -15,9 +15,14 @@ export const useAuthStateChange = (
   const lastEventRef = useRef<string | null>(null);
   const lastEventTimeRef = useRef<number>(0);
   const isInitialCheckDoneRef = useRef(false);
+  const isMountedRef = useRef(true);
 
   useEffect(() => {
+    isMountedRef.current = true;
+
     const debounceEvent = (event: string, callback: () => void) => {
+      if (!isMountedRef.current) return;
+      
       const now = Date.now();
       // Prevent same event from firing within 1 second
       if (lastEventRef.current === event && now - lastEventTimeRef.current < 1000) {
@@ -31,14 +36,14 @@ export const useAuthStateChange = (
 
     const setupAuthListener = async () => {
       try {
-        if (!isListenerSetup) {
+        if (!isListenerSetup && isMountedRef.current) {
           console.log('Setting up auth state change listener');
           isListenerSetup = true;
 
           const {
             data: { subscription },
           } = supabase.auth.onAuthStateChange((event, session) => {
-            if (!isSubscribed) return;
+            if (!isSubscribed || !isMountedRef.current) return;
 
             debounceEvent(event, () => {
               console.log('Auth event:', event, session ? 'Session exists' : 'No session');
@@ -55,20 +60,24 @@ export const useAuthStateChange = (
         }
       } catch (error) {
         console.error('Error setting up auth listener:', error);
-        toast.error("Error setting up authentication. Please refresh the page.");
+        if (isMountedRef.current) {
+          toast.error("Error setting up authentication. Please refresh the page.");
+        }
       }
     };
 
     setupAuthListener();
 
     // Initial session check with delay
-    if (!isInitialCheckDoneRef.current) {
+    if (!isInitialCheckDoneRef.current && isMountedRef.current) {
       const initialCheckTimeout = setTimeout(() => {
-        if (isSubscribed) {
+        if (isSubscribed && isMountedRef.current) {
           isInitialCheckDoneRef.current = true;
           checkSession(isSubscribed).catch(error => {
             console.error('Initial session check failed:', error);
-            toast.error("Failed to check session. Please refresh the page.");
+            if (isMountedRef.current) {
+              toast.error("Failed to check session. Please refresh the page.");
+            }
           });
         }
       }, INITIAL_CHECK_DELAY);
@@ -79,6 +88,7 @@ export const useAuthStateChange = (
     // Cleanup function
     return () => {
       console.log('Cleaning up auth subscriptions');
+      isMountedRef.current = false;
       clearTimeout(authCheckTimeoutRef.current);
       
       if (subscriptionRef.current) {
