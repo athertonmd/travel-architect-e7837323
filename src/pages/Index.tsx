@@ -1,50 +1,56 @@
 import { Layout } from "@/components/Layout";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { TripGrid } from "@/components/TripGrid";
-import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
+
+interface Trip {
+  id: string;
+  title: string;
+  destination: string;
+  start_date: string;
+  end_date: string;
+  travelers: number;
+  status: "draft" | "in-progress" | "confirmed";
+  archived: boolean;
+  segments?: any[];
+}
+
+const fetchTrips = async (userId: string): Promise<Trip[]> => {
+  console.log('Fetching trips for user:', userId);
+  const { data, error } = await supabase
+    .from('trips')
+    .select('*')
+    .eq('user_id', userId)
+    .eq('archived', false)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error('Error fetching trips:', error);
+    throw error;
+  }
+
+  console.log('Fetched trips:', data);
+  return data || [];
+};
 
 const Index = () => {
   const user = useUser();
-  const [trips, setTrips] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    const fetchTrips = async () => {
-      try {
-        setIsLoading(true);
-        
-        if (!user) {
-          setTrips([]);
-          return;
-        }
-        
-        const { data, error } = await supabase
-          .from('trips')
-          .select('*')
-          .eq('user_id', user.id)
-          .eq('archived', false)
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Error fetching trips:', error);
-          toast.error('Failed to load trips');
-          return;
-        }
-        
-        setTrips(data || []);
-      } catch (err) {
-        console.error('Unexpected error:', err);
-        toast.error('An unexpected error occurred');
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const { data: trips = [], isLoading, error } = useQuery({
+    queryKey: ['trips', user?.id],
+    queryFn: () => user ? fetchTrips(user.id) : Promise.resolve([]),
+    enabled: !!user,
+    retry: 2
+  });
 
-    fetchTrips();
-  }, [user]);
+  // Handle query errors
+  if (error) {
+    console.error('Error loading trips:', error);
+    toast.error('Failed to load trips. Please try again.');
+  }
 
   return (
     <Layout>
