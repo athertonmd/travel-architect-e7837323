@@ -31,6 +31,18 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
   }
 
   try {
+    // Check if we have a valid session before making the request
+    const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+    if (sessionError) {
+      console.error('Session error:', sessionError);
+      throw new Error('Authentication error');
+    }
+
+    if (!session) {
+      console.log('No active session found');
+      throw new Error('No active session');
+    }
+
     console.log('Fetching trips for user:', userId);
     const { data: rawTrips, error } = await supabase
       .from('trips')
@@ -117,9 +129,13 @@ const Index = () => {
   useEffect(() => {
     if (error) {
       console.error('Error fetching trips:', error);
-      toast.error('Unable to load trips. Please check your connection and try again.');
+      if ((error as Error).message === 'No active session') {
+        navigate('/', { replace: true });
+      } else {
+        toast.error('Unable to load trips. Please check your connection and try again.');
+      }
     }
-  }, [error]);
+  }, [error, navigate]);
 
   return (
     <Layout>
