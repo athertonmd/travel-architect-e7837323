@@ -33,13 +33,13 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       }
     };
 
-    // Initial session check with a small delay to prevent race conditions
-    sessionCheckTimeout = setTimeout(checkSession, 100);
+    // Initial session check with a longer delay to prevent race conditions
+    sessionCheckTimeout = setTimeout(checkSession, 1000);
 
     // Set up auth state change listener only if not already set up
     if (!subscriptionRef.current) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        // Only handle actual session changes
+        // Only handle SIGNED_OUT events to prevent unnecessary rerenders
         if (event === 'SIGNED_OUT' && !navigationAttemptedRef.current && isMounted) {
           navigationAttemptedRef.current = true;
           navigate('/', { replace: true });
