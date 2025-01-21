@@ -77,31 +77,36 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
 const Index = () => {
   const user = useUser();
-  const lastEventTimeRef = useRef<number>(0);
+  const authCheckRef = useRef(false);
 
   const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', user?.id],
     queryFn: () => fetchTrips(user?.id),
     enabled: !!user?.id,
-    staleTime: 1000 * 60 * 5,
+    staleTime: 1000 * 60 * 5, // 5 minutes
     refetchOnWindowFocus: false,
     retry: 1,
     retryDelay: 1000,
   });
 
   useEffect(() => {
+    // Only set up the listener if it hasn't been set up yet
+    if (authCheckRef.current) return;
+    
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      const now = Date.now();
-      if (now - lastEventTimeRef.current < 1000) {
-        console.log('Debouncing auth state change event:', event);
+      console.log('Auth state change event:', event, 'Session:', session?.user?.id);
+      
+      // Don't do anything for these events to prevent loops
+      if (['INITIAL_SESSION', 'TOKEN_REFRESHED'].includes(event)) {
         return;
       }
-      lastEventTimeRef.current = now;
-      console.log('Auth state change event:', event, 'Session:', session?.user?.id);
     });
+
+    authCheckRef.current = true;
 
     return () => {
       subscription.unsubscribe();
+      authCheckRef.current = false;
     };
   }, []);
 
