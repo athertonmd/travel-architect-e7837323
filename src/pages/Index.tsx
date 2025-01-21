@@ -23,6 +23,11 @@ const isValidStatus = (status: string): status is "draft" | "in-progress" | "con
 };
 
 const fetchTrips = async (userId: string): Promise<Trip[]> => {
+  if (!userId) {
+    console.log('No user ID provided for fetching trips');
+    return [];
+  }
+
   console.log('Fetching trips for user:', userId);
   
   const { data: rawTrips, error } = await supabase
@@ -62,7 +67,9 @@ const Index = () => {
     queryKey: ['trips', user?.id],
     queryFn: () => user ? fetchTrips(user.id) : Promise.resolve([]),
     enabled: !!user,
-    retry: 2
+    retry: 2,
+    staleTime: 1000 * 60 * 5, // Consider data fresh for 5 minutes
+    refetchOnWindowFocus: false // Prevent refetch on window focus
   });
 
   if (error) {
