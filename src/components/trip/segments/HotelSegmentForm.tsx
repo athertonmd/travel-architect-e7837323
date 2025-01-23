@@ -48,6 +48,18 @@ function HotelSegmentFormComponent({ details, onDetailsChange }: HotelSegmentFor
         </Button>
       </div>
 
+      {details.gdsEnabled && (
+        <div className="grid gap-2 mb-4">
+          <Label htmlFor="recordLocator" className="text-blue-500">Find Record Locator</Label>
+          <Input
+            id="recordLocator"
+            value={details.recordLocator as string || ""}
+            onChange={(e) => handleChange("recordLocator", e.target.value)}
+            placeholder="Enter record locator"
+          />
+        </div>
+      )}
+
       <div className="grid gap-2">
         <Label htmlFor="hotelName" className="text-blue-500">Hotel Name</Label>
         <Input
