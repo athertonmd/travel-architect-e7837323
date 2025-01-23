@@ -1,18 +1,21 @@
 import { Layout } from "@/components/Layout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { HotelForm } from "@/components/hotels/HotelForm";
-import { HotelsTable } from "@/components/hotels/HotelsTable";
+import { Button } from "@/components/ui/button";
 import { useSession } from '@supabase/auth-helpers-react';
+import { Plus } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { HotelsRow } from "@/integrations/supabase/types/hotels";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { HotelForm } from "@/components/hotels/HotelForm";
+import { HotelsTable } from "@/components/hotels/HotelsTable";
 
 const HotelBank = () => {
   const session = useSession();
   const queryClient = useQueryClient();
-  const [editingHotel, setEditingHotel] = useState<HotelsRow | null>(null);
+  const [selectedHotel, setSelectedHotel] = useState<HotelsRow | null>(null);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const { data: hotels = [], isLoading } = useQuery({
     queryKey: ['hotels'],
@@ -41,7 +44,8 @@ const HotelBank = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotels'] });
       toast.success('Hotel added successfully');
-      setEditingHotel(null);
+      setIsDialogOpen(false);
+      setSelectedHotel(null);
     },
     onError: (error) => {
       toast.error('Failed to add hotel: ' + error.message);
@@ -63,7 +67,8 @@ const HotelBank = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotels'] });
       toast.success('Hotel updated successfully');
-      setEditingHotel(null);
+      setIsDialogOpen(false);
+      setSelectedHotel(null);
     },
     onError: (error) => {
       toast.error('Failed to update hotel: ' + error.message);
@@ -88,16 +93,17 @@ const HotelBank = () => {
     },
   });
 
-  const handleSubmit = async (values: any) => {
-    if (editingHotel) {
-      await updateHotelMutation.mutateAsync({ ...values, id: editingHotel.id });
+  const handleSubmit = async (values: Partial<HotelsRow>) => {
+    if (selectedHotel) {
+      await updateHotelMutation.mutateAsync({ ...values, id: selectedHotel.id } as HotelsRow);
     } else {
-      await addHotelMutation.mutateAsync(values);
+      await addHotelMutation.mutateAsync(values as Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'>);
     }
   };
 
   const handleEdit = (hotel: HotelsRow) => {
-    setEditingHotel(hotel);
+    setSelectedHotel(hotel);
+    setIsDialogOpen(true);
   };
 
   const handleDelete = async (id: string) => {
@@ -107,44 +113,47 @@ const HotelBank = () => {
   return (
     <Layout>
       <div className="space-y-8">
-        <div>
-          <h1 className="text-3xl font-bold text-white">Hotel Bank</h1>
-          <p className="text-gray-400 mt-1">Manage your hotel inventory</p>
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className="bg-navy-light border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">
-                {editingHotel ? 'Edit Hotel' : 'Add New Hotel'}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-white">Hotel Bank</h1>
+            <p className="text-gray-400 mt-1">Manage your hotel inventory</p>
+          </div>
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button
+                onClick={() => {
+                  setSelectedHotel(null);
+                }}
+                className="bg-navy border border-white hover:bg-navy/90"
+              >
+                <Plus className="h-4 w-4 mr-2" />
+                Add Hotel
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>
+                  {selectedHotel ? "Edit Hotel" : "Add New Hotel"}
+                </DialogTitle>
+              </DialogHeader>
               <HotelForm
-                defaultValues={editingHotel || undefined}
+                defaultValues={selectedHotel || undefined}
                 onSubmit={handleSubmit}
-                submitLabel={editingHotel ? 'Update Hotel' : 'Add Hotel'}
+                submitLabel={selectedHotel ? "Update" : "Add"}
               />
-            </CardContent>
-          </Card>
-
-          <Card className="bg-navy-light border-white/20">
-            <CardHeader>
-              <CardTitle className="text-white">Your Hotels</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <p className="text-white">Loading hotels...</p>
-              ) : (
-                <HotelsTable
-                  hotels={hotels}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              )}
-            </CardContent>
-          </Card>
+            </DialogContent>
+          </Dialog>
         </div>
+
+        {isLoading ? (
+          <p className="text-white">Loading hotels...</p>
+        ) : (
+          <HotelsTable
+            hotels={hotels}
+            onEdit={handleEdit}
+            onDelete={handleDelete}
+          />
+        )}
       </div>
     </Layout>
   );
