@@ -59,6 +59,17 @@ export function HotelBasicInfoSection({ details, onDetailsChange }: HotelBasicIn
       </div>
 
       <div className="grid gap-2">
+        <Label htmlFor="zipCode" className="text-blue-500">Zip Code</Label>
+        <Input
+          id="zipCode"
+          value={details.zipCode as string || ""}
+          onChange={(e) => handleChange("zipCode", e.target.value)}
+          placeholder="Enter zip code"
+          className="text-gray-700"
+        />
+      </div>
+
+      <div className="grid gap-2">
         <Label htmlFor="country" className="text-blue-500">Country</Label>
         <Input
           id="country"
