@@ -59,7 +59,7 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
 
       {details.useGDS && (
         <div className="grid gap-2">
-          <Label htmlFor="gdsCode" className="text-blue-500">GDS Code</Label>
+          <Label htmlFor="gdsCode" className="text-blue-500">Record Locator</Label>
           <Input
             id="gdsCode"
             value={details.gdsCode as string || ""}
