@@ -37,16 +37,27 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Label htmlFor="gds-toggle" className="text-blue-500">Use GDS</Label>
-        <Switch
-          id="gds-toggle"
-          checked={details.useGDS as boolean || false}
-          onCheckedChange={handleGDSChange}
-        />
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="gds-toggle" className="text-blue-500">Use GDS</Label>
+          <Switch
+            id="gds-toggle"
+            checked={details.useGDS as boolean || false}
+            onCheckedChange={handleGDSChange}
+          />
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setIsHotelBankOpen(true)}
+          className="bg-navy hover:bg-navy/90 text-white"
+          disabled={details.useGDS as boolean}
+        >
+          Hotel Bank
+        </Button>
       </div>
 
-      {details.useGDS ? (
+      {details.useGDS && (
         <div className="grid gap-2">
           <Label htmlFor="gdsCode" className="text-blue-500">GDS Code</Label>
           <Input
@@ -57,15 +68,6 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
             className="text-gray-700"
           />
         </div>
-      ) : (
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setIsHotelBankOpen(true)}
-          className="w-full"
-        >
-          Select from Hotel Bank
-        </Button>
       )}
 
       <HotelBankDialog
