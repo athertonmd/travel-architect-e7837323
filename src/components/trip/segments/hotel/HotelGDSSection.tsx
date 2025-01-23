@@ -39,7 +39,7 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
     <div className="space-y-4">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center space-x-2">
-          <Label htmlFor="gds-toggle" className="text-blue-500">Use GDS</Label>
+          <Label htmlFor="gds-toggle" className="text-blue-500">GDS</Label>
           <Switch
             id="gds-toggle"
             checked={details.useGDS as boolean || false}
