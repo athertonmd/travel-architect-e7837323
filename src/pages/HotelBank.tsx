@@ -10,12 +10,14 @@ import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { HotelForm } from "@/components/hotels/HotelForm";
 import { HotelsTable } from "@/components/hotels/HotelsTable";
+import { HotelSearch } from "@/components/hotels/HotelSearch";
 
 const HotelBank = () => {
   const session = useSession();
   const queryClient = useQueryClient();
   const [selectedHotel, setSelectedHotel] = useState<HotelsRow | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const { data: hotels = [], isLoading } = useQuery({
     queryKey: ['hotels'],
@@ -28,6 +30,16 @@ const HotelBank = () => {
       if (error) throw error;
       return data;
     },
+  });
+
+  const filteredHotels = hotels.filter((hotel) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      hotel.name?.toLowerCase().includes(searchLower) ||
+      hotel.address?.toLowerCase().includes(searchLower) ||
+      hotel.city?.toLowerCase().includes(searchLower) ||
+      hotel.country?.toLowerCase().includes(searchLower)
+    );
   });
 
   const addHotelMutation = useMutation({
@@ -145,11 +157,15 @@ const HotelBank = () => {
           </Dialog>
         </div>
 
+        <div className="max-w-md mb-6">
+          <HotelSearch value={searchQuery} onChange={setSearchQuery} />
+        </div>
+
         {isLoading ? (
           <p className="text-white">Loading hotels...</p>
         ) : (
           <HotelsTable
-            hotels={hotels}
+            hotels={filteredHotels}
             onEdit={handleEdit}
             onDelete={handleDelete}
           />
