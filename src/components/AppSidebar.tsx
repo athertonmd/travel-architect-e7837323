@@ -1,4 +1,4 @@
-import { CalendarDays, Home, Plus, LogOut, Users, Archive } from "lucide-react";
+import { CalendarDays, Home, Plus, LogOut, Users, Archive, Building2 } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -18,6 +18,7 @@ const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
   { title: "Create Trip", icon: Plus, url: "/trips/create" },
   { title: "Manage Travellers", icon: Users, url: "/travellers" },
+  { title: "Hotel Bank", icon: Building2, url: "/hotels" },
   { title: "Archive", icon: Archive, url: "/trips/archive" },
 ];
 

@@ -11,13 +11,14 @@ import ViewTrip from "./pages/ViewTrip";
 import Auth from "./pages/Auth";
 import ManageTravellers from "./pages/ManageTravellers";
 import Archive from "./pages/Archive";
+import HotelBank from "./pages/HotelBank";
 import { supabase } from "./integrations/supabase/client";
 
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
-      retry: false, // Disable retries to prevent loops
-      staleTime: 1000 * 60 * 5, // 5 minutes
+      retry: false,
+      staleTime: 1000 * 60 * 5,
     },
   },
 });
@@ -68,6 +69,14 @@ const App = () => (
               element={
                 <ProtectedRoute>
                   <ManageTravellers />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hotels"
+              element={
+                <ProtectedRoute>
+                  <HotelBank />
                 </ProtectedRoute>
               }
             />
