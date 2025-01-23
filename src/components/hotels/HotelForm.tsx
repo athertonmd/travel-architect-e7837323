@@ -20,6 +20,7 @@ export const HotelForm = ({ defaultValues, onSubmit, submitLabel }: HotelFormPro
       country: null,
       telephone: null,
       website: null,
+      zip_code: null,
       ...defaultValues,
     },
   });

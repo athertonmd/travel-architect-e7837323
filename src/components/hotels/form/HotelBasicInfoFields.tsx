@@ -48,6 +48,18 @@ export const HotelBasicInfoFields = ({ form }: HotelBasicInfoFieldsProps) => {
       />
       <FormField
         control={form.control}
+        name="zip_code"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Zip Code</FormLabel>
+            <FormControl>
+              <Input {...field} value={field.value || ''} />
+            </FormControl>
+          </FormItem>
+        )}
+      />
+      <FormField
+        control={form.control}
         name="country"
         render={({ field }) => (
           <FormItem>
