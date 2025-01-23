@@ -17,7 +17,7 @@ export const HotelContactFields = ({ form }: HotelContactFieldsProps) => {
           <FormItem>
             <FormLabel>Telephone Number</FormLabel>
             <FormControl>
-              <Input {...field} placeholder="+1 (555) 555-5555" />
+              <Input {...field} value={field.value || ''} placeholder="+1 (555) 555-5555" />
             </FormControl>
             <FormDescription>
               Please enter the number in international format
@@ -32,7 +32,7 @@ export const HotelContactFields = ({ form }: HotelContactFieldsProps) => {
           <FormItem>
             <FormLabel>Website</FormLabel>
             <FormControl>
-              <Input {...field} type="url" placeholder="https://..." />
+              <Input {...field} value={field.value || ''} type="url" placeholder="https://..." />
             </FormControl>
           </FormItem>
         )}

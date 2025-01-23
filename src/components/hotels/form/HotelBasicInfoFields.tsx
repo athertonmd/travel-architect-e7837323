@@ -29,7 +29,7 @@ export const HotelBasicInfoFields = ({ form }: HotelBasicInfoFieldsProps) => {
           <FormItem>
             <FormLabel>Hotel Address</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value || ''} />
             </FormControl>
           </FormItem>
         )}
@@ -41,7 +41,7 @@ export const HotelBasicInfoFields = ({ form }: HotelBasicInfoFieldsProps) => {
           <FormItem>
             <FormLabel>City</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value || ''} />
             </FormControl>
           </FormItem>
         )}
@@ -53,7 +53,7 @@ export const HotelBasicInfoFields = ({ form }: HotelBasicInfoFieldsProps) => {
           <FormItem>
             <FormLabel>Country</FormLabel>
             <FormControl>
-              <Input {...field} />
+              <Input {...field} value={field.value || ''} />
             </FormControl>
           </FormItem>
         )}

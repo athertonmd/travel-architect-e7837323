@@ -7,19 +7,19 @@ import { HotelContactFields } from "./form/HotelContactFields";
 
 interface HotelFormProps {
   defaultValues?: Partial<HotelsRow>;
-  onSubmit: (values: any) => Promise<void>;
+  onSubmit: (values: Partial<HotelsRow>) => Promise<void>;
   submitLabel: string;
 }
 
 export const HotelForm = ({ defaultValues, onSubmit, submitLabel }: HotelFormProps) => {
-  const form = useForm({
+  const form = useForm<Partial<HotelsRow>>({
     defaultValues: {
       name: "",
-      address: "",
-      city: "",
-      country: "",
-      telephone: "",
-      website: "",
+      address: null,
+      city: null,
+      country: null,
+      telephone: null,
+      website: null,
       ...defaultValues,
     },
   });
