@@ -1,7 +1,7 @@
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { SegmentDetails } from "@/types/segment";
 import { useState } from "react";
 import { HotelBankDialog } from "./HotelBankDialog";
@@ -15,8 +15,12 @@ interface HotelGDSSectionProps {
 export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionProps) {
   const [isHotelBankOpen, setIsHotelBankOpen] = useState(false);
 
-  const handleChange = (field: keyof SegmentDetails, value: string | boolean) => {
-    onDetailsChange({ ...details, [field]: value });
+  const handleGDSChange = (checked: boolean) => {
+    onDetailsChange({ ...details, useGDS: checked });
+  };
+
+  const handleGDSCodeChange = (value: string) => {
+    onDetailsChange({ ...details, gdsCode: value });
   };
 
   const handleHotelSelect = (hotel: HotelsRow) => {
@@ -24,6 +28,7 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
       ...details,
       hotelName: hotel.name,
       addressLine1: hotel.address || "",
+      stateProvince: hotel.city || "", // Map city to stateProvince
       country: hotel.country || "",
       telephone: hotel.telephone || "",
       website: hotel.website || "",
@@ -32,35 +37,35 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="gds-mode" className="text-blue-500">GDS</Label>
-          <Switch
-            id="gds-mode"
-            checked={details.gdsEnabled as boolean}
-            onCheckedChange={(checked) => handleChange("gdsEnabled", checked)}
-          />
-        </div>
-        <Button
-          variant="outline"
-          className="bg-navy hover:bg-navy-light text-white border-navy"
-          disabled={details.gdsEnabled as boolean}
-          onClick={() => setIsHotelBankOpen(true)}
-        >
-          Hotel Bank
-        </Button>
+      <div className="flex items-center justify-between">
+        <Label htmlFor="gds-toggle" className="text-blue-500">Use GDS</Label>
+        <Switch
+          id="gds-toggle"
+          checked={details.useGDS as boolean || false}
+          onCheckedChange={handleGDSChange}
+        />
       </div>
 
-      {details.gdsEnabled && (
-        <div className="grid gap-2 mb-4">
-          <Label htmlFor="recordLocator" className="text-blue-500">Record Locator</Label>
+      {details.useGDS ? (
+        <div className="grid gap-2">
+          <Label htmlFor="gdsCode" className="text-blue-500">GDS Code</Label>
           <Input
-            id="recordLocator"
-            value={details.recordLocator as string || ""}
-            onChange={(e) => handleChange("recordLocator", e.target.value)}
-            placeholder="Enter record locator"
+            id="gdsCode"
+            value={details.gdsCode as string || ""}
+            onChange={(e) => handleGDSCodeChange(e.target.value)}
+            placeholder="Enter GDS code"
+            className="text-gray-700"
           />
         </div>
+      ) : (
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => setIsHotelBankOpen(true)}
+          className="w-full"
+        >
+          Select from Hotel Bank
+        </Button>
       )}
 
       <HotelBankDialog
