@@ -23,9 +23,10 @@ export const HotelsTable = ({ hotels, onEdit, onDelete }: HotelsTableProps) => {
         <TableHeader>
           <TableRow>
             <TableHead className="text-white">Name</TableHead>
-            <TableHead className="text-white">Location</TableHead>
-            <TableHead className="text-white">Rating</TableHead>
-            <TableHead className="text-white">Description</TableHead>
+            <TableHead className="text-white">Address</TableHead>
+            <TableHead className="text-white">City</TableHead>
+            <TableHead className="text-white">Country</TableHead>
+            <TableHead className="text-white">Contact</TableHead>
             <TableHead className="w-[100px] text-white">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -33,9 +34,24 @@ export const HotelsTable = ({ hotels, onEdit, onDelete }: HotelsTableProps) => {
           {hotels?.map((hotel) => (
             <TableRow key={hotel.id}>
               <TableCell className="text-white">{hotel.name}</TableCell>
-              <TableCell className="text-white">{hotel.location}</TableCell>
-              <TableCell className="text-white">{hotel.rating}</TableCell>
-              <TableCell className="text-white">{hotel.description}</TableCell>
+              <TableCell className="text-white">{hotel.address}</TableCell>
+              <TableCell className="text-white">{hotel.city}</TableCell>
+              <TableCell className="text-white">{hotel.country}</TableCell>
+              <TableCell className="text-white">
+                <div className="space-y-1">
+                  <p>{hotel.telephone}</p>
+                  {hotel.website && (
+                    <a 
+                      href={hotel.website} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="text-blue-400 hover:text-blue-300 text-sm"
+                    >
+                      Visit Website
+                    </a>
+                  )}
+                </div>
+              </TableCell>
               <TableCell>
                 <div className="flex gap-2">
                   <Button

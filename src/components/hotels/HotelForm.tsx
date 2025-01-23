@@ -1,7 +1,6 @@
 import { Form, FormControl, FormField, FormItem, FormLabel, FormDescription } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { useForm } from "react-hook-form";
 import { HotelsRow } from "@/integrations/supabase/types/hotels";
 
@@ -15,9 +14,11 @@ export const HotelForm = ({ defaultValues, onSubmit, submitLabel }: HotelFormPro
   const form = useForm({
     defaultValues: {
       name: "",
-      location: "",
-      rating: "",
-      description: "",
+      address: "",
+      city: "",
+      country: "",
+      telephone: "",
+      website: "",
       ...defaultValues,
     },
   });
@@ -39,10 +40,10 @@ export const HotelForm = ({ defaultValues, onSubmit, submitLabel }: HotelFormPro
         />
         <FormField
           control={form.control}
-          name="location"
+          name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Location</FormLabel>
+              <FormLabel>Hotel Address</FormLabel>
               <FormControl>
                 <Input {...field} />
               </FormControl>
@@ -51,27 +52,51 @@ export const HotelForm = ({ defaultValues, onSubmit, submitLabel }: HotelFormPro
         />
         <FormField
           control={form.control}
-          name="rating"
+          name="city"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Rating</FormLabel>
+              <FormLabel>City</FormLabel>
               <FormControl>
-                <Input {...field} placeholder="e.g., 5-star" />
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="country"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Country</FormLabel>
+              <FormControl>
+                <Input {...field} />
+              </FormControl>
+            </FormItem>
+          )}
+        />
+        <FormField
+          control={form.control}
+          name="telephone"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Telephone Number</FormLabel>
+              <FormControl>
+                <Input {...field} placeholder="+1 (555) 555-5555" />
               </FormControl>
               <FormDescription>
-                Optional: Add the hotel's star rating
+                Please enter the number in international format
               </FormDescription>
             </FormItem>
           )}
         />
         <FormField
           control={form.control}
-          name="description"
+          name="website"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Description</FormLabel>
+              <FormLabel>Website</FormLabel>
               <FormControl>
-                <Textarea {...field} />
+                <Input {...field} type="url" placeholder="https://..." />
               </FormControl>
             </FormItem>
           )}
