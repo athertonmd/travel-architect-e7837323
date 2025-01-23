@@ -11,34 +11,49 @@ export type Database = {
     Tables: {
       hotels: {
         Row: {
+          address: string | null
+          city: string | null
+          country: string | null
           created_at: string
           description: string | null
           id: string
-          location: string
+          location: string | null
           name: string
           rating: string | null
+          telephone: string | null
           updated_at: string
           user_id: string
+          website: string | null
         }
         Insert: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          location: string
+          location?: string | null
           name: string
           rating?: string | null
+          telephone?: string | null
           updated_at?: string
           user_id: string
+          website?: string | null
         }
         Update: {
+          address?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           description?: string | null
           id?: string
-          location?: string
+          location?: string | null
           name?: string
           rating?: string | null
+          telephone?: string | null
           updated_at?: string
           user_id?: string
+          website?: string | null
         }
         Relationships: [
           {
