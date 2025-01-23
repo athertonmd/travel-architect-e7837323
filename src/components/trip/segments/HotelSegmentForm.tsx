@@ -36,6 +36,7 @@ function HotelSegmentFormComponent({ details, onDetailsChange }: HotelSegmentFor
         </div>
         <Button
           variant="outline"
+          className="bg-navy hover:bg-navy-light text-white border-navy"
           disabled={details.gdsEnabled as boolean}
           onClick={(e) => {
             e.preventDefault();
