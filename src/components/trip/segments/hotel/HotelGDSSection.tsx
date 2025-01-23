@@ -64,7 +64,7 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
             id="gdsCode"
             value={details.gdsCode as string || ""}
             onChange={(e) => handleGDSCodeChange(e.target.value)}
-            placeholder="Enter GDS code"
+            placeholder="Enter Record Locator"
             className="text-gray-700"
           />
         </div>
