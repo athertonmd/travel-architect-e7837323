@@ -24,7 +24,7 @@ export const HotelsTable = ({ hotels, onEdit, onDelete }: HotelsTableProps) => {
           <TableRow>
             <TableHead className="text-white">Name</TableHead>
             <TableHead className="text-white">Address</TableHead>
-            <TableHead className="text-white">City</TableHead>
+            <TableHead className="text-white">State/Province</TableHead>
             <TableHead className="text-white">Country</TableHead>
             <TableHead className="text-white">Contact</TableHead>
             <TableHead className="w-[100px] text-white">Actions</TableHead>
