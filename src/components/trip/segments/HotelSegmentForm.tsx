@@ -1,5 +1,7 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 import { SegmentDetails } from "@/types/segment";
 import { memo } from "react";
 
@@ -9,7 +11,7 @@ interface HotelSegmentFormProps {
 }
 
 function HotelSegmentFormComponent({ details, onDetailsChange }: HotelSegmentFormProps) {
-  const handleChange = (field: keyof SegmentDetails, value: string) => {
+  const handleChange = (field: keyof SegmentDetails, value: string | boolean) => {
     onDetailsChange({ ...details, [field]: value });
   };
 
@@ -23,6 +25,28 @@ function HotelSegmentFormComponent({ details, onDetailsChange }: HotelSegmentFor
       onClick={stopPropagation}
       onFocus={stopPropagation}
     >
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center space-x-2">
+          <Label htmlFor="gds-mode" className="text-blue-500">GDS</Label>
+          <Switch
+            id="gds-mode"
+            checked={details.gdsEnabled as boolean}
+            onCheckedChange={(checked) => handleChange("gdsEnabled", checked)}
+          />
+        </div>
+        <Button
+          variant="outline"
+          disabled={details.gdsEnabled as boolean}
+          onClick={(e) => {
+            e.preventDefault();
+            // Hotel bank functionality would go here
+            console.log('Opening hotel bank');
+          }}
+        >
+          Hotel Bank
+        </Button>
+      </div>
+
       <div className="grid gap-2">
         <Label htmlFor="hotelName" className="text-blue-500">Hotel Name</Label>
         <Input
