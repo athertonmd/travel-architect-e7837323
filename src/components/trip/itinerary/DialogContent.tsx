@@ -34,7 +34,7 @@ export function DialogContent({
         <DialogDescription>
           <p className="mb-2">Select recipients for the trip itinerary</p>
           <div className="text-sm text-yellow-600 bg-yellow-50 p-2 rounded">
-            Important: In development mode, you can only send to your email address ({userEmail})
+            Important: In development mode, you can only send to athertonmd@gmail.com
           </div>
         </DialogDescription>
       </DialogHeader>

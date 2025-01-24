@@ -30,8 +30,8 @@ export function RecipientList({
   return (
     <div className="space-y-4">
       {recipients.map((recipient) => {
-        const isUserEmail = recipient.email === userEmail;
-        const isDisabled = !isUserEmail;
+        const isAllowedEmail = recipient.email === "athertonmd@gmail.com";
+        const isDisabled = !isAllowedEmail;
 
         return (
           <div key={recipient.email} className="flex items-center space-x-2">
@@ -46,12 +46,12 @@ export function RecipientList({
             <Label
               htmlFor={recipient.email}
               className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed ${
-                isDisabled ? 'text-gray-400' : isUserEmail ? 'text-green-600' : ''
+                isDisabled ? 'text-gray-400' : isAllowedEmail ? 'text-green-600' : ''
               }`}
             >
               {recipient.name} ({recipient.email})
-              {isUserEmail && " (Your email)"}
-              {!isUserEmail && " (Disabled in development)"}
+              {isAllowedEmail && " (Allowed in development)"}
+              {!isAllowedEmail && " (Disabled in development)"}
             </Label>
           </div>
         );

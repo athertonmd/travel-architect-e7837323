@@ -14,6 +14,7 @@ const corsHeaders = {
 interface EmailRequest {
   tripId: string;
   to: string[];
+  generatePdfOnly?: boolean;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -35,7 +36,22 @@ const handler = async (req: Request): Promise<Response> => {
       SUPABASE_SERVICE_ROLE_KEY!
     );
 
-    const { tripId, to }: EmailRequest = await req.json();
+    const { tripId, to, generatePdfOnly = false }: EmailRequest = await req.json();
+    
+    if (!to || !Array.isArray(to) || to.length === 0) {
+      throw new Error("No recipients specified");
+    }
+
+    // In development, only allow sending to athertonmd@gmail.com
+    const ALLOWED_TEST_EMAIL = "athertonmd@gmail.com";
+    if (to.some(email => email !== ALLOWED_TEST_EMAIL)) {
+      throw {
+        name: "validation_error",
+        statusCode: 403,
+        message: `You can only send testing emails to your own email address (${ALLOWED_TEST_EMAIL}). To send emails to other recipients, please verify a domain at resend.com/domains, and change the 'from' address to an email using this domain.`
+      };
+    }
+
     console.log("Processing email request for trip:", tripId, "to recipients:", to);
 
     // Fetch trip details
@@ -80,8 +96,8 @@ const handler = async (req: Request): Promise<Response> => {
     if (!res.ok) {
       const error = await res.text();
       console.error("Error from Resend API:", error);
-      return new Response(JSON.stringify({ error }), {
-        status: 400,
+      return new Response(error, {
+        status: res.status,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -96,10 +112,13 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error: any) {
     console.error("Error in send-itinerary function:", error);
     return new Response(JSON.stringify({ 
-      error: error.message,
-      details: error.response?.data || error.response || error
+      error: {
+        name: error.name || "unknown_error",
+        statusCode: error.statusCode || 500,
+        message: error.message || "An unexpected error occurred",
+      }
     }), {
-      status: 500,
+      status: error.statusCode || 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }

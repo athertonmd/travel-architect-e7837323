@@ -28,8 +28,9 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
       return;
     }
 
-    if (selectedEmails.some(email => email !== userEmail)) {
-      toast.error(`In development mode, you can only send to your email (${userEmail})`);
+    // In development, only allow sending to the user's email
+    if (selectedEmails.some(email => email !== "athertonmd@gmail.com")) {
+      toast.error("In development mode, you can only send to athertonmd@gmail.com");
       return;
     }
 
