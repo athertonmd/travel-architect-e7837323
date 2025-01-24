@@ -14,7 +14,7 @@ export const createBasePDF = async () => {
 
 export const embedHeaderImage = async (pdfDoc: any, page: any) => {
   try {
-    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/24cd14b4-83c7-4191-8479-3504ce16720b.png");
+    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/3d5d9396-0e98-4c13-a4da-15a0d219e9d6.png");
     const imageArrayBuffer = await imageResponse.arrayBuffer();
     const imageBytes = new Uint8Array(imageArrayBuffer);
     
@@ -27,7 +27,7 @@ export const embedHeaderImage = async (pdfDoc: any, page: any) => {
     
     const { width } = page.getSize();
     const imgWidth = 515; // Fixed width with proper margins
-    const imgHeight = 180; // Maintain current height
+    const imgHeight = 180; // Height matching the new image dimensions
     const xMargin = (width - imgWidth) / 2; // Center the image horizontally
     
     page.drawImage(headerImage, {
