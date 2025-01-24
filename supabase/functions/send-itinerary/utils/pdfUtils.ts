@@ -50,6 +50,6 @@ export const drawText = (page: any, text: string, x: number, y: number, font: an
     y,
     size: fontSize,
     font,
-    color: rgb(0, 0, 0),
+    color: rgb(0, 0, 0), // Using rgb helper from pdf-lib
   });
 };
