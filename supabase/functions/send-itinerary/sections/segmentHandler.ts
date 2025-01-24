@@ -1,9 +1,12 @@
 import { drawText, drawDivider } from "../utils/pdfUtils.ts";
 
 const sanitizeDetails = (details: any) => {
-  if (!details || typeof details !== 'object') return {};
+  console.log('Sanitizing segment details...');
+  if (!details || typeof details !== 'object') {
+    console.log('No details to sanitize, returning empty object');
+    return {};
+  }
   
-  // Create a new object with only primitive values
   const sanitized: Record<string, string | number | boolean> = {};
   
   for (const [key, value] of Object.entries(details)) {
@@ -12,10 +15,12 @@ const sanitizeDetails = (details: any) => {
     }
   }
   
+  console.log('Details sanitized successfully');
   return sanitized;
 };
 
 const addFlightDetails = (page: any, details: any, yOffset: number, font: any, fontSize: number, lineHeight: number) => {
+  console.log('Adding flight details...');
   let currentY = yOffset;
   const safeDetails = sanitizeDetails(details);
   
@@ -32,6 +37,7 @@ const addFlightDetails = (page: any, details: any, yOffset: number, font: any, f
 };
 
 const addHotelDetails = (page: any, details: any, yOffset: number, font: any, fontSize: number, lineHeight: number) => {
+  console.log('Adding hotel details...');
   let currentY = yOffset;
   const safeDetails = sanitizeDetails(details);
   
@@ -48,17 +54,18 @@ const addHotelDetails = (page: any, details: any, yOffset: number, font: any, fo
 };
 
 export const addSegment = (page: any, segment: any, yOffset: number, font: any) => {
+  console.log('Adding segment to PDF...');
   const fontSize = 12;
   const lineHeight = 20;
   let currentY = yOffset;
 
   try {
-    // Add segment type as header
     const segmentType = String(segment.type || 'Unknown').toUpperCase();
+    console.log(`Processing segment of type: ${segmentType}`);
+    
     drawText(page, segmentType, 50, currentY, font, fontSize + 2);
     currentY -= lineHeight * 1.5;
 
-    // Add common details
     if (segment.details) {
       const safeDetails = sanitizeDetails(segment.details);
       
@@ -72,7 +79,6 @@ export const addSegment = (page: any, segment: any, yOffset: number, font: any) 
         currentY -= lineHeight;
       }
 
-      // Add type-specific details
       switch (segmentType.toLowerCase()) {
         case 'flight':
           currentY = addFlightDetails(page, safeDetails, currentY, font, fontSize, lineHeight);
@@ -83,14 +89,14 @@ export const addSegment = (page: any, segment: any, yOffset: number, font: any) 
       }
     }
 
-    // Add divider after segment
     currentY -= lineHeight;
     drawDivider(page, currentY);
     currentY -= lineHeight;
 
+    console.log('Segment added successfully');
     return currentY;
   } catch (error) {
     console.error('Error adding segment:', error);
-    return yOffset - (lineHeight * 2); // Return a safe offset to continue with next segment
+    throw new Error(`Failed to add segment: ${error.message}`);
   }
 };
