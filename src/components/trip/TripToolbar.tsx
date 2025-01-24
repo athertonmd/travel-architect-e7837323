@@ -1,58 +1,47 @@
-import { SendItineraryDialog } from "@/components/trip/SendItineraryDialog";
 import { TripHeader } from "@/components/trip/TripHeader";
 import { useSession } from '@supabase/auth-helpers-react';
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { Send, FileText } from "lucide-react";
 
 interface TripToolbarProps {
   title: string;
-  onTitleChange: (title: string) => void;
-  travelers?: number;
-  onSave: () => void;
-  tripId?: string;
-  emailRecipients: { email: string; name: string }[];
+  destination?: string;
+  status: "draft" | "in-progress" | "confirmed";
+  onSendItinerary?: () => void;
 }
 
 export function TripToolbar({ 
   title, 
-  onTitleChange, 
-  travelers, 
-  onSave, 
-  tripId,
-  emailRecipients 
+  destination, 
+  status,
+  onSendItinerary 
 }: TripToolbarProps) {
   const session = useSession();
-  const userEmail = session?.user?.email;
-  
-  // Add user to recipients list if they have an email
-  const allRecipients = userEmail 
-    ? [{ email: userEmail, name: 'Me (Your Email)' }, ...emailRecipients]
-    : emailRecipients;
 
   const handlePdfDownload = () => {
-    // TODO: Implement PDF download functionality
-    console.log('PDF download clicked');
+    console.log('Downloading PDF...');
   };
 
   return (
-    <div className="flex justify-between items-center">
-      <TripHeader 
+    <div className="flex flex-col gap-6 mb-8">
+      <TripHeader
         title={title}
-        onTitleChange={onTitleChange}
-        travelers={travelers}
-        onSave={onSave}
-        tripId={tripId}
+        destination={destination}
+        status={status}
       />
       <div className="flex gap-2">
-        {tripId && allRecipients.length > 0 && (
-          <SendItineraryDialog tripId={tripId} travelers={allRecipients} />
-        )}
         <Button
-          variant="outline"
+          className="bg-navy hover:bg-navy-light border border-white text-white"
+          onClick={onSendItinerary}
+        >
+          <Send className="mr-2 h-4 w-4" />
+          Send Itinerary
+        </Button>
+        <Button
           className="bg-navy hover:bg-navy-light border border-white text-white"
           onClick={handlePdfDownload}
         >
-          <FileText className="mr-2" />
+          <FileText className="mr-2 h-4 w-4" />
           PDF
         </Button>
       </div>
