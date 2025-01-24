@@ -14,34 +14,55 @@ export const createBasePDF = async () => {
 
 export const embedHeaderImage = async (pdfDoc: any, page: any) => {
   try {
+    console.log('Starting header image embedding process...');
+    
     // Fetch the image
-    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/28ce9083-1b5c-4ba8-96e5-fc42a3220744.png");
+    const imageUrl = "https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/28ce9083-1b5c-4ba8-96e5-fc42a3220744.png";
+    console.log('Attempting to fetch image from:', imageUrl);
+    
+    const imageResponse = await fetch(imageUrl);
+    console.log('Image fetch response status:', imageResponse.status);
+    
     if (!imageResponse.ok) {
       console.error('Failed to fetch header image:', imageResponse.statusText);
-      return page.getSize().height - 50; // Return default Y position if image fetch fails
+      return page.getSize().height - 50;
     }
 
     const imageArrayBuffer = await imageResponse.arrayBuffer();
     const imageBytes = new Uint8Array(imageArrayBuffer);
+    console.log('Image bytes length:', imageBytes.length);
     
     // Try to embed as PNG first, then JPG if that fails
     let headerImage;
     try {
+      console.log('Attempting to embed as PNG...');
       headerImage = await pdfDoc.embedPng(imageBytes);
-    } catch {
+      console.log('Successfully embedded as PNG');
+    } catch (pngError) {
+      console.log('PNG embedding failed, attempting JPG...', pngError);
       try {
         headerImage = await pdfDoc.embedJpg(imageBytes);
-      } catch (embedError) {
-        console.error('Failed to embed image:', embedError);
+        console.log('Successfully embedded as JPG');
+      } catch (jpgError) {
+        console.error('Failed to embed as both PNG and JPG:', jpgError);
         return page.getSize().height - 50;
       }
     }
     
-    const { width } = page.getSize();
-    const imgWidth = 515; // Fixed width with proper margins
-    const imgHeight = 90; // Adjusted height for the new image
-    const xMargin = (width - imgWidth) / 2; // Center the image horizontally
-    const yPosition = page.getSize().height - imgHeight - 40; // Position from top
+    const { width, height } = page.getSize();
+    console.log('Page dimensions:', { width, height });
+    
+    const imgWidth = 515;
+    const imgHeight = 90;
+    const xMargin = (width - imgWidth) / 2;
+    const yPosition = height - imgHeight - 40;
+    
+    console.log('Image placement details:', {
+      x: xMargin,
+      y: yPosition,
+      width: imgWidth,
+      height: imgHeight
+    });
     
     // Draw the image
     page.drawImage(headerImage, {
@@ -51,11 +72,16 @@ export const embedHeaderImage = async (pdfDoc: any, page: any) => {
       height: imgHeight,
     });
     
-    // Return the Y position for the next element
-    return yPosition - 20; // Add some spacing after the image
+    console.log('Image drawing completed');
+    return yPosition - 20;
   } catch (error) {
-    console.error('Error in embedHeaderImage:', error);
-    return page.getSize().height - 50; // Return default Y position if anything fails
+    console.error('Detailed error in embedHeaderImage:', error);
+    if (error instanceof Error) {
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+    }
+    return page.getSize().height - 50;
   }
 };
 
