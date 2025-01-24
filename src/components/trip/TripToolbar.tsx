@@ -30,28 +30,30 @@ export function TripToolbar({
 
   return (
     <div className="flex flex-col gap-6 mb-8">
-      <TripHeader
-        title={title}
-        onTitleChange={onTitleChange}
-        onSave={onSave}
-        tripId={tripId}
-        destination={destination}
-        status={status}
-      />
-      <div className="flex gap-2">
-        <Button
-          className="bg-navy hover:bg-navy-light border border-white text-white"
-        >
-          <Send className="mr-2 h-4 w-4" />
-          Send Itinerary
-        </Button>
-        <Button
-          className="bg-navy hover:bg-navy-light border border-white text-white"
-          onClick={handlePdfDownload}
-        >
-          <FileText className="mr-2 h-4 w-4" />
-          PDF
-        </Button>
+      <div className="flex justify-between items-center">
+        <TripHeader
+          title={title}
+          onTitleChange={onTitleChange}
+          onSave={onSave}
+          tripId={tripId}
+          destination={destination}
+          status={status}
+        />
+        <div className="flex gap-2">
+          <Button
+            className="bg-navy hover:bg-navy-light border border-white text-white"
+          >
+            <Send className="mr-2 h-4 w-4" />
+            Send Itinerary
+          </Button>
+          <Button
+            className="bg-navy hover:bg-navy-light border border-white text-white"
+            onClick={handlePdfDownload}
+          >
+            <FileText className="mr-2 h-4 w-4" />
+            PDF
+          </Button>
+        </div>
       </div>
     </div>
   );
