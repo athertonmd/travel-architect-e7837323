@@ -14,34 +14,48 @@ export const createBasePDF = async () => {
 
 export const embedHeaderImage = async (pdfDoc: any, page: any) => {
   try {
-    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/3d5d9396-0e98-4c13-a4da-15a0d219e9d6.png");
+    // Fetch the image
+    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/28ce9083-1b5c-4ba8-96e5-fc42a3220744.png");
+    if (!imageResponse.ok) {
+      console.error('Failed to fetch header image:', imageResponse.statusText);
+      return page.getSize().height - 50; // Return default Y position if image fetch fails
+    }
+
     const imageArrayBuffer = await imageResponse.arrayBuffer();
     const imageBytes = new Uint8Array(imageArrayBuffer);
     
+    // Try to embed as PNG first, then JPG if that fails
     let headerImage;
     try {
-      headerImage = await pdfDoc.embedJpg(imageBytes);
-    } catch {
       headerImage = await pdfDoc.embedPng(imageBytes);
+    } catch {
+      try {
+        headerImage = await pdfDoc.embedJpg(imageBytes);
+      } catch (embedError) {
+        console.error('Failed to embed image:', embedError);
+        return page.getSize().height - 50;
+      }
     }
     
     const { width } = page.getSize();
     const imgWidth = 515; // Fixed width with proper margins
-    const imgHeight = 180; // Height matching the new image dimensions
+    const imgHeight = 90; // Adjusted height for the new image
     const xMargin = (width - imgWidth) / 2; // Center the image horizontally
+    const yPosition = page.getSize().height - imgHeight - 40; // Position from top
     
+    // Draw the image
     page.drawImage(headerImage, {
       x: xMargin,
-      y: page.getSize().height - imgHeight - 40,
+      y: yPosition,
       width: imgWidth,
       height: imgHeight,
     });
     
     // Return the Y position for the next element
-    return page.getSize().height - imgHeight - 60;
+    return yPosition - 20; // Add some spacing after the image
   } catch (error) {
-    console.error('Error embedding header image:', error);
-    return page.getSize().height - 50;
+    console.error('Error in embedHeaderImage:', error);
+    return page.getSize().height - 50; // Return default Y position if anything fails
   }
 };
 
