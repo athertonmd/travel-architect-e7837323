@@ -26,17 +26,19 @@ export const embedHeaderImage = async (pdfDoc: any, page: any) => {
     }
     
     const { width } = page.getSize();
-    const imgWidth = width - 40; // Slightly wider margins for better fit
-    const imgHeight = 180; // Increased height for the landscape image
+    const imgWidth = 515; // Fixed width with proper margins
+    const imgHeight = 180; // Maintain current height
+    const xMargin = (width - imgWidth) / 2; // Center the image horizontally
     
     page.drawImage(headerImage, {
-      x: 20,
-      y: page.getSize().height - imgHeight - 30,
+      x: xMargin,
+      y: page.getSize().height - imgHeight - 40,
       width: imgWidth,
       height: imgHeight,
     });
     
-    return page.getSize().height - imgHeight - 60; // Adjusted spacing after header
+    // Return the Y position for the next element
+    return page.getSize().height - imgHeight - 60;
   } catch (error) {
     console.error('Error embedding header image:', error);
     return page.getSize().height - 50;
@@ -49,7 +51,7 @@ export const drawText = (page: any, text: string, x: number, y: number, font: an
     y,
     size: fontSize,
     font,
-    color: rgb(0, 0, 0), // Using rgb helper from pdf-lib
+    color: rgb(0, 0, 0),
   });
 };
 
@@ -59,6 +61,6 @@ export const drawDivider = (page: any, y: number) => {
     start: { x: 50, y },
     end: { x: width - 50, y },
     thickness: 1,
-    color: rgb(0, 0, 0.8), // Using rgb helper from pdf-lib
+    color: rgb(0, 0, 0.8),
   });
 };
