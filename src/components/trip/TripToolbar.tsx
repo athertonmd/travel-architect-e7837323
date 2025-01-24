@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Send, FileText } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { SendItineraryDialog } from "./SendItineraryDialog";
 
 interface TripToolbarProps {
   title: string;
@@ -25,6 +26,7 @@ export function TripToolbar({
   status
 }: TripToolbarProps) {
   const session = useSession();
+  const userEmail = session?.user?.email;
 
   const handlePdfDownload = async () => {
     if (!tripId) {
@@ -32,11 +34,20 @@ export function TripToolbar({
       return;
     }
 
+    if (!userEmail) {
+      toast.error("You must be logged in to download the PDF");
+      return;
+    }
+
     try {
       toast.loading("Generating PDF...");
       
       const { data, error } = await supabase.functions.invoke('send-itinerary', {
-        body: { tripId, generatePdfOnly: true }
+        body: { 
+          tripId, 
+          generatePdfOnly: true,
+          to: [userEmail] // Always include the user's email
+        }
       });
 
       if (error) throw error;
@@ -77,12 +88,12 @@ export function TripToolbar({
           status={status}
         />
         <div className="flex gap-2">
-          <Button
-            className="bg-navy hover:bg-navy-light border border-white text-white"
-          >
-            <Send className="mr-2 h-4 w-4" />
-            Send Itinerary
-          </Button>
+          {tripId && emailRecipients && (
+            <SendItineraryDialog
+              tripId={tripId}
+              travelers={emailRecipients}
+            />
+          )}
           <Button
             className="bg-navy hover:bg-navy-light border border-white text-white"
             onClick={handlePdfDownload}
