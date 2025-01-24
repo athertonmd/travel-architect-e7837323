@@ -14,29 +14,29 @@ export const createBasePDF = async () => {
 
 export const embedHeaderImage = async (pdfDoc: any, page: any) => {
   try {
-    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/eea4357d-4c1b-4221-9da7-35dd2344a1f8.png");
+    const imageResponse = await fetch("https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/24cd14b4-83c7-4191-8479-3504ce16720b.png");
     const imageArrayBuffer = await imageResponse.arrayBuffer();
     const imageBytes = new Uint8Array(imageArrayBuffer);
     
     let headerImage;
     try {
-      headerImage = await pdfDoc.embedPng(imageBytes);
-    } catch {
       headerImage = await pdfDoc.embedJpg(imageBytes);
+    } catch {
+      headerImage = await pdfDoc.embedPng(imageBytes);
     }
     
     const { width } = page.getSize();
-    const imgWidth = width - 100; // Margins on both sides
-    const imgHeight = 100; // Fixed height for header
+    const imgWidth = width - 40; // Slightly wider margins for better fit
+    const imgHeight = 180; // Increased height for the landscape image
     
     page.drawImage(headerImage, {
-      x: 50,
-      y: page.getSize().height - imgHeight - 50,
+      x: 20,
+      y: page.getSize().height - imgHeight - 30,
       width: imgWidth,
       height: imgHeight,
     });
     
-    return page.getSize().height - imgHeight - 100;
+    return page.getSize().height - imgHeight - 60; // Adjusted spacing after header
   } catch (error) {
     console.error('Error embedding header image:', error);
     return page.getSize().height - 50;
