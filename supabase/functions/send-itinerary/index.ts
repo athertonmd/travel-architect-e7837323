@@ -18,19 +18,46 @@ interface EmailRequest {
   generatePdfOnly?: boolean;
 }
 
-const sanitizeSegments = (segments: any[]) => {
-  if (!Array.isArray(segments)) return [];
-  
-  return segments.map(segment => ({
-    id: segment.id,
-    type: segment.type,
-    icon: segment.icon,
-    details: segment.details || {},
-    position: {
-      x: segment.position?.x || 0,
-      y: segment.position?.y || 0
+const sanitizeSegments = (segments: any) => {
+  try {
+    // If segments is a string, try to parse it
+    const parsedSegments = typeof segments === 'string' ? JSON.parse(segments) : segments;
+    
+    // If not an array, return empty array
+    if (!Array.isArray(parsedSegments)) {
+      console.log('Segments is not an array, returning empty array');
+      return [];
     }
-  }));
+    
+    // Map only the essential properties
+    return parsedSegments.map(segment => {
+      const sanitized = {
+        id: segment.id || crypto.randomUUID(),
+        type: segment.type || 'unknown',
+        icon: segment.icon || '📍',
+        details: {},
+        position: { x: 0, y: 0 }
+      };
+
+      // Safely copy details if they exist
+      if (segment.details && typeof segment.details === 'object') {
+        sanitized.details = { ...segment.details };
+      }
+
+      // Safely copy position if it exists
+      if (segment.position && typeof segment.position === 'object') {
+        sanitized.position = {
+          x: Number(segment.position.x) || 0,
+          y: Number(segment.position.y) || 0
+        };
+      }
+
+      return sanitized;
+    });
+  } catch (error) {
+    console.error('Error sanitizing segments:', error);
+    return [];
+  }
 };
 
 const handler = async (req: Request): Promise<Response> => {
@@ -61,17 +88,18 @@ const handler = async (req: Request): Promise<Response> => {
       throw tripError;
     }
 
-    // Sanitize segments before processing
-    if (trip.segments) {
-      trip.segments = sanitizeSegments(
-        typeof trip.segments === 'string' ? JSON.parse(trip.segments) : trip.segments
-      );
-    }
+    // Create a clean copy of the trip data
+    const cleanTrip = {
+      ...trip,
+      segments: sanitizeSegments(trip.segments)
+    };
+
+    console.log("Sanitized trip data:", JSON.stringify(cleanTrip, null, 2));
 
     if (generatePdfOnly) {
       console.log("Generating PDF only");
       try {
-        const pdfBytes = await generatePDF(trip);
+        const pdfBytes = await generatePDF(cleanTrip);
         const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
         
         return new Response(
@@ -85,7 +113,21 @@ const handler = async (req: Request): Promise<Response> => {
         );
       } catch (pdfError) {
         console.error("PDF generation error:", pdfError);
-        throw pdfError;
+        return new Response(
+          JSON.stringify({ 
+            error: {
+              message: "Failed to generate PDF",
+              details: pdfError.message
+            }
+          }), 
+          { 
+            status: 500,
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json" 
+            } 
+          }
+        );
       }
     }
 
@@ -108,14 +150,14 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const html = `
-      <h1>Trip Itinerary: ${trip.title}</h1>
-      <p>Destination: ${trip.destination || 'Not specified'}</p>
-      <p>Start Date: ${trip.start_date || 'Not specified'}</p>
-      <p>End Date: ${trip.end_date || 'Not specified'}</p>
-      <p>Number of Travelers: ${trip.travelers}</p>
+      <h1>Trip Itinerary: ${cleanTrip.title}</h1>
+      <p>Destination: ${cleanTrip.destination || 'Not specified'}</p>
+      <p>Start Date: ${cleanTrip.start_date || 'Not specified'}</p>
+      <p>End Date: ${cleanTrip.end_date || 'Not specified'}</p>
+      <p>Number of Travelers: ${cleanTrip.travelers}</p>
       
       <h2>Segments:</h2>
-      ${trip.segments ? JSON.stringify(trip.segments, null, 2) : 'No segments added yet'}
+      ${cleanTrip.segments ? JSON.stringify(cleanTrip.segments, null, 2) : 'No segments added yet'}
     `;
 
     const res = await fetch("https://api.resend.com/emails", {
@@ -127,7 +169,7 @@ const handler = async (req: Request): Promise<Response> => {
       body: JSON.stringify({
         from: "Trip Itinerary <onboarding@resend.dev>",
         to,
-        subject: `Trip Itinerary: ${trip.title}`,
+        subject: `Trip Itinerary: ${cleanTrip.title}`,
         html,
       }),
     });
