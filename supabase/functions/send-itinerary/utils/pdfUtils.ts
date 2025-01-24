@@ -22,49 +22,16 @@ export const createBasePDF = async () => {
 export const embedHeaderImage = async (pdfDoc: any, page: any) => {
   try {
     console.log('Starting header image embedding process...');
-    
-    const imageUrl = "https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/header1.png";
-    console.log('Fetching image from:', imageUrl);
-    
-    const imageResponse = await fetch(imageUrl);
-    if (!imageResponse.ok) {
-      console.error('Failed to fetch header image:', imageResponse.statusText);
-      throw new Error('Failed to fetch header image');
-    }
-
-    const imageArrayBuffer = await imageResponse.arrayBuffer();
-    const imageBytes = new Uint8Array(imageArrayBuffer);
-    
-    let headerImage;
-    try {
-      headerImage = await pdfDoc.embedPng(imageBytes);
-    } catch (pngError) {
-      console.log('PNG embedding failed, attempting JPG...', pngError);
-      try {
-        headerImage = await pdfDoc.embedJpg(imageBytes);
-      } catch (jpgError) {
-        throw new Error('Failed to embed image in either PNG or JPG format');
-      }
-    }
-    
     const { width, height } = page.getSize();
-    const imgWidth = 515;
-    const imgHeight = 90;
-    const xMargin = (width - imgWidth) / 2;
-    const yPosition = height - imgHeight - 40;
+    const yPosition = height - 100;
     
-    page.drawImage(headerImage, {
-      x: xMargin,
-      y: yPosition,
-      width: imgWidth,
-      height: imgHeight,
-    });
-    
-    console.log('Header image embedded successfully');
-    return yPosition - 20;
+    // Skip header image for now to simplify the process
+    console.log('Header image embedding skipped');
+    return yPosition;
   } catch (error) {
     console.error('Error in embedHeaderImage:', error);
-    throw error;
+    // Return a default Y position if header image fails
+    return page.getSize().height - 100;
   }
 };
 

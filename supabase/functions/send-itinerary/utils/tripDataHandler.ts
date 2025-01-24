@@ -11,22 +11,20 @@ export const sanitizeTripData = (trip: any) => {
 
 export const sanitizeSegments = (segments: any) => {
   try {
-    const parsedSegments = typeof segments === 'string' ? JSON.parse(segments) : segments;
-    
-    if (!Array.isArray(parsedSegments)) {
+    if (!Array.isArray(segments)) {
       console.log('Segments is not an array, returning empty array');
       return [];
     }
     
-    return parsedSegments.map(segment => ({
-      id: segment.id || crypto.randomUUID(),
-      type: segment.type || 'unknown',
-      icon: segment.icon || '📍',
-      details: segment.details && typeof segment.details === 'object' ? { ...segment.details } : {},
-      position: {
-        x: Number(segment?.position?.x) || 0,
-        y: Number(segment?.position?.y) || 0
-      }
+    return segments.map(segment => ({
+      type: String(segment.type || 'unknown'),
+      details: segment.details && typeof segment.details === 'object' 
+        ? Object.fromEntries(
+            Object.entries(segment.details)
+              .filter(([_, value]) => value !== null && value !== undefined)
+              .map(([key, value]) => [key, String(value)])
+          )
+        : {}
     }));
   } catch (error) {
     console.error('Error sanitizing segments:', error);

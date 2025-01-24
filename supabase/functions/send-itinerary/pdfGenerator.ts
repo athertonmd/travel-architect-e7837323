@@ -1,7 +1,5 @@
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { drawText, drawDivider, createBasePDF, embedHeaderImage } from "./utils/pdfUtils.ts";
-import { addTripHeader } from "./sections/tripHeader.ts";
-import { addSegment } from "./sections/segmentHandler.ts";
 
 export const generatePDF = async (trip: any) => {
   console.log('Starting PDF generation...');
@@ -13,22 +11,55 @@ export const generatePDF = async (trip: any) => {
     let yOffset = await embedHeaderImage(pdfDoc, page);
     console.log('Embedded header image');
     
-    yOffset = addTripHeader(page, trip, yOffset, font);
-    console.log('Added trip header');
+    // Add trip title
+    drawText(page, `Trip: ${trip.title}`, 50, yOffset, font, 14);
+    yOffset -= 30;
 
+    // Add destination if available
+    if (trip.destination) {
+      drawText(page, `Destination: ${trip.destination}`, 50, yOffset, font, 12);
+      yOffset -= 20;
+    }
+
+    // Add dates if available
+    if (trip.start_date || trip.end_date) {
+      const dateText = `Date: ${trip.start_date || 'TBD'} - ${trip.end_date || 'TBD'}`;
+      drawText(page, dateText, 50, yOffset, font, 12);
+      yOffset -= 20;
+    }
+
+    drawDivider(page, yOffset);
+    yOffset -= 20;
+
+    // Process segments
     if (trip.segments && Array.isArray(trip.segments)) {
       console.log(`Processing ${trip.segments.length} segments...`);
+      
       for (const segment of trip.segments) {
         try {
-          if (segment.type?.toLowerCase() === 'traveller') {
-            console.log('Processing traveller segment');
-            continue;
+          if (!segment.type) continue;
+          
+          // Draw segment type header
+          drawText(page, segment.type.toUpperCase(), 50, yOffset, font, 12);
+          yOffset -= 20;
+
+          // Process segment details
+          if (segment.details && typeof segment.details === 'object') {
+            for (const [key, value] of Object.entries(segment.details)) {
+              if (value && typeof value !== 'object') {
+                const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
+                drawText(page, `${label}: ${value}`, 70, yOffset, font, 10);
+                yOffset -= 15;
+              }
+            }
           }
-          
-          yOffset = await addSegment(page, segment, yOffset, font);
-          
+
+          yOffset -= 10;
+          drawDivider(page, yOffset);
+          yOffset -= 20;
+
+          // Check if we need a new page
           if (yOffset < 50) {
-            console.log('Adding new page due to low Y offset');
             const newPage = pdfDoc.addPage();
             yOffset = newPage.getSize().height - 50;
           }
@@ -39,8 +70,8 @@ export const generatePDF = async (trip: any) => {
       }
     }
 
+    // Add page numbers
     const pageCount = pdfDoc.getPageCount();
-    console.log(`Adding page numbers for ${pageCount} pages`);
     for (let i = 0; i < pageCount; i++) {
       const currentPage = pdfDoc.getPage(i);
       drawText(currentPage, `Page ${i + 1} of ${pageCount}`, 250, 30, font, 10);
