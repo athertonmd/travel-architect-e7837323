@@ -18,10 +18,24 @@ interface EmailRequest {
   generatePdfOnly?: boolean;
 }
 
+const sanitizeSegments = (segments: any[]) => {
+  if (!Array.isArray(segments)) return [];
+  
+  return segments.map(segment => ({
+    id: segment.id,
+    type: segment.type,
+    icon: segment.icon,
+    details: segment.details || {},
+    position: {
+      x: segment.position?.x || 0,
+      y: segment.position?.y || 0
+    }
+  }));
+};
+
 const handler = async (req: Request): Promise<Response> => {
   console.log("Received request to send-itinerary function");
   
-  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
@@ -34,7 +48,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { tripId, to, generatePdfOnly = false }: EmailRequest = await req.json();
     
-    // Fetch trip details
+    console.log("Fetching trip details for ID:", tripId);
+    
     const { data: trip, error: tripError } = await supabase
       .from('trips')
       .select('*')
@@ -46,26 +61,34 @@ const handler = async (req: Request): Promise<Response> => {
       throw tripError;
     }
 
-    // If we're only generating a PDF, skip email validation
-    if (generatePdfOnly) {
-      console.log("Generating PDF only");
-      const pdfBytes = await generatePDF(trip);
-      
-      // Convert to base64
-      const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
-      
-      return new Response(
-        JSON.stringify({ pdf: pdfBase64 }), 
-        { 
-          headers: { 
-            ...corsHeaders, 
-            "Content-Type": "application/json" 
-          } 
-        }
+    // Sanitize segments before processing
+    if (trip.segments) {
+      trip.segments = sanitizeSegments(
+        typeof trip.segments === 'string' ? JSON.parse(trip.segments) : trip.segments
       );
     }
 
-    // Email validation only needed for sending emails
+    if (generatePdfOnly) {
+      console.log("Generating PDF only");
+      try {
+        const pdfBytes = await generatePDF(trip);
+        const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+        
+        return new Response(
+          JSON.stringify({ pdf: pdfBase64 }), 
+          { 
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json" 
+            } 
+          }
+        );
+      } catch (pdfError) {
+        console.error("PDF generation error:", pdfError);
+        throw pdfError;
+      }
+    }
+
     if (!RESEND_API_KEY) {
       console.error("RESEND_API_KEY is not configured");
       throw new Error("Email service is not configured properly");
@@ -75,7 +98,6 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("No recipients specified");
     }
 
-    // In development, only allow sending to athertonmd@gmail.com
     const ALLOWED_TEST_EMAIL = "athertonmd@gmail.com";
     if (to.some(email => email !== ALLOWED_TEST_EMAIL)) {
       throw {
@@ -85,7 +107,6 @@ const handler = async (req: Request): Promise<Response> => {
       };
     }
 
-    // Create email HTML content
     const html = `
       <h1>Trip Itinerary: ${trip.title}</h1>
       <p>Destination: ${trip.destination || 'Not specified'}</p>
@@ -97,7 +118,6 @@ const handler = async (req: Request): Promise<Response> => {
       ${trip.segments ? JSON.stringify(trip.segments, null, 2) : 'No segments added yet'}
     `;
 
-    // Send email using Resend
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
