@@ -1,6 +1,8 @@
 import { SendItineraryDialog } from "@/components/trip/SendItineraryDialog";
 import { TripHeader } from "@/components/trip/TripHeader";
 import { useSession } from '@supabase/auth-helpers-react';
+import { Button } from "@/components/ui/button";
+import { FilePdf } from "lucide-react";
 
 interface TripToolbarProps {
   title: string;
@@ -27,6 +29,11 @@ export function TripToolbar({
     ? [{ email: userEmail, name: 'Me (Your Email)' }, ...emailRecipients]
     : emailRecipients;
 
+  const handlePdfDownload = () => {
+    // TODO: Implement PDF download functionality
+    console.log('PDF download clicked');
+  };
+
   return (
     <div className="flex justify-between items-center">
       <TripHeader 
@@ -36,9 +43,19 @@ export function TripToolbar({
         onSave={onSave}
         tripId={tripId}
       />
-      {tripId && allRecipients.length > 0 && (
-        <SendItineraryDialog tripId={tripId} travelers={allRecipients} />
-      )}
+      <div className="flex gap-2">
+        {tripId && allRecipients.length > 0 && (
+          <SendItineraryDialog tripId={tripId} travelers={allRecipients} />
+        )}
+        <Button
+          variant="outline"
+          className="bg-navy hover:bg-navy-light border border-white text-white"
+          onClick={handlePdfDownload}
+        >
+          <FilePdf className="mr-2" />
+          PDF
+        </Button>
+      </div>
     </div>
   );
 }
