@@ -16,8 +16,8 @@ export const embedHeaderImage = async (pdfDoc: any, page: any) => {
   try {
     console.log('Starting header image embedding process...');
     
-    // Fetch the image
-    const imageUrl = "https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/28ce9083-1b5c-4ba8-96e5-fc42a3220744.png";
+    // Use the provided header image URL
+    const imageUrl = "https://fakwoguybbzfpwokzhvj.supabase.co/storage/v1/object/public/lovable-uploads/header1.png";
     console.log('Attempting to fetch image from:', imageUrl);
     
     const imageResponse = await fetch(imageUrl);
