@@ -7,7 +7,7 @@ export const corsHeaders = {
 
 export const createBasePDF = async () => {
   const pdfDoc = await PDFDocument.create();
-  const page = pdfDoc.addPage();
+  const page = pdfDoc.addPage([595, 842]); // A4 size
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
   return { pdfDoc, page, font };
 };
@@ -25,19 +25,18 @@ export const embedHeaderImage = async (pdfDoc: any, page: any) => {
       headerImage = await pdfDoc.embedJpg(imageBytes);
     }
     
-    const { width, height } = page.getSize();
-    const imgDims = headerImage.scale(0.5);
-    const imgWidth = Math.min(width - 100, imgDims.width);
-    const imgHeight = (imgDims.height * imgWidth) / imgDims.width;
+    const { width } = page.getSize();
+    const imgWidth = width - 100; // Margins on both sides
+    const imgHeight = 100; // Fixed height for header
     
     page.drawImage(headerImage, {
-      x: (width - imgWidth) / 2,
-      y: height - imgHeight - 50,
+      x: 50,
+      y: page.getSize().height - imgHeight - 50,
       width: imgWidth,
       height: imgHeight,
     });
     
-    return height - imgHeight - 100;
+    return page.getSize().height - imgHeight - 100;
   } catch (error) {
     console.error('Error embedding header image:', error);
     return page.getSize().height - 50;
@@ -50,6 +49,16 @@ export const drawText = (page: any, text: string, x: number, y: number, font: an
     y,
     size: fontSize,
     font,
-    color: rgb(0, 0, 0), // Using rgb helper directly
+    color: { r: 0, g: 0, b: 0 },
+  });
+};
+
+export const drawDivider = (page: any, y: number) => {
+  const { width } = page.getSize();
+  page.drawLine({
+    start: { x: 50, y },
+    end: { x: width - 50, y },
+    thickness: 1,
+    color: { r: 0, g: 0, b: 0.8 },
   });
 };

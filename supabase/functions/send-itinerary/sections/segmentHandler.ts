@@ -1,4 +1,4 @@
-import { drawText } from "../utils/pdfUtils.ts";
+import { drawText, drawDivider } from "../utils/pdfUtils.ts";
 
 const addFlightDetails = (page: any, details: any, yOffset: number, font: any, fontSize: number, lineHeight: number) => {
   let currentY = yOffset;
@@ -35,9 +35,9 @@ export const addSegment = (page: any, segment: any, yOffset: number, font: any) 
   const lineHeight = 20;
   let currentY = yOffset;
 
-  // Add segment type
-  drawText(page, segment.type.toUpperCase(), 50, currentY, font, fontSize);
-  currentY -= lineHeight;
+  // Add segment type as header
+  drawText(page, segment.type.toUpperCase(), 50, currentY, font, fontSize + 2);
+  currentY -= lineHeight * 1.5;
 
   // Add common details
   if (segment.details) {
@@ -54,7 +54,7 @@ export const addSegment = (page: any, segment: any, yOffset: number, font: any) 
     }
 
     // Add type-specific details
-    switch (segment.type) {
+    switch (segment.type.toLowerCase()) {
       case 'flight':
         currentY = addFlightDetails(page, details, currentY, font, fontSize, lineHeight);
         break;
@@ -64,5 +64,10 @@ export const addSegment = (page: any, segment: any, yOffset: number, font: any) 
     }
   }
 
-  return currentY - lineHeight; // Add space between segments
+  // Add divider after segment
+  currentY -= lineHeight;
+  drawDivider(page, currentY);
+  currentY -= lineHeight;
+
+  return currentY;
 };

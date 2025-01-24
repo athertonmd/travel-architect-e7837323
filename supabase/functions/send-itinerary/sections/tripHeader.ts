@@ -1,25 +1,23 @@
-import { drawText } from "../utils/pdfUtils.ts";
+import { drawText, drawDivider } from "../utils/pdfUtils.ts";
 
 export const addTripHeader = (page: any, trip: any, yOffset: number, font: any) => {
   let currentY = yOffset;
   const lineHeight = 20;
 
-  // Add title
-  drawText(page, `Trip Itinerary: ${trip.title}`, 50, currentY, font, 16);
-  currentY -= lineHeight * 2;
-
-  // Add destination
-  if (trip.destination) {
-    drawText(page, `Destination: ${trip.destination}`, 50, currentY, font, 12);
-    currentY -= lineHeight;
+  // Add travelers list
+  if (trip.segments && trip.segments.length > 0) {
+    const travellerSegment = trip.segments.find((s: any) => s.type.toLowerCase() === 'traveller');
+    if (travellerSegment && travellerSegment.details?.traveller_names) {
+      const names = travellerSegment.details.traveller_names;
+      const travelersText = `Travel Itinerary for: ${names.join(', ')}`;
+      drawText(page, travelersText, 50, currentY, font, 12);
+      currentY -= lineHeight * 1.5;
+    }
   }
 
-  // Add dates
-  if (trip.start_date || trip.end_date) {
-    const dateText = `Date: ${trip.start_date || ''} ${trip.end_date ? `to ${trip.end_date}` : ''}`;
-    drawText(page, dateText, 50, currentY, font, 12);
-    currentY -= lineHeight * 2;
-  }
+  // Draw divider after header
+  drawDivider(page, currentY);
+  currentY -= lineHeight;
 
   return currentY;
 };

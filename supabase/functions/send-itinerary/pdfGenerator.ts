@@ -18,17 +18,10 @@ export const generatePDF = async (trip: any) => {
       : trip.segments;
 
     if (segments && segments.length > 0) {
-      // Add segments title
-      page.drawText('Itinerary Details:', {
-        x: 50,
-        y: yOffset,
-        size: 14,
-        font,
-        color: { r: 0, g: 0, b: 0 },
-      });
-      yOffset -= 30;
-
       for (const segment of segments) {
+        // Skip traveller segment as it's shown in the header
+        if (segment.type.toLowerCase() === 'traveller') continue;
+        
         yOffset = await addSegment(page, segment, yOffset, font);
         
         // Check if we need a new page
@@ -37,6 +30,19 @@ export const generatePDF = async (trip: any) => {
           yOffset = newPage.getSize().height - 50;
         }
       }
+    }
+
+    // Add page numbers
+    const pageCount = pdfDoc.getPageCount();
+    for (let i = 0; i < pageCount; i++) {
+      const page = pdfDoc.getPage(i);
+      page.drawText(`Page ${i + 1} of ${pageCount}`, {
+        x: 250,
+        y: 30,
+        size: 10,
+        font,
+        color: { r: 0, g: 0, b: 0 },
+      });
     }
 
     return pdfDoc.save();
