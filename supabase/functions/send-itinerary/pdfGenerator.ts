@@ -1,6 +1,7 @@
 import { createBasePDF, embedHeaderImage } from "./utils/pdfUtils.ts";
 import { addTripHeader } from "./sections/tripHeader.ts";
 import { addSegment } from "./sections/segmentHandler.ts";
+import { rgb } from "https://esm.sh/pdf-lib@1.17.1";
 
 export const generatePDF = async (trip: any) => {
   const { pdfDoc, page, font } = await createBasePDF();
@@ -41,7 +42,7 @@ export const generatePDF = async (trip: any) => {
         y: 30,
         size: 10,
         font,
-        color: { r: 0, g: 0, b: 0 },
+        color: rgb(0, 0, 0), // Using rgb helper from pdf-lib
       });
     }
 

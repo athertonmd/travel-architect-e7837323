@@ -49,7 +49,7 @@ export const drawText = (page: any, text: string, x: number, y: number, font: an
     y,
     size: fontSize,
     font,
-    color: { r: 0, g: 0, b: 0 },
+    color: rgb(0, 0, 0), // Using rgb helper from pdf-lib
   });
 };
 
@@ -59,6 +59,6 @@ export const drawDivider = (page: any, y: number) => {
     start: { x: 50, y },
     end: { x: width - 50, y },
     thickness: 1,
-    color: { r: 0, g: 0, b: 0.8 },
+    color: rgb(0, 0, 0.8), // Using rgb helper from pdf-lib
   });
 };
