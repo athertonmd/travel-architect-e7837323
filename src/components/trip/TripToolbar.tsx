@@ -2,7 +2,7 @@ import { SendItineraryDialog } from "@/components/trip/SendItineraryDialog";
 import { TripHeader } from "@/components/trip/TripHeader";
 import { useSession } from '@supabase/auth-helpers-react';
 import { Button } from "@/components/ui/button";
-import { FilePdf } from "lucide-react";
+import { FileText } from "lucide-react";
 
 interface TripToolbarProps {
   title: string;
@@ -52,7 +52,7 @@ export function TripToolbar({
           className="bg-navy hover:bg-navy-light border border-white text-white"
           onClick={handlePdfDownload}
         >
-          <FilePdf className="mr-2" />
+          <FileText className="mr-2" />
           PDF
         </Button>
       </div>
