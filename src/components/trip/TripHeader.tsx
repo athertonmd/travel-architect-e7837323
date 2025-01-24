@@ -12,13 +12,23 @@ import {
 
 interface TripHeaderProps {
   title: string;
-  onTitleChange: (title: string) => void;
+  onTitleChange?: (title: string) => void;
   travelers?: number;
-  onSave: () => void;
+  onSave?: () => void;
   tripId?: string;
+  destination?: string;
+  status?: "draft" | "in-progress" | "confirmed";
 }
 
-export function TripHeader({ title, onTitleChange, travelers, onSave, tripId }: TripHeaderProps) {
+export function TripHeader({ 
+  title, 
+  onTitleChange, 
+  travelers, 
+  onSave, 
+  tripId,
+  destination,
+  status 
+}: TripHeaderProps) {
   const queryClient = useQueryClient();
 
   const updateTripStatus = async () => {
@@ -45,32 +55,44 @@ export function TripHeader({ title, onTitleChange, travelers, onSave, tripId }: 
   };
 
   const handleSave = async () => {
-    await updateTripStatus();
-    onSave();
+    if (onSave) {
+      await updateTripStatus();
+      onSave();
+    }
   };
 
   return (
     <div className="flex justify-between items-center">
       <div className="flex items-center gap-4">
-        <TripTitleHeader title={title} onTitleChange={onTitleChange} />
+        <TripTitleHeader 
+          title={title} 
+          onTitleChange={onTitleChange} 
+        />
+        {destination && (
+          <span className="text-sm text-gray-500">
+            {destination}
+          </span>
+        )}
       </div>
-      <div className="border-l pl-4 ml-4 border-white/20">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                onClick={handleSave}
-                className="bg-navy hover:bg-navy-light border border-white"
-              >
-                Save Changes
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Save all changes made to this trip</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+      {onSave && (
+        <div className="border-l pl-4 ml-4 border-white/20">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  onClick={handleSave}
+                  className="bg-navy hover:bg-navy-light border border-white"
+                >
+                  Save Changes
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Save all changes made to this trip</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        </div>
+      )}
     </div>
   );
 }
