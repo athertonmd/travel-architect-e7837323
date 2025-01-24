@@ -6,8 +6,8 @@ export const generatePDF = async (trip: any) => {
     const { pdfDoc, page, font } = await createBasePDF();
     let yOffset = page.getSize().height - 50;
 
-    // Add header
-    yOffset = addHeader(page, font, yOffset);
+    // Add header with image
+    yOffset = await addHeader(pdfDoc, page, font, yOffset);
     
     // Add trip title
     if (trip.title) {
