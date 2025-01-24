@@ -1,10 +1,7 @@
 import { TripHeader } from "@/components/trip/TripHeader";
 import { useSession } from '@supabase/auth-helpers-react';
-import { Button } from "@/components/ui/button";
-import { Send, FileText } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 import { SendItineraryDialog } from "./SendItineraryDialog";
+import { PdfPreviewDialog } from "./PdfPreviewDialog";
 
 interface TripToolbarProps {
   title: string;
@@ -28,54 +25,6 @@ export function TripToolbar({
   const session = useSession();
   const userEmail = session?.user?.email;
 
-  const handlePdfDownload = async () => {
-    if (!tripId) {
-      toast.error("Trip ID is required to generate PDF");
-      return;
-    }
-
-    if (!userEmail) {
-      toast.error("You must be logged in to download the PDF");
-      return;
-    }
-
-    try {
-      toast.loading("Generating PDF...");
-      
-      const { data, error } = await supabase.functions.invoke('send-itinerary', {
-        body: { 
-          tripId, 
-          generatePdfOnly: true,
-          to: [userEmail] // Required by the function but not used for PDF generation
-        }
-      });
-
-      if (error) throw error;
-
-      // Convert base64 to Blob
-      const pdfBlob = await fetch(`data:application/pdf;base64,${data.pdf}`).then(res => res.blob());
-      
-      // Create download link
-      const url = window.URL.createObjectURL(pdfBlob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.setAttribute('download', `${title.replace(/\s+/g, '-').toLowerCase()}-itinerary.pdf`);
-      document.body.appendChild(link);
-      link.click();
-      
-      // Cleanup
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-      
-      toast.dismiss();
-      toast.success("PDF downloaded successfully");
-    } catch (error: any) {
-      console.error('Error downloading PDF:', error);
-      toast.dismiss();
-      toast.error("Failed to generate PDF. Please try again.");
-    }
-  };
-
   return (
     <div className="flex flex-col gap-6 mb-8">
       <div className="flex justify-between items-center">
@@ -94,13 +43,13 @@ export function TripToolbar({
               travelers={emailRecipients}
             />
           )}
-          <Button
-            className="bg-navy hover:bg-navy-light border border-white text-white"
-            onClick={handlePdfDownload}
-          >
-            <FileText className="mr-2 h-4 w-4" />
-            PDF
-          </Button>
+          {tripId && (
+            <PdfPreviewDialog
+              tripId={tripId}
+              title={title}
+              userEmail={userEmail}
+            />
+          )}
         </div>
       </div>
     </div>
