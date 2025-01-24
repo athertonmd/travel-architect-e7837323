@@ -1,14 +1,30 @@
 import { drawText, drawDivider } from "../utils/pdfUtils.ts";
 
+const sanitizeDetails = (details: any) => {
+  if (!details || typeof details !== 'object') return {};
+  
+  // Create a new object with only primitive values
+  const sanitized: Record<string, string | number | boolean> = {};
+  
+  for (const [key, value] of Object.entries(details)) {
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+      sanitized[key] = value;
+    }
+  }
+  
+  return sanitized;
+};
+
 const addFlightDetails = (page: any, details: any, yOffset: number, font: any, fontSize: number, lineHeight: number) => {
   let currentY = yOffset;
+  const safeDetails = sanitizeDetails(details);
   
-  if (details.departureAirport) {
-    drawText(page, `From: ${details.departureAirport}`, 70, currentY, font, fontSize);
+  if (safeDetails.departureAirport) {
+    drawText(page, `From: ${safeDetails.departureAirport}`, 70, currentY, font, fontSize);
     currentY -= lineHeight;
   }
-  if (details.destinationAirport) {
-    drawText(page, `To: ${details.destinationAirport}`, 70, currentY, font, fontSize);
+  if (safeDetails.destinationAirport) {
+    drawText(page, `To: ${safeDetails.destinationAirport}`, 70, currentY, font, fontSize);
     currentY -= lineHeight;
   }
   
@@ -17,13 +33,14 @@ const addFlightDetails = (page: any, details: any, yOffset: number, font: any, f
 
 const addHotelDetails = (page: any, details: any, yOffset: number, font: any, fontSize: number, lineHeight: number) => {
   let currentY = yOffset;
+  const safeDetails = sanitizeDetails(details);
   
-  if (details.hotelName) {
-    drawText(page, `Hotel: ${details.hotelName}`, 70, currentY, font, fontSize);
+  if (safeDetails.hotelName) {
+    drawText(page, `Hotel: ${safeDetails.hotelName}`, 70, currentY, font, fontSize);
     currentY -= lineHeight;
   }
-  if (details.checkInDate) {
-    drawText(page, `Check-in: ${details.checkInDate}`, 70, currentY, font, fontSize);
+  if (safeDetails.checkInDate) {
+    drawText(page, `Check-in: ${safeDetails.checkInDate}`, 70, currentY, font, fontSize);
     currentY -= lineHeight;
   }
   
@@ -35,39 +52,45 @@ export const addSegment = (page: any, segment: any, yOffset: number, font: any) 
   const lineHeight = 20;
   let currentY = yOffset;
 
-  // Add segment type as header
-  drawText(page, segment.type.toUpperCase(), 50, currentY, font, fontSize + 2);
-  currentY -= lineHeight * 1.5;
+  try {
+    // Add segment type as header
+    const segmentType = String(segment.type || 'Unknown').toUpperCase();
+    drawText(page, segmentType, 50, currentY, font, fontSize + 2);
+    currentY -= lineHeight * 1.5;
 
-  // Add common details
-  if (segment.details) {
-    const details = segment.details;
-    
-    if (details.date) {
-      drawText(page, `Date: ${details.date}`, 70, currentY, font, fontSize);
-      currentY -= lineHeight;
-    }
-    
-    if (details.time) {
-      drawText(page, `Time: ${details.time}`, 70, currentY, font, fontSize);
-      currentY -= lineHeight;
+    // Add common details
+    if (segment.details) {
+      const safeDetails = sanitizeDetails(segment.details);
+      
+      if (safeDetails.date) {
+        drawText(page, `Date: ${safeDetails.date}`, 70, currentY, font, fontSize);
+        currentY -= lineHeight;
+      }
+      
+      if (safeDetails.time) {
+        drawText(page, `Time: ${safeDetails.time}`, 70, currentY, font, fontSize);
+        currentY -= lineHeight;
+      }
+
+      // Add type-specific details
+      switch (segmentType.toLowerCase()) {
+        case 'flight':
+          currentY = addFlightDetails(page, safeDetails, currentY, font, fontSize, lineHeight);
+          break;
+        case 'hotel':
+          currentY = addHotelDetails(page, safeDetails, currentY, font, fontSize, lineHeight);
+          break;
+      }
     }
 
-    // Add type-specific details
-    switch (segment.type.toLowerCase()) {
-      case 'flight':
-        currentY = addFlightDetails(page, details, currentY, font, fontSize, lineHeight);
-        break;
-      case 'hotel':
-        currentY = addHotelDetails(page, details, currentY, font, fontSize, lineHeight);
-        break;
-    }
+    // Add divider after segment
+    currentY -= lineHeight;
+    drawDivider(page, currentY);
+    currentY -= lineHeight;
+
+    return currentY;
+  } catch (error) {
+    console.error('Error adding segment:', error);
+    return yOffset - (lineHeight * 2); // Return a safe offset to continue with next segment
   }
-
-  // Add divider after segment
-  currentY -= lineHeight;
-  drawDivider(page, currentY);
-  currentY -= lineHeight;
-
-  return currentY;
 };
