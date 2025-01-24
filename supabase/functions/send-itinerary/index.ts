@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { generatePDF } from "./pdfGenerator.ts";
 
 const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
@@ -26,11 +27,6 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    if (!RESEND_API_KEY) {
-      console.error("RESEND_API_KEY is not configured");
-      throw new Error("Email service is not configured properly");
-    }
-
     const supabase = createClient(
       SUPABASE_URL!,
       SUPABASE_SERVICE_ROLE_KEY!
@@ -38,6 +34,43 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { tripId, to, generatePdfOnly = false }: EmailRequest = await req.json();
     
+    // Fetch trip details
+    const { data: trip, error: tripError } = await supabase
+      .from('trips')
+      .select('*')
+      .eq('id', tripId)
+      .single();
+
+    if (tripError) {
+      console.error("Error fetching trip:", tripError);
+      throw tripError;
+    }
+
+    // If we're only generating a PDF, skip email validation
+    if (generatePdfOnly) {
+      console.log("Generating PDF only");
+      const pdfBytes = await generatePDF(trip);
+      
+      // Convert to base64
+      const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+      
+      return new Response(
+        JSON.stringify({ pdf: pdfBase64 }), 
+        { 
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json" 
+          } 
+        }
+      );
+    }
+
+    // Email validation only needed for sending emails
+    if (!RESEND_API_KEY) {
+      console.error("RESEND_API_KEY is not configured");
+      throw new Error("Email service is not configured properly");
+    }
+
     if (!to || !Array.isArray(to) || to.length === 0) {
       throw new Error("No recipients specified");
     }
@@ -50,20 +83,6 @@ const handler = async (req: Request): Promise<Response> => {
         statusCode: 403,
         message: `You can only send testing emails to your own email address (${ALLOWED_TEST_EMAIL}). To send emails to other recipients, please verify a domain at resend.com/domains, and change the 'from' address to an email using this domain.`
       };
-    }
-
-    console.log("Processing email request for trip:", tripId, "to recipients:", to);
-
-    // Fetch trip details
-    const { data: trip, error: tripError } = await supabase
-      .from('trips')
-      .select('*')
-      .eq('id', tripId)
-      .single();
-
-    if (tripError) {
-      console.error("Error fetching trip:", tripError);
-      throw tripError;
     }
 
     // Create email HTML content
