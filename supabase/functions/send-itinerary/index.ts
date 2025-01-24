@@ -19,14 +19,21 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    const supabase = createClient(SUPABASE_URL!, SUPABASE_SERVICE_ROLE_KEY!);
-
-    const { tripId, to, generatePdfOnly = false }: EmailRequest = await req.json();
-    console.log("Fetching trip details for ID:", tripId);
     
+    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
+      throw new Error("Missing Supabase configuration");
+    }
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
+    const { tripId, to, generatePdfOnly = false }: EmailRequest = await req.json();
+    console.log("Processing request for trip:", tripId, "generatePdfOnly:", generatePdfOnly);
+    
+    if (!tripId) {
+      throw new Error("Trip ID is required");
+    }
+
     const { data: trip, error: tripError } = await supabase
       .from('trips')
       .select('*')
@@ -38,63 +45,58 @@ const handler = async (req: Request): Promise<Response> => {
       throw tripError;
     }
 
-    const cleanTrip = sanitizeTripData(trip);
-    console.log("Sanitized trip data:", JSON.stringify(cleanTrip, null, 2));
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
 
-    if (generatePdfOnly) {
-      console.log("Generating PDF only");
-      try {
-        const pdfBytes = await generatePDF(cleanTrip);
+    console.log("Trip data fetched successfully");
+    const cleanTrip = sanitizeTripData(trip);
+    console.log("Trip data sanitized");
+
+    try {
+      const pdfBytes = await generatePDF(cleanTrip);
+      console.log("PDF generated successfully");
+
+      if (generatePdfOnly) {
         const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
-        
         return new Response(
           JSON.stringify({ pdf: pdfBase64 }), 
-          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          { 
+            status: 200,
+            headers: { 
+              ...corsHeaders, 
+              "Content-Type": "application/json" 
+            } 
+          }
         );
-      } catch (pdfError) {
-        console.error("PDF generation error:", pdfError);
-        return createErrorResponse({
-          message: "Failed to generate PDF",
-          details: pdfError.message,
-          statusCode: 500
-        });
       }
+
+      // Handle email sending if not just generating PDF
+      if (!to || !Array.isArray(to) || to.length === 0) {
+        throw new Error("No recipients specified for email");
+      }
+
+      const emailResponse = await sendEmail(to, cleanTrip.title, pdfBytes);
+      console.log("Email sent successfully");
+
+      return new Response(
+        JSON.stringify(emailResponse),
+        { 
+          status: 200,
+          headers: { 
+            ...corsHeaders, 
+            "Content-Type": "application/json" 
+          } 
+        }
+      );
+
+    } catch (pdfError) {
+      console.error("Error in PDF generation or email sending:", pdfError);
+      throw pdfError;
     }
 
-    if (!RESEND_API_KEY) {
-      throw new Error("Email service is not configured properly");
-    }
-
-    if (!to || !Array.isArray(to) || to.length === 0) {
-      throw new Error("No recipients specified");
-    }
-
-    const ALLOWED_TEST_EMAIL = "athertonmd@gmail.com";
-    if (to.some(email => email !== ALLOWED_TEST_EMAIL)) {
-      throw {
-        name: "validation_error",
-        statusCode: 403,
-        message: `You can only send testing emails to ${ALLOWED_TEST_EMAIL}`
-      };
-    }
-
-    const html = `
-      <h1>Trip Itinerary: ${cleanTrip.title}</h1>
-      <p>Destination: ${cleanTrip.destination || 'Not specified'}</p>
-      <p>Start Date: ${cleanTrip.start_date || 'Not specified'}</p>
-      <p>End Date: ${cleanTrip.end_date || 'Not specified'}</p>
-      <p>Number of Travelers: ${cleanTrip.travelers}</p>
-      <h2>Segments:</h2>
-      ${cleanTrip.segments ? JSON.stringify(cleanTrip.segments, null, 2) : 'No segments added yet'}
-    `;
-
-    return await sendEmail(
-      RESEND_API_KEY,
-      to,
-      `Trip Itinerary: ${cleanTrip.title}`,
-      html
-    );
   } catch (error: any) {
+    console.error("Error in send-itinerary function:", error);
     return createErrorResponse(error);
   }
 };

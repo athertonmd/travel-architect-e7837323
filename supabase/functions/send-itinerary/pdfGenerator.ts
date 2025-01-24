@@ -1,4 +1,5 @@
-import { createBasePDF, embedHeaderImage } from "./utils/pdfUtils.ts";
+import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
+import { drawText, drawDivider, createBasePDF, embedHeaderImage } from "./utils/pdfUtils.ts";
 import { addTripHeader } from "./sections/tripHeader.ts";
 import { addSegment } from "./sections/segmentHandler.ts";
 
@@ -64,13 +65,7 @@ export const generatePDF = async (trip: any) => {
     console.log(`Adding page numbers for ${pageCount} pages`);
     for (let i = 0; i < pageCount; i++) {
       const currentPage = pdfDoc.getPage(i);
-      currentPage.drawText(`Page ${i + 1} of ${pageCount}`, {
-        x: 250,
-        y: 30,
-        size: 10,
-        font,
-        color: rgb(0, 0, 0),
-      });
+      drawText(currentPage, `Page ${i + 1} of ${pageCount}`, 250, 30, font, 10);
     }
 
     console.log('PDF generation completed successfully');

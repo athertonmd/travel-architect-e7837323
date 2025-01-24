@@ -12,16 +12,19 @@ export interface ErrorResponse {
 
 export const createErrorResponse = (error: any): Response => {
   console.error("Error in send-itinerary function:", error);
+  
+  // Ensure we have a proper error object with required fields
   const errorResponse: ErrorResponse = {
     name: error.name || "unknown_error",
     statusCode: error.statusCode || 500,
     message: error.message || "An unexpected error occurred",
   };
 
+  // Return a properly formatted error response
   return new Response(
     JSON.stringify({ error: errorResponse }), 
     {
-      status: error.statusCode || 500,
+      status: errorResponse.statusCode,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     }
   );
