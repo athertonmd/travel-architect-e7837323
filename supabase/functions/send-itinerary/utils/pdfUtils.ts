@@ -19,15 +19,33 @@ export const createBasePDF = async () => {
   }
 };
 
+// Base64 encoded small placeholder logo
+const HEADER_IMAGE_BASE64 = 'iVBORw0KGgoAAAANSUhEUgAAAMAAAABACAYAAABMbHjfAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF0WlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNy4yLWMwMDAgNzkuMWI2NWE3OWI0LCAyMDIyLzA2LzEzLTIyOjAxOjAxICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOnhtcE1NPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvbW0vIiB4bWxuczpzdEV2dD0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL3NUeXBlL1Jlc291cmNlRXZlbnQjIiB4bWxuczpkYz0iaHR0cDovL3B1cmwub3JnL2RjL2VsZW1lbnRzLzEuMS8iIHhtbG5zOnBob3Rvc2hvcD0iaHR0cDovL25zLmFkb2JlLmNvbS9waG90b3Nob3AvMS4wLyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjQuMCAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjQtMDEtMjRUMTg6NDc6NDcrMDA6MDAiIHhtcDpNZXRhZGF0YURhdGU9IjIwMjQtMDEtMjRUMTg6NDc6NDcrMDA6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDI0LTAxLTI0VDE4OjQ3OjQ3KzAwOjAwIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjA1MGZiMjM5LTVkMGUtNDc0ZC1hMzBkLTU0OWNhMjk0ZjM0YyIgeG1wTU06RG9jdW1lbnRJRD0iYWRvYmU6ZG9jaWQ6cGhvdG9zaG9wOjA4ZjJiOWM5LTM5ZDAtYjU0OC1hNmQ2LTEyZDM3ZmQ5ZjI0OCIgeG1wTU06T3JpZ2luYWxEb2N1bWVudElEPSJ4bXAuZGlkOjMwZWM1ZDM5LWU3ZTctNDU0MS05MzVjLTNhOTBkNzgwZDQ0ZiIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjMwZWM1ZDM5LWU3ZTctNDU0MS05MzVjLTNhOTBkNzgwZDQ0ZiIgc3RFdnQ6d2hlbj0iMjAyNC0wMS0yNFQxODo0Nzo0NyswMDowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDI0LjAgKE1hY2ludG9zaCkiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjA1MGZiMjM5LTVkMGUtNDc0ZC1hMzBkLTU0OWNhMjk0ZjM0YyIgc3RFdnQ6d2hlbj0iMjAyNC0wMS0yNFQxODo0Nzo0NyswMDowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDI0LjAgKE1hY2ludG9zaCkiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+wZXPWAAAABJJREFUeJztwTEBAAAAwqD1T20ND6AAAAA+BgyAAAFsd0XxAAAAAElFTkSuQmCC';
+
 export const embedHeaderImage = async (pdfDoc: any, page: any) => {
   try {
     console.log('Starting header image embedding process...');
     const { width, height } = page.getSize();
     const yPosition = height - 100;
+
+    // Decode and embed the base64 image
+    const imageBytes = Uint8Array.from(atob(HEADER_IMAGE_BASE64), c => c.charCodeAt(0));
+    const headerImage = await pdfDoc.embedPng(imageBytes);
     
-    // Skip header image for now to simplify the process
-    console.log('Header image embedding skipped');
-    return yPosition;
+    // Calculate dimensions to maintain aspect ratio
+    const imgDims = headerImage.scale(0.5); // Scale down the image
+    const xPosition = (width - imgDims.width) / 2; // Center horizontally
+    
+    // Draw the image
+    page.drawImage(headerImage, {
+      x: xPosition,
+      y: yPosition,
+      width: imgDims.width,
+      height: imgDims.height,
+    });
+    
+    console.log('Header image embedded successfully');
+    return yPosition - imgDims.height - 20; // Return Y position for next content
   } catch (error) {
     console.error('Error in embedHeaderImage:', error);
     // Return a default Y position if header image fails
