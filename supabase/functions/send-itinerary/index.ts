@@ -71,7 +71,6 @@ const handler = async (req: Request): Promise<Response> => {
         );
       }
 
-      // Handle email sending if not just generating PDF
       if (!to || !Array.isArray(to) || to.length === 0) {
         throw new Error("No recipients specified for email");
       }

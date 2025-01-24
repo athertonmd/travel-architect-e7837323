@@ -3,25 +3,6 @@ import { drawText, drawDivider, createBasePDF, embedHeaderImage } from "./utils/
 import { addTripHeader } from "./sections/tripHeader.ts";
 import { addSegment } from "./sections/segmentHandler.ts";
 
-const sanitizeTripData = (trip: any) => {
-  console.log('Sanitizing trip data...');
-  try {
-    const sanitized = {
-      title: String(trip.title || ''),
-      destination: String(trip.destination || ''),
-      start_date: trip.start_date ? String(trip.start_date) : null,
-      end_date: trip.end_date ? String(trip.end_date) : null,
-      travelers: Number(trip.travelers) || 0,
-      segments: Array.isArray(trip.segments) ? trip.segments : []
-    };
-    console.log('Trip data sanitized successfully');
-    return sanitized;
-  } catch (error) {
-    console.error('Error sanitizing trip data:', error);
-    throw new Error('Failed to sanitize trip data');
-  }
-};
-
 export const generatePDF = async (trip: any) => {
   console.log('Starting PDF generation...');
   
@@ -29,21 +10,18 @@ export const generatePDF = async (trip: any) => {
     const { pdfDoc, page, font } = await createBasePDF();
     console.log('Created base PDF document');
     
-    const sanitizedTrip = sanitizeTripData(trip);
-    console.log('Sanitized trip data');
-    
     let yOffset = await embedHeaderImage(pdfDoc, page);
     console.log('Embedded header image');
     
-    yOffset = addTripHeader(page, sanitizedTrip, yOffset, font);
+    yOffset = addTripHeader(page, trip, yOffset, font);
     console.log('Added trip header');
 
-    if (sanitizedTrip.segments && sanitizedTrip.segments.length > 0) {
-      console.log(`Processing ${sanitizedTrip.segments.length} segments...`);
-      for (const segment of sanitizedTrip.segments) {
+    if (trip.segments && Array.isArray(trip.segments)) {
+      console.log(`Processing ${trip.segments.length} segments...`);
+      for (const segment of trip.segments) {
         try {
           if (segment.type?.toLowerCase() === 'traveller') {
-            console.log('Skipping traveller segment as it\'s shown in header');
+            console.log('Processing traveller segment');
             continue;
           }
           
@@ -55,7 +33,7 @@ export const generatePDF = async (trip: any) => {
             yOffset = newPage.getSize().height - 50;
           }
         } catch (segmentError) {
-          console.error('Error processing segment:', segment, segmentError);
+          console.error('Error processing segment:', segmentError);
           continue;
         }
       }
