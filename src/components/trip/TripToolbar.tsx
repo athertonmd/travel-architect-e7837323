@@ -46,7 +46,7 @@ export function TripToolbar({
         body: { 
           tripId, 
           generatePdfOnly: true,
-          to: [userEmail] // Always include the user's email
+          to: [userEmail] // Required by the function but not used for PDF generation
         }
       });
 
@@ -69,7 +69,7 @@ export function TripToolbar({
       
       toast.dismiss();
       toast.success("PDF downloaded successfully");
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error downloading PDF:', error);
       toast.dismiss();
       toast.error("Failed to generate PDF. Please try again.");
