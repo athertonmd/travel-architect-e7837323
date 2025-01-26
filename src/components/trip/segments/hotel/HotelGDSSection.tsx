@@ -32,6 +32,7 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
       country: hotel.country || "",
       telephone: hotel.telephone || "",
       website: hotel.website || "",
+      zipCode: hotel.zip_code || "", // Add zip code mapping
     });
   };
 
