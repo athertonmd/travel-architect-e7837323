@@ -9,10 +9,11 @@ export const createBasePDF = async () => {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage([595, 842]); // A4 size
   const font = await pdfDoc.embedFont(StandardFonts.Helvetica);
-  return { pdfDoc, page, font };
+  const boldFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+  return { pdfDoc, page, font, boldFont };
 };
 
-export const drawText = (page: any, text: string, x: number, y: number, font: any, fontSize: number) => {
+export const drawText = (page: any, text: string, x: number, y: number, font: any, fontSize: number, color = rgb(0, 0, 0)) => {
   if (!text || !page || !font) return;
   
   const safeText = String(text).trim();
@@ -23,19 +24,21 @@ export const drawText = (page: any, text: string, x: number, y: number, font: an
     y: Math.max(0, y),
     size: Math.max(1, fontSize),
     font,
-    color: rgb(0, 0, 0),
+    color,
   });
 };
 
-export const drawDivider = (page: any, y: number) => {
+export const drawDivider = (page: any, y: number, width = 495) => {
   if (!page || y < 0) return;
   
-  const { width } = page.getSize();
+  const pageWidth = page.getSize().width;
+  const startX = (pageWidth - width) / 2;
+  
   page.drawLine({
-    start: { x: 50, y },
-    end: { x: width - 50, y },
-    thickness: 1,
-    color: rgb(0, 0, 0.8),
+    start: { x: startX, y },
+    end: { x: startX + width, y },
+    thickness: 0.5,
+    color: rgb(0.8, 0.8, 0.8),
   });
 };
 
@@ -60,8 +63,8 @@ export const addHeader = async (pdfDoc: any, page: any, font: any, yPosition: nu
     const { width } = page.getSize();
     
     // Calculate image dimensions (scale down if needed)
-    const maxWidth = 200;
-    const maxHeight = 100;
+    const maxWidth = 150;
+    const maxHeight = 75;
     const scale = Math.min(
       maxWidth / image.width,
       maxHeight / image.height
@@ -80,11 +83,37 @@ export const addHeader = async (pdfDoc: any, page: any, font: any, yPosition: nu
       width: scaledWidth,
       height: scaledHeight,
     });
+
+    // Add a decorative line under the logo
+    drawDivider(page, yPosition - scaledHeight - 20);
     
-    // Return new Y position after image
-    return yPosition - scaledHeight - 20;
+    // Return new Y position after image and divider
+    return yPosition - scaledHeight - 40;
   } catch (error) {
     console.error('Error adding header image:', error);
     return yPosition - 40; // Return fallback position if image fails
   }
+};
+
+// Function to draw a section header
+export const drawSectionHeader = (page: any, text: string, y: number, font: any) => {
+  const { width } = page.getSize();
+  
+  // Draw section header text
+  drawText(page, text, 50, y, font, 14, rgb(0.1, 0.2, 0.4));
+  
+  // Draw divider under section header
+  drawDivider(page, y - 10);
+  
+  return y - 30; // Return new Y position after header
+};
+
+// Function to draw a detail row
+export const drawDetailRow = (page: any, label: string, value: string, y: number, font: any, boldFont: any) => {
+  if (!label || !value) return y;
+  
+  drawText(page, label + ":", 70, y, boldFont, 10, rgb(0.3, 0.3, 0.3));
+  drawText(page, value, 200, y, font, 10, rgb(0, 0, 0));
+  
+  return y - 20; // Return new Y position after row
 };
