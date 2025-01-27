@@ -23,6 +23,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
   const [isGenerating, setIsGenerating] = useState(false);
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isOpen, setIsOpen] = useState(false);
 
   const generatePdf = async () => {
     if (!tripId) {
@@ -44,7 +45,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
         body: { 
           tripId, 
           generatePdfOnly: true,
-          to: [userEmail] // Required by the function but not used for PDF generation
+          to: [userEmail]
         }
       });
 
@@ -70,19 +71,15 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     if (!pdfData) return;
     
     try {
-      // Convert base64 to Blob
       fetch(`data:application/pdf;base64,${pdfData}`)
         .then(res => res.blob())
         .then(blob => {
-          // Create download link
           const url = window.URL.createObjectURL(blob);
           const link = document.createElement('a');
           link.href = url;
           link.setAttribute('download', `${title.replace(/\s+/g, '-').toLowerCase()}-itinerary.pdf`);
           document.body.appendChild(link);
           link.click();
-          
-          // Cleanup
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
           toast.success("PDF downloaded successfully");
@@ -94,6 +91,13 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     } catch (error) {
       console.error('Error in download handler:', error);
       toast.error("Failed to download PDF. Please try again.");
+    }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    setIsOpen(open);
+    if (open && !pdfData && !isGenerating) {
+      generatePdf();
     }
   };
 
@@ -138,17 +142,16 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     return (
       <div className="flex flex-col items-center justify-center h-full gap-4">
         <FileText className="h-12 w-12 text-gray-400" />
-        <p className="text-gray-600">Click generate to preview the PDF</p>
+        <p className="text-gray-600">Opening preview...</p>
       </div>
     );
   };
 
   return (
-    <Dialog>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button
           className="bg-navy hover:bg-navy-light border border-white text-white"
-          onClick={() => !pdfData && generatePdf()}
         >
           <FileText className="mr-2 h-4 w-4" />
           PDF
