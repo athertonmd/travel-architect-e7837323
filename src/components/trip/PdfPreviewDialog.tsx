@@ -2,21 +2,16 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { FileText, AlertCircle, Loader2 } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { supabase } from "@/integrations/supabase/client";
 
 interface PdfPreviewDialogProps {
-  tripId: string;
+  tripId?: string;
   title: string;
-  userEmail: string | undefined;
+  userEmail?: string;
 }
 
 export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogProps) {
@@ -27,41 +22,36 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
 
   const generatePdf = async () => {
     if (!tripId) {
-      toast.error("Trip ID is required to generate PDF");
-      return;
-    }
-
-    if (!userEmail) {
-      toast.error("You must be logged in to download the PDF");
+      setError("Trip ID is required");
       return;
     }
 
     setIsGenerating(true);
     setError(null);
-    
+
     try {
-      console.log('Generating PDF for trip:', tripId);
-      const { data, error } = await supabase.functions.invoke('send-itinerary', {
-        body: { 
+      const response = await fetch("/api/send-itinerary", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ 
           tripId, 
           generatePdfOnly: true,
           to: [userEmail]
-        }
+        })
       });
 
-      if (error) throw error;
-      
-      if (!data?.pdf) {
-        throw new Error('No PDF data received from the server');
+      if (!response.ok) {
+        throw new Error(`Failed to generate PDF: ${response.statusText}`);
       }
-      
-      console.log('PDF generated successfully');
-      setPdfData(data.pdf);
-      
-    } catch (error: any) {
+
+      const data = await response.json();
+      setPdfData(data.pdfBase64);
+    } catch (error) {
       console.error('Error generating PDF:', error);
-      setError(error.message || "Failed to generate PDF");
-      toast.error("Failed to generate PDF. Please try again.");
+      setError("Failed to generate PDF. Please try again.");
+      toast.error("Failed to generate PDF");
     } finally {
       setIsGenerating(false);
     }
@@ -83,10 +73,6 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
           document.body.removeChild(link);
           window.URL.revokeObjectURL(url);
           toast.success("PDF downloaded successfully");
-        })
-        .catch(error => {
-          console.error('Error downloading PDF:', error);
-          toast.error("Failed to download PDF. Please try again.");
         });
     } catch (error) {
       console.error('Error in download handler:', error);
@@ -99,43 +85,51 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     if (open && !pdfData && !isGenerating) {
       generatePdf();
     }
+    if (!open) {
+      setPdfData(null);
+      setError(null);
+    }
   };
 
   const renderContent = () => {
-    if (isGenerating) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full gap-4">
-          <Loader2 className="h-8 w-8 animate-spin text-navy" />
-          <p className="text-gray-600">Generating preview...</p>
-        </div>
-      );
-    }
-
     if (error) {
       return (
         <div className="flex flex-col items-center justify-center h-full gap-4">
-          <AlertCircle className="h-12 w-12 text-red-500" />
-          <p className="text-gray-600">{error}</p>
-          <Button 
-            onClick={() => {
-              setError(null);
-              generatePdf();
-            }}
-            className="bg-navy hover:bg-navy-light text-white"
-          >
+          <FileText className="h-12 w-12 text-red-400" />
+          <p className="text-red-600">{error}</p>
+          <Button onClick={generatePdf} disabled={isGenerating}>
             Try Again
           </Button>
         </div>
       );
     }
 
+    if (isGenerating) {
+      return (
+        <div className="flex flex-col items-center justify-center h-full gap-4">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
+          <p className="text-gray-600">Generating PDF...</p>
+        </div>
+      );
+    }
+
     if (pdfData) {
       return (
-        <iframe 
-          src={`data:application/pdf;base64,${pdfData}`}
-          className="w-full h-full"
-          title="PDF Preview"
-        />
+        <div className="flex flex-col h-full">
+          <div className="flex-1 relative min-h-[500px]">
+            <iframe
+              src={`data:application/pdf;base64,${pdfData}`}
+              className="absolute inset-0 w-full h-full"
+              title="PDF Preview"
+            />
+          </div>
+          <div className="flex justify-end p-4 border-t">
+            <Button onClick={handleDownload}>
+              <FileText className="mr-2 h-4 w-4" />
+              Download PDF
+            </Button>
+          </div>
+        </div>
       );
     }
 
@@ -157,25 +151,8 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
           PDF
         </Button>
       </DialogTrigger>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>Trip Itinerary Preview</DialogTitle>
-          <DialogDescription>
-            Review your itinerary before downloading
-          </DialogDescription>
-        </DialogHeader>
-        <div className="h-[60vh] overflow-auto border rounded-md p-4 bg-gray-50">
-          {renderContent()}
-        </div>
-        <DialogFooter>
-          <Button
-            onClick={handleDownload}
-            disabled={!pdfData || isGenerating}
-            className="bg-navy hover:bg-navy-light text-white"
-          >
-            Download PDF
-          </Button>
-        </DialogFooter>
+      <DialogContent className="max-w-4xl h-[80vh]">
+        {renderContent()}
       </DialogContent>
     </Dialog>
   );
