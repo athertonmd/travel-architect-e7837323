@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
+import { generatePdfDocument } from "@/utils/pdf/pdfGenerationService";
+import { sendPdfViaEmail } from "@/utils/pdf/pdfEmailService";
+import { getAuthenticatedSession } from "@/utils/pdf/sessionUtils";
 
 interface UsePdfGenerationProps {
   tripId?: string;
@@ -21,81 +22,21 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
 
     setIsGenerating(true);
     setError(null);
-    console.log("Initiating PDF generation for trip:", tripId);
-
+    
     try {
-      // Get the current session
-      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-      
-      if (sessionError) {
-        console.error("Session error:", sessionError);
-        throw new Error("Authentication error");
-      }
+      const session = await getAuthenticatedSession();
+      const { pdfBase64 } = await generatePdfDocument(tripId, session.access_token);
+      setPdfData(pdfBase64);
 
-      if (!session) {
-        console.error("No active session found");
-        throw new Error("No active session");
-      }
-
-      console.log("Calling generate-pdf function with session token...");
-      const { data, error: functionError } = await supabase.functions.invoke(
-        'generate-pdf',
-        {
-          body: { tripId },
-          headers: {
-            Authorization: `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-        }
-      );
-
-      console.log("Response from generate-pdf function:", {
-        hasData: !!data,
-        hasError: !!functionError,
-        errorMessage: functionError?.message
-      });
-
-      if (functionError) {
-        console.error('Error from generate-pdf function:', functionError);
-        throw new Error(functionError.message || 'Failed to generate PDF');
-      }
-
-      if (!data?.pdfBase64) {
-        console.error('No PDF data in response:', data);
-        throw new Error("No PDF data received from the server");
-      }
-
-      console.log("PDF generated successfully");
-      setPdfData(data.pdfBase64);
-
-      // If email is provided, send the PDF
       if (userEmail) {
-        console.log("Sending PDF via email to:", userEmail);
-        const { error: emailError } = await supabase.functions.invoke("send-itinerary", {
-          body: {
-            tripId,
-            to: [userEmail],
-            pdfBase64: data.pdfBase64
-          }
-        });
-
-        if (emailError) {
-          console.error('Error sending email:', emailError);
-          toast.error("PDF generated but failed to send email. Please try again later.");
-        } else {
-          console.log("Email sent successfully");
-          toast.success("PDF generated and sent successfully!");
-        }
+        await sendPdfViaEmail(tripId, userEmail, pdfBase64);
       }
-
     } catch (error) {
       console.error('Error in PDF generation:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
       setError(errorMessage);
-      toast.error("Failed to generate PDF. Please try again later.");
     } finally {
       setIsGenerating(false);
-      console.log("PDF generation process completed");
     }
   };
 
