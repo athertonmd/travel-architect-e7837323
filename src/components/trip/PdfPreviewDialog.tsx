@@ -2,7 +2,8 @@ import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogTrigger,
+  DialogTitle,
+  DialogHeader,
 } from "@/components/ui/dialog";
 import { FileText } from "lucide-react";
 import { useState } from "react";
@@ -43,14 +44,18 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to generate PDF: ${response.statusText}`);
+        const errorData = await response.json();
+        throw new Error(errorData.error?.message || `Failed to generate PDF: ${response.statusText}`);
       }
 
       const data = await response.json();
+      if (!data.pdfBase64) {
+        throw new Error("Invalid PDF data received");
+      }
       setPdfData(data.pdfBase64);
     } catch (error) {
       console.error('Error generating PDF:', error);
-      setError("Failed to generate PDF. Please try again.");
+      setError(error instanceof Error ? error.message : "Failed to generate PDF. Please try again.");
       toast.error("Failed to generate PDF");
     } finally {
       setIsGenerating(false);
@@ -94,9 +99,9 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
   const renderContent = () => {
     if (error) {
       return (
-        <div className="flex flex-col items-center justify-center h-full gap-4">
+        <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
           <FileText className="h-12 w-12 text-red-400" />
-          <p className="text-red-600">{error}</p>
+          <p className="text-red-600 text-center">{error}</p>
           <Button onClick={generatePdf} disabled={isGenerating}>
             Try Again
           </Button>
@@ -106,7 +111,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
 
     if (isGenerating) {
       return (
-        <div className="flex flex-col items-center justify-center h-full gap-4">
+        <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
           <p className="text-gray-600">Generating PDF...</p>
         </div>
@@ -134,7 +139,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     }
 
     return (
-      <div className="flex flex-col items-center justify-center h-full gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
         <FileText className="h-12 w-12 text-gray-400" />
         <p className="text-gray-600">Opening preview...</p>
       </div>
@@ -143,15 +148,17 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
 
   return (
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>
-        <Button
-          className="bg-navy hover:bg-navy-light border border-white text-white"
-        >
-          <FileText className="mr-2 h-4 w-4" />
-          PDF
-        </Button>
-      </DialogTrigger>
+      <Button
+        onClick={() => setIsOpen(true)}
+        className="bg-navy hover:bg-navy-light border border-white text-white"
+      >
+        <FileText className="mr-2 h-4 w-4" />
+        PDF
+      </Button>
       <DialogContent className="max-w-4xl h-[80vh]">
+        <DialogHeader>
+          <DialogTitle>Trip Itinerary</DialogTitle>
+        </DialogHeader>
         {renderContent()}
       </DialogContent>
     </Dialog>

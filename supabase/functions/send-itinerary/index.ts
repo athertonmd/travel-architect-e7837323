@@ -60,7 +60,7 @@ const handler = async (req: Request): Promise<Response> => {
       if (generatePdfOnly) {
         const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
         return new Response(
-          JSON.stringify({ pdf: pdfBase64 }), 
+          JSON.stringify({ pdfBase64 }), 
           { 
             status: 200,
             headers: { 
@@ -91,7 +91,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     } catch (pdfError) {
       console.error("Error in PDF generation or email sending:", pdfError);
-      throw pdfError;
+      return createErrorResponse(pdfError);
     }
 
   } catch (error: any) {
