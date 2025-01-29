@@ -24,17 +24,32 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     console.log("Initiating PDF generation for trip:", tripId);
 
     try {
-      // First generate the PDF
+      // Get the current session
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+      
+      if (sessionError) {
+        console.error("Session error:", sessionError);
+        throw new Error("Authentication error");
+      }
+
+      if (!session) {
+        console.error("No active session found");
+        throw new Error("No active session");
+      }
+
       console.log("Calling generate-pdf function...");
       const { data: pdfResult, error: pdfError } = await supabase.functions.invoke("generate-pdf", {
         body: { tripId },
         headers: {
-          // Ensure we're sending the authorization header
-          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+          Authorization: `Bearer ${session.access_token}`
         }
       });
 
-      console.log("Response received from generate-pdf function:", { pdfResult, pdfError });
+      console.log("Response received from generate-pdf function:", { 
+        success: !!pdfResult,
+        hasError: !!pdfError,
+        dataReceived: !!pdfResult?.pdfBase64
+      });
 
       if (pdfError) {
         console.error('Error generating PDF:', pdfError);
@@ -81,6 +96,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
   };
 
   const resetPdfState = () => {
+    console.log("Resetting PDF state");
     setPdfData(null);
     setError(null);
   };

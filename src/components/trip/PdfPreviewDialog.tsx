@@ -29,18 +29,23 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
   } = usePdfGeneration({ tripId, userEmail });
 
   const handleOpenChange = (open: boolean) => {
-    console.log("Dialog open state changing to:", open);
+    console.log("PDF Dialog open state changing to:", open);
+    console.log("Current state - pdfData:", !!pdfData, "isGenerating:", isGenerating);
+    
     setIsOpen(open);
     if (open && !pdfData && !isGenerating) {
+      console.log("Initiating PDF generation for trip:", tripId);
       generatePdf();
     }
     if (!open) {
+      console.log("Closing dialog, resetting PDF state");
       resetPdfState();
     }
   };
 
   const renderContent = () => {
     if (error) {
+      console.log("Rendering error state:", error);
       return (
         <PdfErrorState 
           error={error}
@@ -51,13 +56,16 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     }
 
     if (isGenerating) {
+      console.log("Rendering loading state - generating PDF");
       return <PdfLoadingState message="Generating your PDF, please wait..." />;
     }
 
     if (pdfData) {
+      console.log("Rendering PDF viewer with data");
       return <PdfViewer pdfData={pdfData} title={title} />;
     }
 
+    console.log("Rendering initial loading state");
     return <PdfLoadingState message="Opening preview..." />;
   };
 
