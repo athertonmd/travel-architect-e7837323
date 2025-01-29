@@ -1,7 +1,8 @@
-import { Session } from '@supabase/supabase-js';
 import { supabase } from "@/integrations/supabase/client";
 
-export async function getAuthenticatedSession(): Promise<Session> {
+export async function getAuthenticatedSession() {
+  console.log("Getting authenticated session...");
+  
   const { data: { session }, error: sessionError } = await supabase.auth.getSession();
   
   if (sessionError) {
@@ -14,5 +15,6 @@ export async function getAuthenticatedSession(): Promise<Session> {
     throw new Error("No active session");
   }
 
+  console.log("Session retrieved successfully");
   return session;
 }
