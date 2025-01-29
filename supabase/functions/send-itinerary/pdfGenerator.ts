@@ -2,20 +2,28 @@ import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { drawText, drawDivider, createBasePDF, addHeader, drawSectionHeader, drawDetailRow } from "./utils/pdfUtils.ts";
 
 export const generatePDF = async (trip: any) => {
+  console.log("Starting PDF generation for trip:", trip.title);
+  
   try {
     const { pdfDoc, page, font, boldFont } = await createBasePDF();
+    console.log("Base PDF created successfully");
+    
     let yOffset = page.getSize().height - 50;
 
     // Add header with image
+    console.log("Adding header...");
     yOffset = await addHeader(pdfDoc, page, font, yOffset);
+    console.log("Header added successfully");
     
     // Add trip title
     if (trip.title) {
+      console.log("Adding trip title:", trip.title);
       drawText(page, trip.title, 50, yOffset, boldFont, 18, rgb(0.1, 0.2, 0.4));
       yOffset -= 30;
     }
 
     // Add trip details section
+    console.log("Adding trip details section...");
     yOffset = drawSectionHeader(page, "Trip Details", yOffset, boldFont);
 
     // Add destination and dates
@@ -32,19 +40,20 @@ export const generatePDF = async (trip: any) => {
 
     // Process segments
     if (Array.isArray(trip.segments)) {
+      console.log("Processing trip segments...");
       for (const segment of trip.segments) {
         if (!segment?.type) continue;
 
         // Check if we need a new page
         if (yOffset < 100) {
+          console.log("Adding new page...");
           page = pdfDoc.addPage();
           yOffset = page.getSize().height - 50;
         }
 
-        // Draw segment header
+        console.log("Adding segment:", segment.type);
         yOffset = drawSectionHeader(page, segment.type.toUpperCase(), yOffset, boldFont);
 
-        // Draw segment details
         if (segment.details && typeof segment.details === 'object') {
           for (const [key, value] of Object.entries(segment.details)) {
             if (value && typeof value !== 'object') {
@@ -56,9 +65,11 @@ export const generatePDF = async (trip: any) => {
 
         yOffset -= 20;
       }
+      console.log("All segments processed successfully");
     }
 
     // Add page numbers
+    console.log("Adding page numbers...");
     const pageCount = pdfDoc.getPageCount();
     for (let i = 0; i < pageCount; i++) {
       const currentPage = pdfDoc.getPage(i);
@@ -73,7 +84,10 @@ export const generatePDF = async (trip: any) => {
       );
     }
 
-    return await pdfDoc.save();
+    console.log("Saving PDF document...");
+    const pdfBytes = await pdfDoc.save();
+    console.log("PDF document saved successfully, size:", pdfBytes.length, "bytes");
+    return pdfBytes;
   } catch (error) {
     console.error('Error in PDF generation:', error);
     throw new Error(`PDF generation failed: ${error.message}`);
