@@ -8,6 +8,9 @@ import {
 import { FileText } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { PdfViewer } from "./pdf/PdfViewer";
+import { PdfLoadingState } from "./pdf/PdfLoadingState";
+import { PdfErrorState } from "./pdf/PdfErrorState";
 
 interface PdfPreviewDialogProps {
   tripId?: string;
@@ -62,29 +65,6 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     }
   };
 
-  const handleDownload = () => {
-    if (!pdfData) return;
-    
-    try {
-      fetch(`data:application/pdf;base64,${pdfData}`)
-        .then(res => res.blob())
-        .then(blob => {
-          const url = window.URL.createObjectURL(blob);
-          const link = document.createElement('a');
-          link.href = url;
-          link.setAttribute('download', `${title.replace(/\s+/g, '-').toLowerCase()}-itinerary.pdf`);
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-          window.URL.revokeObjectURL(url);
-          toast.success("PDF downloaded successfully");
-        });
-    } catch (error) {
-      console.error('Error in download handler:', error);
-      toast.error("Failed to download PDF. Please try again.");
-    }
-  };
-
   const handleOpenChange = (open: boolean) => {
     setIsOpen(open);
     if (open && !pdfData && !isGenerating) {
@@ -99,51 +79,23 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
   const renderContent = () => {
     if (error) {
       return (
-        <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
-          <FileText className="h-12 w-12 text-red-400" />
-          <p className="text-red-600 text-center">{error}</p>
-          <Button onClick={generatePdf} disabled={isGenerating}>
-            Try Again
-          </Button>
-        </div>
+        <PdfErrorState 
+          error={error}
+          onRetry={generatePdf}
+          isGenerating={isGenerating}
+        />
       );
     }
 
     if (isGenerating) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-900" />
-          <p className="text-gray-600">Generating PDF...</p>
-        </div>
-      );
+      return <PdfLoadingState message="Generating PDF..." />;
     }
 
     if (pdfData) {
-      return (
-        <div className="flex flex-col h-full">
-          <div className="flex-1 relative min-h-[500px]">
-            <iframe
-              src={`data:application/pdf;base64,${pdfData}`}
-              className="absolute inset-0 w-full h-full"
-              title="PDF Preview"
-            />
-          </div>
-          <div className="flex justify-end p-4 border-t">
-            <Button onClick={handleDownload}>
-              <FileText className="mr-2 h-4 w-4" />
-              Download PDF
-            </Button>
-          </div>
-        </div>
-      );
+      return <PdfViewer pdfData={pdfData} title={title} />;
     }
 
-    return (
-      <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
-        <FileText className="h-12 w-12 text-gray-400" />
-        <p className="text-gray-600">Opening preview...</p>
-      </div>
-    );
+    return <PdfLoadingState message="Opening preview..." />;
   };
 
   return (
