@@ -23,6 +23,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     console.log("Starting PDF generation for trip:", tripId);
     setIsGenerating(true);
     setError(null);
+    setPdfData(null);
     
     try {
       console.log("Getting authenticated session");
@@ -30,7 +31,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       console.log("Session obtained, generating PDF document");
       
       const { pdfBase64 } = await generatePdfDocument(tripId, session.access_token);
-      console.log("PDF document generated successfully");
+      console.log("PDF document generated successfully, data length:", pdfBase64.length);
       setPdfData(pdfBase64);
 
       if (userEmail) {
@@ -42,6 +43,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       console.error('Error in PDF generation:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
       setError(errorMessage);
+      setPdfData(null);
     } finally {
       console.log("PDF generation process completed");
       setIsGenerating(false);

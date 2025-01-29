@@ -56,18 +56,14 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       );
     }
 
-    if (isGenerating) {
-      console.log("Rendering loading state - generating PDF");
-      return <PdfLoadingState message="Generating your PDF, please wait..." />;
+    if (isGenerating || !pdfData) {
+      const message = isGenerating ? "Generating your PDF, please wait..." : "Opening preview...";
+      console.log("Rendering loading state:", message);
+      return <PdfLoadingState message={message} />;
     }
 
-    if (pdfData) {
-      console.log("Rendering PDF viewer with data length:", pdfData.length);
-      return <PdfViewer pdfData={pdfData} title={title} />;
-    }
-
-    console.log("Rendering initial loading state");
-    return <PdfLoadingState message="Opening preview..." />;
+    console.log("Rendering PDF viewer with data length:", pdfData.length);
+    return <PdfViewer pdfData={pdfData} title={title} />;
   };
 
   return (
