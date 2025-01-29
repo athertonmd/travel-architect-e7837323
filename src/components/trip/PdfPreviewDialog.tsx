@@ -28,6 +28,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
 
   const generatePdf = async () => {
     if (!tripId) {
+      console.error("No trip ID provided");
       setError("Trip ID is required");
       return;
     }
@@ -37,18 +38,16 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     console.log("Initiating PDF generation for trip:", tripId);
 
     try {
-      console.log("Calling send-itinerary function with params:", {
+      const params = {
         tripId,
         generatePdfOnly: true,
-        to: userEmail ? [userEmail] : [],
-      });
+        to: userEmail ? [userEmail] : []
+      };
+      
+      console.log("Calling send-itinerary function with params:", params);
 
       const { data, error: functionError } = await supabase.functions.invoke("send-itinerary", {
-        body: {
-          tripId,
-          generatePdfOnly: true,
-          to: userEmail ? [userEmail] : []
-        },
+        body: params,
       });
 
       console.log("Function response:", { data, error: functionError });
