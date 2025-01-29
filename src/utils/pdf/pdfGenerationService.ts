@@ -11,24 +11,23 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
     // Log the request details
     console.log("Making request to generate-pdf function with:", {
       tripId,
-      hasSessionToken: !!sessionToken
+      hasSessionToken: !!sessionToken,
+      functionUrl: `${supabase.functions.url}/generate-pdf`
     });
 
-    const { data, error } = await supabase.functions.invoke(
-      'generate-pdf',
-      {
-        body: { tripId },
-        headers: {
-          Authorization: `Bearer ${sessionToken}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    );
+    const { data, error } = await supabase.functions.invoke('generate-pdf', {
+      body: { tripId },
+      headers: {
+        Authorization: `Bearer ${sessionToken}`,
+        'Content-Type': 'application/json',
+      },
+    });
 
     console.log("Response from generate-pdf function:", {
       hasData: !!data,
       hasError: !!error,
-      errorDetails: error
+      errorDetails: error,
+      responseData: data
     });
 
     if (error) {
