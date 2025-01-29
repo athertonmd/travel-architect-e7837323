@@ -24,43 +24,45 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     console.log("Initiating PDF generation for trip:", tripId);
 
     try {
-      const params = {
-        tripId,
-        generatePdfOnly: true,
-        to: userEmail ? [userEmail] : []
-      };
-      
-      console.log("Preparing to call send-itinerary function with params:", params);
-
-      // Add authorization header explicitly
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
-        throw new Error("No active session found");
-      }
-
-      console.log("Calling send-itinerary function...");
-      const { data, error: functionError } = await supabase.functions.invoke("send-itinerary", {
-        body: params,
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-        }
+      // First generate the PDF
+      console.log("Calling generate-pdf function...");
+      const { data: pdfResult, error: pdfError } = await supabase.functions.invoke("generate-pdf", {
+        body: { tripId }
       });
 
-      console.log("Function response received:", { data, error: functionError });
-
-      if (functionError) {
-        console.error('Supabase function error:', functionError);
-        throw new Error(functionError.message || 'Failed to generate PDF');
+      if (pdfError) {
+        console.error('Error generating PDF:', pdfError);
+        throw new Error(pdfError.message || 'Failed to generate PDF');
       }
 
-      if (!data?.pdfBase64) {
-        console.error('No PDF data in response:', data);
+      if (!pdfResult?.pdfBase64) {
+        console.error('No PDF data in response:', pdfResult);
         throw new Error("No PDF data received from the server");
       }
 
-      console.log("PDF data received, length:", data.pdfBase64.length);
-      setPdfData(data.pdfBase64);
-      console.log("PDF data set successfully");
+      console.log("PDF generated successfully");
+      setPdfData(pdfResult.pdfBase64);
+
+      // If email is provided, send the PDF
+      if (userEmail) {
+        console.log("Sending PDF via email to:", userEmail);
+        const { error: emailError } = await supabase.functions.invoke("send-itinerary", {
+          body: {
+            tripId,
+            to: [userEmail],
+            pdfBase64: pdfResult.pdfBase64
+          }
+        });
+
+        if (emailError) {
+          console.error('Error sending email:', emailError);
+          toast.error("PDF generated but failed to send email. Please try again later.");
+        } else {
+          console.log("Email sent successfully");
+          toast.success("PDF generated and sent successfully!");
+        }
+      }
+
     } catch (error) {
       console.error('Error in PDF generation:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
