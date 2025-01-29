@@ -27,8 +27,14 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       // First generate the PDF
       console.log("Calling generate-pdf function...");
       const { data: pdfResult, error: pdfError } = await supabase.functions.invoke("generate-pdf", {
-        body: { tripId }
+        body: { tripId },
+        headers: {
+          // Ensure we're sending the authorization header
+          Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token}`
+        }
       });
+
+      console.log("Response received from generate-pdf function:", { pdfResult, pdfError });
 
       if (pdfError) {
         console.error('Error generating PDF:', pdfError);
