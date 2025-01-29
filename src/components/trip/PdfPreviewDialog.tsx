@@ -34,40 +34,51 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
 
     setIsGenerating(true);
     setError(null);
-    console.log("Generating PDF for trip:", tripId);
+    console.log("Initiating PDF generation for trip:", tripId);
 
     try {
-      const { data, error } = await supabase.functions.invoke("send-itinerary", {
+      console.log("Calling send-itinerary function with params:", {
+        tripId,
+        generatePdfOnly: true,
+        to: userEmail ? [userEmail] : [],
+      });
+
+      const { data, error: functionError } = await supabase.functions.invoke("send-itinerary", {
         body: {
           tripId,
           generatePdfOnly: true,
-          to: [userEmail]
+          to: userEmail ? [userEmail] : []
         },
       });
 
-      if (error) {
-        console.error('Supabase function error:', error);
-        throw error;
+      console.log("Function response:", { data, error: functionError });
+
+      if (functionError) {
+        console.error('Supabase function error:', functionError);
+        throw new Error(functionError.message || 'Failed to generate PDF');
       }
 
-      console.log("Received response from PDF generation:", data);
-
       if (!data?.pdfBase64) {
+        console.error('No PDF data in response:', data);
         throw new Error("No PDF data received from the server");
       }
 
+      console.log("PDF data received, length:", data.pdfBase64.length);
       setPdfData(data.pdfBase64);
       console.log("PDF data set successfully");
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      setError(error instanceof Error ? error.message : "Failed to generate PDF. Please try again.");
+      console.error('Error in PDF generation:', error);
+      const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
+      setError(errorMessage);
       toast.error("Failed to generate PDF. Please try again later.");
     } finally {
       setIsGenerating(false);
+      console.log("PDF generation process completed");
     }
   };
 
   const handleOpenChange = (open: boolean) => {
+    console.log("Dialog open state changing to:", open);
     setIsOpen(open);
     if (open && !pdfData && !isGenerating) {
       generatePdf();
