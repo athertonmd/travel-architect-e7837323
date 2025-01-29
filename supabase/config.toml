@@ -12,6 +12,6 @@ port = 54322
 enabled = true
 port = 54323
 
-[[functions]]
-name = "generate-pdf"
+[functions]
+[functions.generate-pdf]
 verify_jwt = true
