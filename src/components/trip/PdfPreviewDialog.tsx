@@ -30,11 +30,12 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
 
   const handleOpenChange = (open: boolean) => {
     console.log("PDF Dialog open state changing to:", open);
-    console.log("Current state - pdfData:", !!pdfData, "isGenerating:", isGenerating);
+    console.log("Current state - tripId:", tripId, "userEmail:", userEmail);
+    console.log("PDF generation state:", { isGenerating, hasPdfData: !!pdfData, error });
     
     setIsOpen(open);
     if (open && !pdfData && !isGenerating) {
-      console.log("Initiating PDF generation for trip:", tripId);
+      console.log("Initiating PDF generation");
       generatePdf();
     }
     if (!open) {
@@ -61,7 +62,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     }
 
     if (pdfData) {
-      console.log("Rendering PDF viewer with data");
+      console.log("Rendering PDF viewer with data length:", pdfData.length);
       return <PdfViewer pdfData={pdfData} title={title} />;
     }
 

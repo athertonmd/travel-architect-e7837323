@@ -15,27 +15,35 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
 
   const generatePdf = async () => {
     if (!tripId) {
-      console.error("No trip ID provided");
+      console.error("No trip ID provided for PDF generation");
       setError("Trip ID is required");
       return;
     }
 
+    console.log("Starting PDF generation for trip:", tripId);
     setIsGenerating(true);
     setError(null);
     
     try {
+      console.log("Getting authenticated session");
       const session = await getAuthenticatedSession();
+      console.log("Session obtained, generating PDF document");
+      
       const { pdfBase64 } = await generatePdfDocument(tripId, session.access_token);
+      console.log("PDF document generated successfully");
       setPdfData(pdfBase64);
 
       if (userEmail) {
+        console.log("Sending PDF via email to:", userEmail);
         await sendPdfViaEmail(tripId, userEmail, pdfBase64);
+        console.log("PDF email sent successfully");
       }
     } catch (error) {
       console.error('Error in PDF generation:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
       setError(errorMessage);
     } finally {
+      console.log("PDF generation process completed");
       setIsGenerating(false);
     }
   };
