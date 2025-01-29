@@ -37,32 +37,36 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
         throw new Error("No active session");
       }
 
-      console.log("Calling generate-pdf function...");
-      const { data: pdfResult, error: pdfError } = await supabase.functions.invoke("generate-pdf", {
-        body: { tripId },
-        headers: {
-          Authorization: `Bearer ${session.access_token}`
+      console.log("Calling generate-pdf function with session token...");
+      const { data, error: functionError } = await supabase.functions.invoke(
+        'generate-pdf',
+        {
+          body: { tripId },
+          headers: {
+            Authorization: `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
         }
+      );
+
+      console.log("Response from generate-pdf function:", {
+        hasData: !!data,
+        hasError: !!functionError,
+        errorMessage: functionError?.message
       });
 
-      console.log("Response received from generate-pdf function:", { 
-        success: !!pdfResult,
-        hasError: !!pdfError,
-        dataReceived: !!pdfResult?.pdfBase64
-      });
-
-      if (pdfError) {
-        console.error('Error generating PDF:', pdfError);
-        throw new Error(pdfError.message || 'Failed to generate PDF');
+      if (functionError) {
+        console.error('Error from generate-pdf function:', functionError);
+        throw new Error(functionError.message || 'Failed to generate PDF');
       }
 
-      if (!pdfResult?.pdfBase64) {
-        console.error('No PDF data in response:', pdfResult);
+      if (!data?.pdfBase64) {
+        console.error('No PDF data in response:', data);
         throw new Error("No PDF data received from the server");
       }
 
       console.log("PDF generated successfully");
-      setPdfData(pdfResult.pdfBase64);
+      setPdfData(data.pdfBase64);
 
       // If email is provided, send the PDF
       if (userEmail) {
@@ -71,7 +75,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
           body: {
             tripId,
             to: [userEmail],
-            pdfBase64: pdfResult.pdfBase64
+            pdfBase64: data.pdfBase64
           }
         });
 
