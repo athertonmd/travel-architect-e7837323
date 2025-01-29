@@ -15,6 +15,8 @@ console.log("Edge function loaded and ready to handle requests");
 
 const handler = async (req: Request): Promise<Response> => {
   console.log("Received request to send-itinerary function");
+  console.log("Request method:", req.method);
+  console.log("Request headers:", Object.fromEntries(req.headers.entries()));
   
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
@@ -31,9 +33,11 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Missing Supabase configuration");
     }
 
+    console.log("Supabase configuration validated");
+
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
     const requestData = await req.json();
-    console.log("Request data:", requestData);
+    console.log("Parsed request data:", requestData);
     
     const { tripId, to, generatePdfOnly = false }: EmailRequest = requestData;
     console.log("Processing request for trip:", tripId, "generatePdfOnly:", generatePdfOnly);
