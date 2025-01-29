@@ -12,6 +12,7 @@ import { toast } from "sonner";
 import { PdfViewer } from "./pdf/PdfViewer";
 import { PdfLoadingState } from "./pdf/PdfLoadingState";
 import { PdfErrorState } from "./pdf/PdfErrorState";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PdfPreviewDialogProps {
   tripId?: string;
@@ -36,27 +37,19 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     console.log("Generating PDF for trip:", tripId);
 
     try {
-      const response = await fetch("/api/send-itinerary", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ 
-          tripId, 
+      const { data, error } = await supabase.functions.invoke("send-itinerary", {
+        body: {
+          tripId,
           generatePdfOnly: true,
           to: [userEmail]
-        })
+        },
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error?.message || `Failed to generate PDF: ${response.statusText}`);
-      }
+      if (error) throw error;
 
-      const data = await response.json();
-      console.log("Received response from PDF generation");
+      console.log("Received response from PDF generation:", data);
 
-      if (!data.pdfBase64) {
+      if (!data?.pdfBase64) {
         throw new Error("No PDF data received from the server");
       }
 
