@@ -9,11 +9,7 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
   
   try {
     // Log the request details
-    console.log("Making request to generate-pdf function with:", {
-      tripId,
-      hasSessionToken: !!sessionToken,
-      functionUrl: `${supabase.functions.url}/generate-pdf`
-    });
+    console.log("Making request to generate-pdf function");
 
     const { data, error } = await supabase.functions.invoke('generate-pdf', {
       body: { tripId },
