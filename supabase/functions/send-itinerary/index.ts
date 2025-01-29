@@ -11,10 +11,14 @@ interface EmailRequest {
   generatePdfOnly?: boolean;
 }
 
+console.log("Edge function loaded and ready to handle requests");
+
 const handler = async (req: Request): Promise<Response> => {
   console.log("Received request to send-itinerary function");
   
+  // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
+    console.log("Handling OPTIONS request");
     return new Response(null, { headers: corsHeaders });
   }
 

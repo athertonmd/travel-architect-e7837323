@@ -45,7 +45,10 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase function error:', error);
+        throw error;
+      }
 
       console.log("Received response from PDF generation:", data);
 
