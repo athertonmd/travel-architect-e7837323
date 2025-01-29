@@ -1,89 +1,51 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1'
+import { corsHeaders } from '../_shared/cors.ts'
 
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+console.log('Hello from generate-pdf function!')
 
-console.log("PDF generation function loaded and ready");
-
-const handler = async (req: Request): Promise<Response> => {
-  console.log("Received request to generate-pdf function");
-  
-  // Handle CORS preflight requests
-  if (req.method === "OPTIONS") {
-    console.log("Handling OPTIONS request");
-    return new Response(null, { headers: corsHeaders });
+serve(async (req) => {
+  // Handle CORS
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
   }
 
   try {
-    const { tripId } = await req.json();
-    console.log("Processing PDF request for trip:", tripId);
-    
+    // Parse the request body
+    const { tripId } = await req.json()
+    console.log('Received request for tripId:', tripId)
+
     if (!tripId) {
-      console.error("No trip ID provided");
-      throw new Error("Trip ID is required");
+      throw new Error('Trip ID is required')
     }
 
-    // Get Supabase client configuration
-    const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
-    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-    
-    if (!SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
-      console.error("Missing Supabase configuration");
-      throw new Error("Missing Supabase configuration");
-    }
+    // For now, return a simple base64 encoded PDF (just for testing)
+    // In production, you would generate a real PDF here
+    const mockPdfBase64 = 'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9udAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2JqCgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G'
 
-    const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-
-    console.log("Fetching trip data from database...");
-    const { data: trip, error: tripError } = await supabase
-      .from('trips')
-      .select('*')
-      .eq('id', tripId)
-      .single();
-
-    if (tripError) {
-      console.error("Error fetching trip:", tripError);
-      throw tripError;
-    }
-
-    if (!trip) {
-      console.error("No trip found with ID:", tripId);
-      throw new Error("Trip not found");
-    }
-
-    console.log("Trip data fetched successfully");
-
-    // For now, return a simple PDF (we can enhance this later)
-    const pdfBase64 = btoa("Sample PDF Content");
-    console.log("PDF generated successfully");
+    console.log('Returning mock PDF')
 
     return new Response(
-      JSON.stringify({ pdfBase64 }), 
-      { 
+      JSON.stringify({ pdfBase64: mockPdfBase64 }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
         status: 200,
-        headers: { 
-          ...corsHeaders, 
-          "Content-Type": "application/json" 
-        } 
-      }
-    );
-
-  } catch (error: any) {
-    console.error("Error in generate-pdf function:", error);
+      },
+    )
+  } catch (error) {
+    console.error('Error:', error.message)
     return new Response(
-      JSON.stringify({ error: error.message }), 
-      { 
-        status: 500,
-        headers: { 
-          ...corsHeaders, 
-          "Content-Type": "application/json" 
-        } 
-      }
-    );
+      JSON.stringify({ error: error.message }),
+      {
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json',
+        },
+        status: 400,
+      },
+    )
   }
-};
-
-serve(handler);
+})

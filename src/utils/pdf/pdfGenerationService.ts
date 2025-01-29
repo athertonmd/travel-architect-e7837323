@@ -8,6 +8,12 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
   console.log("Initiating PDF generation for trip:", tripId);
   
   try {
+    // Log the request details
+    console.log("Making request to generate-pdf function with:", {
+      tripId,
+      hasSessionToken: !!sessionToken
+    });
+
     const { data, error } = await supabase.functions.invoke(
       'generate-pdf',
       {
@@ -35,6 +41,7 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
       throw new Error("No PDF data received from the server");
     }
 
+    console.log("Successfully generated PDF");
     return data as GeneratePdfResponse;
   } catch (error) {
     console.error('Error in generatePdfDocument:', error);
