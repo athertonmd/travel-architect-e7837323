@@ -30,13 +30,23 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
         to: userEmail ? [userEmail] : []
       };
       
-      console.log("Calling send-itinerary function with params:", params);
+      console.log("Preparing to call send-itinerary function with params:", params);
 
+      // Add authorization header explicitly
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        throw new Error("No active session found");
+      }
+
+      console.log("Calling send-itinerary function...");
       const { data, error: functionError } = await supabase.functions.invoke("send-itinerary", {
         body: params,
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+        }
       });
 
-      console.log("Function response:", { data, error: functionError });
+      console.log("Function response received:", { data, error: functionError });
 
       if (functionError) {
         console.error('Supabase function error:', functionError);

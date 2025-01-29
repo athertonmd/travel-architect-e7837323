@@ -25,6 +25,14 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Verify JWT token
+    const authHeader = req.headers.get('Authorization');
+    if (!authHeader) {
+      console.error("No Authorization header found");
+      throw new Error("Missing Authorization header");
+    }
+    console.log("Authorization header present");
+
     const SUPABASE_URL = Deno.env.get("SUPABASE_URL");
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
     
@@ -36,7 +44,12 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Supabase configuration validated");
 
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY);
-    const requestData = await req.json();
+
+    // Parse request body
+    const requestBody = await req.text();
+    console.log("Raw request body:", requestBody);
+    
+    const requestData = JSON.parse(requestBody);
     console.log("Parsed request data:", requestData);
     
     const { tripId, to, generatePdfOnly = false }: EmailRequest = requestData;
@@ -69,13 +82,15 @@ const handler = async (req: Request): Promise<Response> => {
     console.log("Trip data sanitized");
 
     try {
-      console.log("Generating PDF...");
+      console.log("Starting PDF generation...");
       const pdfBytes = await generatePDF(cleanTrip);
       console.log("PDF generated successfully, size:", pdfBytes.length, "bytes");
 
       if (generatePdfOnly) {
-        console.log("Returning PDF data only");
+        console.log("Converting PDF to base64...");
         const pdfBase64 = btoa(String.fromCharCode(...new Uint8Array(pdfBytes)));
+        console.log("PDF converted to base64, length:", pdfBase64.length);
+        
         return new Response(
           JSON.stringify({ pdfBase64 }), 
           { 
