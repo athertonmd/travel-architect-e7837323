@@ -4,6 +4,7 @@ import {
   DialogContent,
   DialogTitle,
   DialogHeader,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import { FileText } from "lucide-react";
 import { useState } from "react";
@@ -32,6 +33,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
 
     setIsGenerating(true);
     setError(null);
+    console.log("Generating PDF for trip:", tripId);
 
     try {
       const response = await fetch("/api/send-itinerary", {
@@ -52,14 +54,18 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       }
 
       const data = await response.json();
+      console.log("Received response from PDF generation");
+
       if (!data.pdfBase64) {
-        throw new Error("Invalid PDF data received");
+        throw new Error("No PDF data received from the server");
       }
+
       setPdfData(data.pdfBase64);
+      console.log("PDF data set successfully");
     } catch (error) {
       console.error('Error generating PDF:', error);
       setError(error instanceof Error ? error.message : "Failed to generate PDF. Please try again.");
-      toast.error("Failed to generate PDF");
+      toast.error("Failed to generate PDF. Please try again later.");
     } finally {
       setIsGenerating(false);
     }
@@ -88,7 +94,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     }
 
     if (isGenerating) {
-      return <PdfLoadingState message="Generating PDF..." />;
+      return <PdfLoadingState message="Generating your PDF, please wait..." />;
     }
 
     if (pdfData) {
@@ -110,6 +116,9 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       <DialogContent className="max-w-4xl h-[80vh]">
         <DialogHeader>
           <DialogTitle>Trip Itinerary</DialogTitle>
+          <DialogDescription>
+            Preview and download your trip itinerary in PDF format
+          </DialogDescription>
         </DialogHeader>
         {renderContent()}
       </DialogContent>

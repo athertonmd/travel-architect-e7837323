@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
+import { AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface PdfErrorStateProps {
   error: string;
@@ -9,11 +10,18 @@ interface PdfErrorStateProps {
 
 export function PdfErrorState({ error, onRetry, isGenerating }: PdfErrorStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center h-full gap-4 p-6">
-      <FileText className="h-12 w-12 text-red-400" />
-      <p className="text-red-600 text-center">{error}</p>
-      <Button onClick={onRetry} disabled={isGenerating}>
-        Try Again
+    <div className="flex flex-col items-center justify-center h-full gap-6 p-6">
+      <Alert variant="destructive" className="max-w-md">
+        <AlertCircle className="h-4 w-4" />
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+      <Button 
+        onClick={onRetry} 
+        disabled={isGenerating}
+        variant="outline"
+        className="min-w-[120px]"
+      >
+        {isGenerating ? "Retrying..." : "Try Again"}
       </Button>
     </div>
   );
