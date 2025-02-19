@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 
@@ -14,7 +15,7 @@ export const HotelSearch = ({ value, onChange }: HotelSearchProps) => {
         placeholder="Search by name or location..."
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="pl-8"
+        className="pl-8 text-white placeholder:text-gray-400 bg-navy/50"
       />
     </div>
   );
