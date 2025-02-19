@@ -8,6 +8,7 @@ import { LimoSegmentForm } from "./LimoSegmentForm";
 import { TransferSegmentForm } from "./TransferSegmentForm";
 import { RestaurantSegmentForm } from "./RestaurantSegmentForm";
 import { ActivitySegmentForm } from "./ActivitySegmentForm";
+import { VipSegmentForm } from "./VipSegmentForm";
 import { DefaultSegmentForm } from "./DefaultSegmentForm";
 
 interface SegmentFormSelectorProps {
@@ -41,6 +42,9 @@ export function SegmentFormSelector({
       return <RestaurantSegmentForm details={details} onDetailsChange={onDetailsChange} />;
     case 'activity':
       return <ActivitySegmentForm details={details} onDetailsChange={onDetailsChange} />;
+    case 'vip':
+    case 'vip service':
+      return <VipSegmentForm details={details} onDetailsChange={onDetailsChange} />;
     default:
       return <DefaultSegmentForm details={details} onDetailsChange={onDetailsChange} />;
   }
