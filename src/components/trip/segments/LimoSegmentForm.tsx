@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SegmentDetails } from "@/types/segment";
@@ -50,6 +51,24 @@ export function LimoSegmentForm({ details, onDetailsChange }: LimoSegmentFormPro
             type="time"
             value={details.pickupTime as string || ""}
             onChange={(e) => handleInputChange("pickupTime", e.target.value)}
+            className="text-gray-700"
+          />
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        <Label className="text-blue-500">Expected Drop Off</Label>
+        <div className="flex gap-2">
+          <Input
+            type="date"
+            value={details.dropoffDate as string || ""}
+            onChange={(e) => handleInputChange("dropoffDate", e.target.value)}
+            className="text-gray-700"
+          />
+          <Input
+            type="time"
+            value={details.dropoffTime as string || ""}
+            onChange={(e) => handleInputChange("dropoffTime", e.target.value)}
             className="text-gray-700"
           />
         </div>
