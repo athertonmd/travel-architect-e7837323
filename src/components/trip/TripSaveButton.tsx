@@ -48,7 +48,6 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
         details: node.data.details || {}
       }));
 
-      // Get the location from the first segment's details if available
       const firstSegmentLocation = nodes[0]?.data?.details?.location || 
                                  nodes[0]?.data?.details?.destinationAirport || 
                                  "Unknown";
@@ -76,7 +75,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
   return (
     <Button 
       onClick={handleSaveTrip} 
-      className="bg-navy hover:bg-navy-light border border-white"
+      className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6"
     >
       Save Trip
     </Button>
