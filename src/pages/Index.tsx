@@ -25,8 +25,11 @@ const isValidStatus = (status: string): status is "draft" | "sent" => {
 
 const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
   if (!userId) {
+    console.log('No user ID provided to fetchTrips');
     return [];
   }
+
+  console.log('Fetching trips for user:', userId);
 
   const { data: trips, error } = await supabase
     .from('trips')
@@ -36,8 +39,11 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
     .order('created_at', { ascending: false });
 
   if (error) {
+    console.error('Error fetching trips:', error);
     throw error;
   }
+
+  console.log('Fetched trips:', trips);
 
   return trips?.map(trip => ({
     id: trip.id,
