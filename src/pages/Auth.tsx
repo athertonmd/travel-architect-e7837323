@@ -11,6 +11,16 @@ const Auth = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
+    // Check for existing session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session) {
+        navigate('/dashboard', { replace: true });
+      }
+    };
+    
+    checkSession();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       console.log('Auth state changed:', event, session);
       if (event === 'SIGNED_IN' && session) {
@@ -59,10 +69,6 @@ const Auth = () => {
               }}
               providers={[]}
               theme="light"
-              onError={(error) => {
-                console.error('Auth error:', error);
-                toast.error('Authentication failed. Please try again.');
-              }}
             />
           </div>
         </div>

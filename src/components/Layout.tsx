@@ -3,11 +3,32 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Navigate } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
-  const session = useSession();
+  const supabaseSession = useSession();
+  const [session, setSession] = useState(supabaseSession);
   const isAuthPage = location.pathname === "/auth";
+
+  useEffect(() => {
+    // Check for existing session on mount
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+    };
+    
+    checkSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   console.log('Layout render - session:', session ? 'exists' : 'none', 'path:', location.pathname);
 
