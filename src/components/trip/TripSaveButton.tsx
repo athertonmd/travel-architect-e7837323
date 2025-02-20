@@ -18,6 +18,8 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
   const user = useUser();
 
   const handleSaveTrip = async () => {
+    console.log('Save trip clicked', { user, title, nodes, travelers });
+
     if (!user) {
       toast.error("You must be logged in to save a trip");
       return;
@@ -29,13 +31,21 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
     }
 
     try {
-      const { data: profile } = await supabase
+      console.log('Fetching profile for user:', user.id);
+      const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
         .eq('id', user.id)
         .single();
 
+      if (profileError) {
+        console.error('Profile fetch error:', profileError);
+        toast.error("Error fetching profile");
+        return;
+      }
+
       if (!profile) {
+        console.error('No profile found for user:', user.id);
         toast.error("Profile not found");
         return;
       }
@@ -52,7 +62,15 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
                                  nodes[0]?.data?.details?.destinationAirport || 
                                  "Unknown";
 
-      const { error } = await supabase
+      console.log('Inserting trip:', {
+        user_id: profile.id,
+        title,
+        destination: firstSegmentLocation,
+        travelers,
+        segments
+      });
+
+      const { error: insertError } = await supabase
         .from('trips')
         .insert({
           user_id: profile.id,
@@ -62,7 +80,11 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
           segments: segments
         });
 
-      if (error) throw error;
+      if (insertError) {
+        console.error('Trip insert error:', insertError);
+        toast.error(insertError.message || "Failed to save trip");
+        return;
+      }
 
       toast.success("Trip saved successfully!");
       navigate('/dashboard');
