@@ -1,12 +1,13 @@
 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { format } from "date-fns";
+import { format, parse } from "date-fns";
 import { SegmentDetails } from "@/types/segment";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 
@@ -19,15 +20,19 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
   const [date, setDate] = useState<Date | undefined>(
     details.departureDate ? new Date(details.departureDate) : undefined
   );
-  const [time, setTime] = useState<string>(
-    details.departureDate ? format(new Date(details.departureDate), "HH:mm") : ""
+  const [hours, setHours] = useState<string>(
+    details.departureDate ? format(new Date(details.departureDate), "HH") : "00"
+  );
+  const [minutes, setMinutes] = useState<string>(
+    details.departureDate ? format(new Date(details.departureDate), "mm") : "00"
   );
 
   useEffect(() => {
     if (details.departureDate) {
       const newDate = new Date(details.departureDate);
       setDate(newDate);
-      setTime(format(newDate, "HH:mm"));
+      setHours(format(newDate, "HH"));
+      setMinutes(format(newDate, "mm"));
     }
   }, [details.departureDate]);
 
@@ -40,11 +45,8 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
-      const hours = time ? parseInt(time.split(':')[0]) : new Date().getHours();
-      const minutes = time ? parseInt(time.split(':')[1]) : new Date().getMinutes();
-      
       const newDate = new Date(selectedDate);
-      newDate.setHours(hours, minutes);
+      newDate.setHours(parseInt(hours), parseInt(minutes));
       
       console.log('Selected new date:', newDate);
       setDate(newDate);
@@ -52,18 +54,28 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
     }
   };
 
-  const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newTime = e.target.value;
-    setTime(newTime);
-    if (date && newTime) {
-      const [hours, minutes] = newTime.split(':');
+  const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
+    if (type === 'hours') {
+      setHours(value);
+    } else {
+      setMinutes(value);
+    }
+
+    if (date) {
       const newDate = new Date(date);
-      newDate.setHours(parseInt(hours), parseInt(minutes));
+      newDate.setHours(
+        type === 'hours' ? parseInt(value) : parseInt(hours),
+        type === 'minutes' ? parseInt(value) : parseInt(minutes)
+      );
       onDetailsChange("departureDate", newDate.toISOString());
     }
   };
 
   const formattedDate = date ? format(date, "MMMM d, yyyy") : "Pick a date";
+
+  // Generate hours and minutes arrays for the selectors
+  const hoursArray = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
+  const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
 
   return (
     <div className="grid gap-2">
@@ -98,12 +110,36 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
             />
           </PopoverContent>
         </Popover>
-        <Input
-          type="time"
-          value={time}
-          onChange={handleTimeChange}
-          className="w-[150px] text-gray-700"
-        />
+        
+        <div className="flex gap-1">
+          <Select value={hours} onValueChange={(value) => handleTimeChange('hours', value)}>
+            <SelectTrigger className="w-[70px]">
+              <SelectValue placeholder="HH" />
+            </SelectTrigger>
+            <SelectContent>
+              {hoursArray.map((hour) => (
+                <SelectItem key={hour} value={hour}>
+                  {hour}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          
+          <span className="flex items-center px-1">:</span>
+          
+          <Select value={minutes} onValueChange={(value) => handleTimeChange('minutes', value)}>
+            <SelectTrigger className="w-[70px]">
+              <SelectValue placeholder="MM" />
+            </SelectTrigger>
+            <SelectContent>
+              {minutesArray.map((minute) => (
+                <SelectItem key={minute} value={minute}>
+                  {minute}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
