@@ -36,7 +36,7 @@ const Index = () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
         if (mounted) {
-          console.log('Initial session loaded:', initialSession);
+          console.log('Initial session loaded:', initialSession?.user?.email);
           setSession(initialSession);
         }
       } catch (error) {
@@ -52,7 +52,7 @@ const Index = () => {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
       if (mounted) {
-        console.log('Auth state changed:', currentSession);
+        console.log('Auth state changed, new user email:', currentSession?.user?.email);
         setSession(currentSession);
       }
     });
@@ -70,11 +70,11 @@ const Index = () => {
     }
 
     try {
-      console.log('Fetching trips for user:', session.user.id);
-      const { data: trips, error } = await supabase
+      console.log('Fetching trips for user:', session.user.email);
+      
+      const { data: trips, error, count } = await supabase
         .from('trips')
-        .select('*')
-        .eq('user_id', session.user.id)
+        .select('*', { count: 'exact' })
         .eq('archived', false)
         .order('created_at', { ascending: false });
 
@@ -83,7 +83,8 @@ const Index = () => {
         throw error;
       }
 
-      console.log('Fetched trips:', trips);
+      console.log(`Fetched ${count} trips:`, trips);
+      
       return (trips || []).map(trip => ({
         id: trip.id,
         title: trip.title || '',
