@@ -14,28 +14,30 @@ export const useLogout = () => {
       const { data: { session } } = await supabase.auth.getSession();
       console.log("Current session state:", session ? "Active" : "No session");
       
-      // Always try to sign out, even if session check fails
-      const { error } = await supabase.auth.signOut({
-        scope: 'local' // Only clear current browser tab session
-      });
+      // Try both global and local signout
+      await supabase.auth.signOut({ scope: 'global' });
+      await supabase.auth.signOut({ scope: 'local' });
       
-      if (error && error.message !== 'Auth session missing!') {
-        // Only show error if it's not the "session missing" error
-        console.error("Error during logout:", error.message);
-        toast.error("Error during logout. Please try again.");
-        return;
-      }
+      // Force clear the Supabase session from localStorage
+      localStorage.removeItem('supabase.auth.token');
+      localStorage.removeItem('supabase.auth.expires_at');
       
-      // Consider logout successful even if session was already missing
+      // Clear all browser storage to be thorough
+      localStorage.clear();
+      sessionStorage.clear();
+      
       console.log("Successfully logged out!");
       toast.success("Successfully logged out!");
       
-      // Force a clean navigation to auth page
+      // Immediate navigation and force page reload to ensure clean state
       navigate('/auth', { replace: true });
+      window.location.reload();
       
     } catch (err) {
       console.error("Unexpected error during logout:", err);
       toast.error("An unexpected error occurred during logout.");
+      // Even if there's an error, try to redirect to auth
+      navigate('/auth', { replace: true });
     }
   };
 
