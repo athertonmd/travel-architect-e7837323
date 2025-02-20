@@ -35,12 +35,13 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
-      setDate(selectedDate);
-      // Preserve existing time if any, or default to current time
       const hours = time ? parseInt(time.split(':')[0]) : new Date().getHours();
       const minutes = time ? parseInt(time.split(':')[1]) : new Date().getMinutes();
+      
       const newDate = new Date(selectedDate);
       newDate.setHours(hours, minutes);
+      
+      setDate(selectedDate);
       onDetailsChange("departureDate", newDate.toISOString());
     }
   };
@@ -72,7 +73,11 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "MMMM d, yyyy") : <span>Pick a date</span>}
+              {date ? (
+                format(date, "MMMM d, yyyy")
+              ) : (
+                <span>Pick a date</span>
+              )}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
