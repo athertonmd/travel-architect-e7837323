@@ -2,34 +2,24 @@
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
+import { useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
 import { toast } from "sonner";
 
 const Auth = () => {
   const navigate = useNavigate();
-  const navigationAttemptedRef = useRef(false);
-  const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
 
   useEffect(() => {
-    // Only set up the subscription if we haven't already
-    if (!subscriptionRef.current) {
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-        if (event === 'SIGNED_IN' && session && !navigationAttemptedRef.current) {
-          navigationAttemptedRef.current = true;
-          navigate('/dashboard', { replace: true });
-        }
-      });
-
-      subscriptionRef.current = subscription;
-    }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state changed:', event, session);
+      if (event === 'SIGNED_IN' && session) {
+        navigate('/dashboard', { replace: true });
+      }
+    });
 
     return () => {
-      if (subscriptionRef.current) {
-        subscriptionRef.current.unsubscribe();
-        subscriptionRef.current = null;
-      }
+      subscription.unsubscribe();
     };
   }, [navigate]);
 
@@ -69,6 +59,10 @@ const Auth = () => {
               }}
               providers={[]}
               theme="light"
+              onError={(error) => {
+                console.error('Auth error:', error);
+                toast.error('Authentication failed. Please try again.');
+              }}
             />
           </div>
         </div>
