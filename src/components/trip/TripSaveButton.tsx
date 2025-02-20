@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useUser } from "@supabase/auth-helpers-react";
@@ -31,6 +32,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
       const { data: profile } = await supabase
         .from('profiles')
         .select('id')
+        .eq('id', user.id)
         .single();
 
       if (!profile) {
@@ -39,24 +41,26 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
       }
 
       const segments = nodes.map(node => ({
+        id: node.id,
         type: String(node.data.label).toLowerCase(),
-        details: node.data.details,
-        position: {
-          x: node.position.x,
-          y: node.position.y
-        }
+        icon: node.data.icon,
+        position: node.position,
+        details: node.data.details || {}
       }));
 
-      const firstSegmentLocation = nodes[0]?.data?.details?.location;
+      // Get the location from the first segment's details if available
+      const firstSegmentLocation = nodes[0]?.data?.details?.location || 
+                                 nodes[0]?.data?.details?.destinationAirport || 
+                                 "Unknown";
 
       const { error } = await supabase
         .from('trips')
         .insert({
           user_id: profile.id,
           title: title,
-          destination: firstSegmentLocation || "Unknown",
+          destination: firstSegmentLocation,
           travelers: travelers,
-          segments: segments as any
+          segments: segments
         });
 
       if (error) throw error;
@@ -64,7 +68,8 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
       toast.success("Trip saved successfully!");
       navigate('/dashboard');
     } catch (error: any) {
-      toast.error(error.message);
+      console.error('Error saving trip:', error);
+      toast.error(error.message || "Failed to save trip");
     }
   };
 
