@@ -64,7 +64,7 @@ export default function Notifications() {
             <TableHeader>
               <TableRow>
                 <TableHead>Trip Name</TableHead>
-                <TableHead>Recipients</TableHead>
+                <TableHead>Traveller</TableHead>
                 <TableHead>Sent By</TableHead>
                 <TableHead>Sent At</TableHead>
               </TableRow>
@@ -95,3 +95,4 @@ export default function Notifications() {
     </Layout>
   );
 }
+
