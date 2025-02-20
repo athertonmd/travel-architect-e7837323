@@ -16,15 +16,22 @@ interface HotelDatesSectionProps {
 }
 
 export function HotelDatesSection({ details, onDetailsChange }: HotelDatesSectionProps) {
-  const [checkInDate, setCheckInDate] = useState<Date | undefined>(
-    details.checkInDate ? new Date(details.checkInDate) : undefined
-  );
+  const [checkInDate, setCheckInDate] = useState<Date | undefined>(() => {
+    if (typeof details.checkInDate === 'string') {
+      return new Date(details.checkInDate);
+    }
+    return undefined;
+  });
+
+  const [checkOutDate, setCheckOutDate] = useState<Date | undefined>(() => {
+    if (typeof details.checkOutDate === 'string') {
+      return new Date(details.checkOutDate);
+    }
+    return undefined;
+  });
+
   const [checkInHours, setCheckInHours] = useState<string>("14");
   const [checkInMinutes, setCheckInMinutes] = useState<string>("00");
-  
-  const [checkOutDate, setCheckOutDate] = useState<Date | undefined>(
-    details.checkOutDate ? new Date(details.checkOutDate) : undefined
-  );
   const [checkOutHours, setCheckOutHours] = useState<string>("12");
   const [checkOutMinutes, setCheckOutMinutes] = useState<string>("00");
 
