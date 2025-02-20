@@ -5,19 +5,23 @@ import { HotelsRow } from "@/integrations/supabase/types/hotels";
 import { toast } from "sonner";
 import { useSession } from "@supabase/auth-helpers-react";
 
+type HotelInput = Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'> & {
+  name: string; // Ensure name is required
+};
+
 export function useHotelMutations() {
   const session = useSession();
   const queryClient = useQueryClient();
 
   const addHotelMutation = useMutation({
-    mutationFn: async (values: Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+    mutationFn: async (values: HotelInput) => {
       if (!session?.user?.id) {
         throw new Error('User must be logged in to add hotels');
       }
 
       const { data, error } = await supabase
         .from('hotels')
-        .insert([{ ...values, user_id: session.user.id }])
+        .insert({ ...values, user_id: session.user.id })
         .select()
         .single();
 
@@ -35,7 +39,7 @@ export function useHotelMutations() {
   });
 
   const updateHotelMutation = useMutation({
-    mutationFn: async (values: Omit<HotelsRow, 'created_at' | 'updated_at' | 'user_id'>) => {
+    mutationFn: async (values: HotelInput & { id: string }) => {
       if (!session?.user?.id) {
         throw new Error('User must be logged in to update hotels');
       }
