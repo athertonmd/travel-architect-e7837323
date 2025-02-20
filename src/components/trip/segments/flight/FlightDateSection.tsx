@@ -63,7 +63,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
         Departure Date and Time
       </Label>
       <div className="flex gap-2">
-        <Popover open={open} onOpenChange={setOpen}>
+        <Popover>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
