@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { useRef, useEffect } from 'react';
 import { ProtectedContent } from './ProtectedContent';
@@ -42,7 +43,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   useEffect(() => {
     isMountedRef.current = true;
 
-    // Only set up the subscription if we haven't already
     if (!subscriptionRef.current && isMountedRef.current) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
         if (!isMountedRef.current) return;
@@ -56,7 +56,6 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
       subscriptionRef.current = subscription;
     }
 
-    // Initial session check with a small delay
     const sessionCheckTimeout = setTimeout(handleSessionCheck, 1000);
 
     return () => {
@@ -70,5 +69,5 @@ export const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     };
   }, [navigate]);
 
-  return <ProtectedContent>{children}</ProtectedContent>;
+  return <>{children}</>;
 };

@@ -12,13 +12,14 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { useSession } from '@supabase/auth-helpers-react';
+import { Json } from "@/integrations/supabase/types";
 
 interface Notification {
   id: string;
   trip_id: string;
   sent_by: string;
   sent_at: string;
-  recipients: string[];
+  recipients: Json;
   trip: {
     title: string;
   } | null;
@@ -38,12 +39,12 @@ export default function Notifications() {
         .select(`
           *,
           trip:trips(title),
-          profiles:sent_by(username)
+          profiles:profiles!sent_notifications_sent_by_fkey(username)
         `)
         .order('sent_at', { ascending: false });
 
       if (error) throw error;
-      return (data || []) as Notification[];
+      return (data as unknown) as Notification[];
     },
     enabled: !!session
   });
@@ -77,7 +78,7 @@ export default function Notifications() {
                   <TableCell>
                     {Array.isArray(notification.recipients) 
                       ? notification.recipients.join(", ")
-                      : notification.recipients}
+                      : String(notification.recipients)}
                   </TableCell>
                   <TableCell>
                     {notification.profiles?.username || "Unknown User"}
