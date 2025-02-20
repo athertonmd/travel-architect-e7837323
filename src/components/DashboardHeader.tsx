@@ -3,10 +3,32 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
   const session = useSession();
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    // Get current session
+    const getCurrentSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user?.email) {
+        setUserEmail(session.user.email);
+      }
+    };
+
+    getCurrentSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUserEmail(session?.user?.email || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   return (
     <div className="flex justify-between items-center">
@@ -14,8 +36,8 @@ export function DashboardHeader() {
         <h1 className="text-3xl font-bold text-white">Travel Dashboard</h1>
         <div className="flex items-center gap-2">
           <p className="text-white mt-1">Manage your travel itineraries</p>
-          {session?.user?.email && (
-            <p className="text-white/70 mt-1">• {session.user.email}</p>
+          {userEmail && (
+            <p className="text-white/70 mt-1">• Logged in as {userEmail}</p>
           )}
         </div>
       </div>
