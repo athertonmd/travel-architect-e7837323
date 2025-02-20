@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/Layout";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { TripGrid } from "@/components/TripGrid";
@@ -7,6 +6,7 @@ import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { Navigate } from "react-router-dom";
 
 interface Trip {
   id: string;
@@ -32,27 +32,6 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
   console.log('Fetching trips for user:', userId);
 
-  // First, verify the current session
-  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-  
-  if (sessionError) {
-    console.error('Session error:', sessionError);
-    throw sessionError;
-  }
-
-  if (!session) {
-    console.error('No active session found');
-    return [];
-  }
-
-  // Log the current user's session information
-  console.log('Current session:', {
-    user: session.user.id,
-    email: session.user.email,
-    aud: session.user.aud
-  });
-
-  // Fetch trips with detailed logging
   const { data: trips, error } = await supabase
     .from('trips')
     .select('*')
@@ -87,7 +66,6 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 const Index = () => {
   const user = useUser();
 
-  // Log user information when it changes
   useEffect(() => {
     if (user) {
       console.log('Current user:', {
@@ -124,14 +102,20 @@ const Index = () => {
     console.log('Query state:', { isLoading, error: error ? 'Error present' : 'No error', tripsCount: trips.length });
   }, [isLoading, error, trips]);
 
-  return (
-    <Layout>
-      <div className="space-y-8">
-        <DashboardHeader />
-        <TripGrid trips={trips} isLoading={isLoading} />
-      </div>
-    </Layout>
-  );
+  // If on /dashboard route, show the dashboard
+  if (window.location.pathname === '/dashboard') {
+    return (
+      <Layout>
+        <div className="space-y-8">
+          <DashboardHeader />
+          <TripGrid trips={trips} isLoading={isLoading} />
+        </div>
+      </Layout>
+    );
+  }
+
+  // Otherwise, redirect to /dashboard
+  return <Navigate to="/dashboard" replace />;
 };
 
 export default Index;
