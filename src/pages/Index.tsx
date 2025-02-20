@@ -1,8 +1,9 @@
+
 import { Layout } from "@/components/Layout";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { TripGrid } from "@/components/TripGrid";
 import { supabase } from "@/integrations/supabase/client";
-import { useUser } from '@supabase/auth-helpers-react';
+import { useUser, useSession } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
@@ -24,12 +25,13 @@ const isValidStatus = (status: string): status is "draft" | "sent" => {
   return ["draft", "sent"].includes(status);
 };
 
-const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
-  if (!userId) {
-    console.log('No user ID provided to fetchTrips');
+const fetchTrips = async (session: any): Promise<Trip[]> => {
+  if (!session?.user?.id) {
+    console.log('No valid session for fetchTrips');
     return [];
   }
 
+  const userId = session.user.id;
   console.log('Fetching trips for user:', userId);
 
   const { data: trips, error } = await supabase
@@ -64,24 +66,18 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 };
 
 const Index = () => {
+  const session = useSession();
   const user = useUser();
 
   useEffect(() => {
-    if (user) {
-      console.log('Current user:', {
-        id: user.id,
-        email: user.email,
-        role: user.role
-      });
-    } else {
-      console.log('No user found');
-    }
-  }, [user]);
+    console.log('Session state:', session);
+    console.log('User state:', user);
+  }, [session, user]);
 
   const { data: trips = [], isLoading, error } = useQuery({
-    queryKey: ['trips', user?.id],
-    queryFn: () => fetchTrips(user?.id),
-    enabled: !!user?.id,
+    queryKey: ['trips', session?.user?.id],
+    queryFn: () => fetchTrips(session),
+    enabled: !!session?.user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
     retry: 3,
@@ -101,6 +97,11 @@ const Index = () => {
   useEffect(() => {
     console.log('Query state:', { isLoading, error: error ? 'Error present' : 'No error', tripsCount: trips.length });
   }, [isLoading, error, trips]);
+
+  // If there's no session, redirect to auth
+  if (!session) {
+    return <Navigate to="/auth" replace />;
+  }
 
   // If on /dashboard route, show the dashboard
   if (window.location.pathname === '/dashboard') {
