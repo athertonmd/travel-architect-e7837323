@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface FlightDateSectionProps {
   details: SegmentDetails;
@@ -23,21 +23,31 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
     details.departureDate ? format(new Date(details.departureDate), "HH:mm") : ""
   );
 
+  useEffect(() => {
+    if (details.departureDate) {
+      setDate(new Date(details.departureDate));
+      setTime(format(new Date(details.departureDate), "HH:mm"));
+    }
+  }, [details.departureDate]);
+
   const today = new Date();
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
     setDate(selectedDate);
-    if (selectedDate && time) {
-      const [hours, minutes] = time.split(':');
-      selectedDate.setHours(parseInt(hours), parseInt(minutes));
-      onDetailsChange("departureDate", selectedDate.toISOString());
+    if (selectedDate) {
+      const hours = time ? parseInt(time.split(':')[0]) : 0;
+      const minutes = time ? parseInt(time.split(':')[1]) : 0;
+      const newDate = new Date(selectedDate);
+      newDate.setHours(hours, minutes);
+      onDetailsChange("departureDate", newDate.toISOString());
     }
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setTime(e.target.value);
-    if (date && e.target.value) {
-      const [hours, minutes] = e.target.value.split(':');
+    const newTime = e.target.value;
+    setTime(newTime);
+    if (date && newTime) {
+      const [hours, minutes] = newTime.split(':');
       const newDate = new Date(date);
       newDate.setHours(parseInt(hours), parseInt(minutes));
       onDetailsChange("departureDate", newDate.toISOString());
@@ -60,7 +70,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "PPP") : <span>Pick a date</span>}
+              {date ? format(date, "MMMM d, yyyy") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
