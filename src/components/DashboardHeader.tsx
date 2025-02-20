@@ -30,6 +30,11 @@ export function DashboardHeader() {
     return () => subscription.unsubscribe();
   }, []);
 
+  const handleCreateTrip = () => {
+    console.log('Navigating to create trip page');
+    navigate('/trips/create');
+  };
+
   return (
     <div className="flex justify-between items-center">
       <div>
@@ -43,7 +48,7 @@ export function DashboardHeader() {
       </div>
       <Button 
         className="bg-navy hover:bg-navy-light border border-white"
-        onClick={() => navigate("/trips/create")}
+        onClick={handleCreateTrip}
       >
         <Plus className="h-4 w-4 mr-2" />
         Create New Trip
