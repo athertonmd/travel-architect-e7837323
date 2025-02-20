@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useSession } from '@supabase/auth-helpers-react';
@@ -5,19 +6,28 @@ import { Plus } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { HotelsRow } from "@/integrations/supabase/types/hotels";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { HotelForm } from "@/components/hotels/HotelForm";
 import { HotelsTable } from "@/components/hotels/HotelsTable";
 import { HotelSearch } from "@/components/hotels/HotelSearch";
+import { useNavigate } from "react-router-dom";
 
 const HotelBank = () => {
   const session = useSession();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedHotel, setSelectedHotel] = useState<HotelsRow | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (!session) {
+      console.log('No active session, redirecting to auth page');
+      navigate('/auth');
+    }
+  }, [session, navigate]);
 
   const { data: hotels = [], isLoading } = useQuery({
     queryKey: ['hotels'],
@@ -35,6 +45,7 @@ const HotelBank = () => {
       console.log('Fetched hotels:', data);
       return data;
     },
+    enabled: !!session?.user?.id, // Only run query when session is available
   });
 
   const filteredHotels = hotels.filter((hotel) => {
@@ -162,7 +173,13 @@ const HotelBank = () => {
   };
 
   if (!session) {
-    return null;
+    return (
+      <Layout>
+        <div className="flex items-center justify-center min-h-screen">
+          <p className="text-white">Loading...</p>
+        </div>
+      </Layout>
+    );
   }
 
   return (
