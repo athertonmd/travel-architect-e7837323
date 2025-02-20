@@ -3,6 +3,7 @@ import { useSession } from '@supabase/auth-helpers-react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { LoadingSkeleton } from '../LoadingSkeleton';
 
 export function ProtectedContent() {
   const session = useSession();
@@ -12,7 +13,16 @@ export function ProtectedContent() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Checking authentication...');
+        const { data: { session }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error('Auth check error:', error);
+          setIsAuthenticated(false);
+          return;
+        }
+
+        console.log('Session check result:', session ? 'Session found' : 'No session');
         setIsAuthenticated(!!session);
       } catch (error) {
         console.error('Auth check error:', error);
@@ -25,12 +35,18 @@ export function ProtectedContent() {
     checkAuth();
   }, []);
 
-  // Show nothing while checking authentication
+  // Show loading state while checking authentication
   if (isLoading) {
-    return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-navy">
+        <LoadingSkeleton />
+      </div>
+    );
   }
 
+  // Redirect to auth page if not authenticated
   if (!isAuthenticated) {
+    console.log('Not authenticated, redirecting to /auth');
     return <Navigate to="/auth" replace />;
   }
 
