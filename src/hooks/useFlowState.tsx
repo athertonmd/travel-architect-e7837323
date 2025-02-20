@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect } from "react";
 import { Node, useNodesState, useEdgesState, Connection, Edge, addEdge } from "@xyflow/react";
 import { SegmentNodeData } from "@/types/segment";
@@ -17,7 +18,11 @@ export function useFlowState(
     if (initialNodes.length > 0) {
       const timer = setTimeout(() => {
         const updatedNodes = reorganizeNodes(initialNodes);
-        setNodes(updatedNodes);
+        setNodes(currentNodes => {
+          // Prevent unnecessary updates
+          const hasChanged = JSON.stringify(currentNodes) !== JSON.stringify(updatedNodes);
+          return hasChanged ? updatedNodes : currentNodes;
+        });
         setEdges(updateEdges(updatedNodes));
       }, 50);
 
@@ -35,12 +40,19 @@ export function useFlowState(
     
     setNodes((currentNodes) => {
       const updatedNodes = reorganizeNodes(currentNodes);
-      setEdges(updateEdges(updatedNodes));
-      if (onNodesUpdate) {
-        onNodesUpdate(updatedNodes);
-        toast.success("Trip sequence updated");
+      // Only update if nodes have actually changed
+      const hasChanged = JSON.stringify(currentNodes) !== JSON.stringify(updatedNodes);
+      
+      if (hasChanged) {
+        setEdges(updateEdges(updatedNodes));
+        if (onNodesUpdate) {
+          onNodesUpdate(updatedNodes);
+          toast.success("Trip sequence updated");
+        }
+        return updatedNodes;
       }
-      return updatedNodes;
+      
+      return currentNodes;
     });
   }, [setNodes, setEdges, reorganizeNodes, updateEdges, readOnly, onNodesUpdate]);
 
