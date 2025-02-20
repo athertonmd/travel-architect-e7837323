@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Handle, Position } from "@xyflow/react";
 import { SegmentNodeData } from "@/types/segment";
@@ -8,6 +9,7 @@ export function SegmentNode({ data, id, selected }: {
   selected?: boolean 
 }) {
   const destinationAirport = data.details?.destinationAirport;
+  const destinationStation = data.details?.destinationStation;
   const hotelName = data.details?.hotelName;
   const provider = data.details?.provider as string | undefined;
   const travelerCount = Array.isArray(data.details?.traveller_names) ? data.details.traveller_names.length : 0;
@@ -29,6 +31,9 @@ export function SegmentNode({ data, id, selected }: {
           {data.details?.time && <span className="text-sm text-muted-foreground">({data.details.time})</span>}
           {data.label.toLowerCase() === 'flight' && destinationAirport && (
             <span className="text-sm text-muted-foreground">→ {destinationAirport}</span>
+          )}
+          {data.label.toLowerCase() === 'train' && destinationStation && (
+            <span className="text-sm text-muted-foreground">→ {destinationStation}</span>
           )}
           {data.label.toLowerCase() === 'hotel' && hotelName && (
             <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
