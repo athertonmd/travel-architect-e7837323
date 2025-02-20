@@ -1,3 +1,4 @@
+
 import { CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
 import { TripStatusBadge } from "./TripStatusBadge";
@@ -7,7 +8,7 @@ interface TripCardHeaderProps {
   id: string;
   title: string;
   destination: string;
-  status: "draft" | "in-progress" | "confirmed";
+  status: "draft" | "sent";
   onDelete: () => void;
   onArchive: () => void;
   archived?: boolean;

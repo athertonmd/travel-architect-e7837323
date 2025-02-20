@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { useState } from "react";
@@ -5,6 +6,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from '@supabase/auth-helpers-react';
 import { DialogContent } from "./itinerary/DialogContent";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface SendItineraryDialogProps {
   tripId: string;
@@ -16,6 +18,7 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
   const [isSending, setIsSending] = useState(false);
   const session = useSession();
   const userEmail = session?.user?.email;
+  const queryClient = useQueryClient();
   
   const handleSend = async () => {
     if (!userEmail) {
@@ -36,14 +39,26 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
 
     setIsSending(true);
     try {
-      const { data, error } = await supabase.functions.invoke("send-itinerary", {
+      // Send the itinerary
+      const { data, error: sendError } = await supabase.functions.invoke("send-itinerary", {
         body: {
           tripId,
           to: selectedEmails,
         },
       });
 
-      if (error) throw error;
+      if (sendError) throw sendError;
+      
+      // Update trip status to "sent"
+      const { error: updateError } = await supabase
+        .from('trips')
+        .update({ status: 'sent' })
+        .eq('id', tripId);
+
+      if (updateError) throw updateError;
+
+      // Invalidate queries to refresh UI
+      await queryClient.invalidateQueries({ queryKey: ['trips'] });
       
       console.log("Response from send-itinerary function:", data);
       toast.success("Itinerary sent successfully!");
