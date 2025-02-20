@@ -62,7 +62,11 @@ export function TripSaveButton({ title, nodes, travelers }: TripSaveButtonProps)
 
       console.log('Trip saved successfully:', trip);
       
+      // Immediately invalidate and refetch trips
       await queryClient.invalidateQueries({ queryKey: ['trips'] });
+      // Force a refetch
+      await queryClient.refetchQueries({ queryKey: ['trips'] });
+      
       toast.success("Trip saved successfully!");
       navigate('/dashboard');
     } catch (error: any) {
