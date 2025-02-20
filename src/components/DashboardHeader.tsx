@@ -2,17 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-import { useSession } from '@supabase/auth-helpers-react';
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function DashboardHeader() {
   const navigate = useNavigate();
-  const session = useSession();
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    // Get current session
     const getCurrentSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       if (session?.user?.email) {
@@ -22,7 +19,6 @@ export function DashboardHeader() {
 
     getCurrentSession();
 
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUserEmail(session?.user?.email || null);
     });
@@ -31,14 +27,7 @@ export function DashboardHeader() {
   }, []);
 
   const handleCreateTrip = () => {
-    console.log('Current location:', window.location.pathname);
-    console.log('Attempting to navigate to create trip page...');
-    try {
-      navigate('/trips/create', { replace: true });
-      console.log('Navigation completed');
-    } catch (error) {
-      console.error('Navigation error:', error);
-    }
+    navigate('/trips/create');
   };
 
   return (
