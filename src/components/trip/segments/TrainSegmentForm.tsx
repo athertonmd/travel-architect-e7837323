@@ -1,9 +1,9 @@
 
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { SegmentDetails } from "@/types/segment";
-import { DateTimePicker } from "./hotel/DateTimePicker";
 import { useState } from "react";
+import { TrainDateTime } from "./train/TrainDateTime";
+import { TrainStationInput } from "./train/TrainStationInput";
+import { useTimeState } from "./train/useTimeState";
 
 interface TrainSegmentFormProps {
   details: SegmentDetails;
@@ -25,33 +25,19 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
     return undefined;
   });
 
-  const [departureHours, setDepartureHours] = useState<string>(() => {
-    if (typeof details.departureTime === 'string') {
-      return details.departureTime.split(':')[0] || "09";
-    }
-    return "09";
-  });
+  const {
+    hours: departureHours,
+    minutes: departureMinutes,
+    setHours: setDepartureHours,
+    setMinutes: setDepartureMinutes
+  } = useTimeState(details.departureTime as string | undefined, "09", "00");
 
-  const [departureMinutes, setDepartureMinutes] = useState<string>(() => {
-    if (typeof details.departureTime === 'string') {
-      return details.departureTime.split(':')[1] || "00";
-    }
-    return "00";
-  });
-
-  const [arrivalHours, setArrivalHours] = useState<string>(() => {
-    if (typeof details.arrivalTime === 'string') {
-      return details.arrivalTime.split(':')[0] || "10";
-    }
-    return "10";
-  });
-
-  const [arrivalMinutes, setArrivalMinutes] = useState<string>(() => {
-    if (typeof details.arrivalTime === 'string') {
-      return details.arrivalTime.split(':')[1] || "00";
-    }
-    return "00";
-  });
+  const {
+    hours: arrivalHours,
+    minutes: arrivalMinutes,
+    setHours: setArrivalHours,
+    setMinutes: setArrivalMinutes
+  } = useTimeState(details.arrivalTime as string | undefined, "10", "00");
 
   const handleDepartureDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
@@ -136,91 +122,65 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-2">
-        <Label htmlFor="departureStation" className="text-blue-500">
-          Departure Station
-        </Label>
-        <Input
-          id="departureStation"
-          value={getStringValue(details.departureStation)}
-          onChange={(e) => handleInputChange("departureStation", e.target.value)}
-          placeholder="Enter departure station"
-        />
-      </div>
+      <TrainStationInput
+        id="departureStation"
+        label="Departure Station"
+        value={getStringValue(details.departureStation)}
+        onChange={(value) => handleInputChange("departureStation", value)}
+        placeholder="Enter departure station"
+      />
 
-      <div className="grid gap-2">
-        <Label className="text-blue-500">Departure Date and Time</Label>
-        <DateTimePicker
-          label="Departure"
-          date={departureDate}
-          hours={departureHours}
-          minutes={departureMinutes}
-          onDateSelect={handleDepartureDateSelect}
-          onTimeChange={handleDepartureTimeChange}
-          minDate={new Date()}
-        />
-      </div>
+      <TrainDateTime
+        label="Departure Date and Time"
+        date={departureDate}
+        hours={departureHours}
+        minutes={departureMinutes}
+        onDateSelect={handleDepartureDateSelect}
+        onTimeChange={handleDepartureTimeChange}
+        minDate={new Date()}
+      />
 
-      <div className="grid gap-2">
-        <Label htmlFor="trainOperator" className="text-blue-500">
-          Train Operator
-        </Label>
-        <Input
-          id="trainOperator"
-          value={getStringValue(details.trainOperator)}
-          onChange={(e) => handleInputChange("trainOperator", e.target.value)}
-          placeholder="Enter train operator"
-        />
-      </div>
+      <TrainStationInput
+        id="trainOperator"
+        label="Train Operator"
+        value={getStringValue(details.trainOperator)}
+        onChange={(value) => handleInputChange("trainOperator", value)}
+        placeholder="Enter train operator"
+      />
 
-      <div className="grid gap-2">
-        <Label htmlFor="destinationStation" className="text-blue-500">
-          Destination Station
-        </Label>
-        <Input
-          id="destinationStation"
-          value={getStringValue(details.destinationStation)}
-          onChange={(e) => handleInputChange("destinationStation", e.target.value)}
-          placeholder="Enter destination station"
-        />
-      </div>
+      <TrainStationInput
+        id="destinationStation"
+        label="Destination Station"
+        value={getStringValue(details.destinationStation)}
+        onChange={(value) => handleInputChange("destinationStation", value)}
+        placeholder="Enter destination station"
+      />
 
-      <div className="grid gap-2">
-        <Label className="text-blue-500">Arrival Date and Time</Label>
-        <DateTimePicker
-          label="Arrival"
-          date={arrivalDate}
-          hours={arrivalHours}
-          minutes={arrivalMinutes}
-          onDateSelect={handleArrivalDateSelect}
-          onTimeChange={handleArrivalTimeChange}
-          minDate={departureDate}
-        />
-      </div>
+      <TrainDateTime
+        label="Arrival Date and Time"
+        date={arrivalDate}
+        hours={arrivalHours}
+        minutes={arrivalMinutes}
+        onDateSelect={handleArrivalDateSelect}
+        onTimeChange={handleArrivalTimeChange}
+        minDate={departureDate}
+      />
 
-      <div className="grid gap-2">
-        <Label htmlFor="ticketReference" className="text-blue-500">
-          Ticket Reference Number
-        </Label>
-        <Input
-          id="ticketReference"
-          value={getStringValue(details.ticketReference)}
-          onChange={(e) => handleInputChange("ticketReference", e.target.value)}
-          placeholder="Enter ticket reference number"
-        />
-      </div>
+      <TrainStationInput
+        id="ticketReference"
+        label="Ticket Reference Number"
+        value={getStringValue(details.ticketReference)}
+        onChange={(value) => handleInputChange("ticketReference", value)}
+        placeholder="Enter ticket reference number"
+      />
 
-      <div className="grid gap-2">
-        <Label htmlFor="ticketClass" className="text-blue-500">
-          Ticket Class
-        </Label>
-        <Input
-          id="ticketClass"
-          value={getStringValue(details.ticketClass)}
-          onChange={(e) => handleInputChange("ticketClass", e.target.value)}
-          placeholder="Enter ticket class"
-        />
-      </div>
+      <TrainStationInput
+        id="ticketClass"
+        label="Ticket Class"
+        value={getStringValue(details.ticketClass)}
+        onChange={(value) => handleInputChange("ticketClass", value)}
+        placeholder="Enter ticket class"
+      />
     </div>
   );
 }
