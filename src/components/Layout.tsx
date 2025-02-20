@@ -3,27 +3,11 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation, Navigate } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
-import { useEffect, useState } from 'react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const session = useSession();
   const isAuthPage = location.pathname === "/auth";
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Short timeout to ensure session is properly initialized
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 100);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Don't render anything while checking session
-  if (isLoading) {
-    return null;
-  }
 
   console.log('Layout render - session:', session ? 'exists' : 'none', 'path:', location.pathname);
 

@@ -16,10 +16,33 @@ import Archive from "@/pages/Archive";
 import ManageTravellers from "@/pages/ManageTravellers";
 import HotelBank from "@/pages/HotelBank";
 import Notifications from "@/pages/Notifications";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 
 const queryClient = new QueryClient();
 
 export default function App() {
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  useEffect(() => {
+    const initializeAuth = async () => {
+      // Wait for initial session check
+      await supabase.auth.getSession();
+      setIsInitialized(true);
+    };
+
+    initializeAuth();
+  }, []);
+
+  if (!isInitialized) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-navy">
+        <LoadingSkeleton />
+      </div>
+    );
+  }
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
