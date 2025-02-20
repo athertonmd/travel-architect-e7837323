@@ -86,8 +86,8 @@ export default function Notifications() {
                     {format(new Date(notification.sent_at), "PPpp")}
                   </TableCell>
                 </TableRow>
-              </TableBody>
-            </Table>
+              ))}
+            </TableBody>
           </Table>
         </div>
       </div>
