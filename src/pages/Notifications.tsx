@@ -21,10 +21,10 @@ interface Notification {
   recipients: string[];
   trip: {
     title: string;
-  };
+  } | null;
   profiles: {
-    username: string;
-  };
+    username: string | null;
+  } | null;
 }
 
 export default function Notifications() {
@@ -38,12 +38,12 @@ export default function Notifications() {
         .select(`
           *,
           trip:trips(title),
-          profiles:profiles!sent_notifications_sent_by_fkey(username)
+          profiles:sent_by(username)
         `)
         .order('sent_at', { ascending: false });
 
       if (error) throw error;
-      return data as Notification[];
+      return (data || []) as Notification[];
     },
     enabled: !!session
   });
