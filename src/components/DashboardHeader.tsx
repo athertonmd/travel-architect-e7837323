@@ -2,28 +2,14 @@
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { Link } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
+import { Session } from '@supabase/supabase-js';
 
-export function DashboardHeader() {
-  const [userEmail, setUserEmail] = useState<string | null>(null);
+interface DashboardHeaderProps {
+  session: Session;
+}
 
-  useEffect(() => {
-    const getCurrentSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user?.email) {
-        setUserEmail(session.user.email);
-      }
-    };
-
-    getCurrentSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUserEmail(session?.user?.email || null);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
+export function DashboardHeader({ session }: DashboardHeaderProps) {
+  const userEmail = session?.user?.email;
 
   return (
     <div className="flex justify-between items-center">

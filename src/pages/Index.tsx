@@ -5,7 +5,7 @@ import { TripGrid } from "@/components/TripGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import { Session } from '@supabase/supabase-js';
 
@@ -27,7 +27,19 @@ const isValidStatus = (status: string): status is "draft" | "sent" => {
 
 const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+
+  // Initialize session on mount
+  useState(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    return () => subscription.unsubscribe();
+  });
 
   const fetchTrips = useCallback(async () => {
     if (!session?.user?.id) {
@@ -63,36 +75,17 @@ const Index = () => {
     }
   }, [session?.user?.id]);
 
-  useEffect(() => {
-    const initializeSession = async () => {
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
-        setSession(currentSession);
-      } catch (error) {
-        console.error('Error getting session:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    initializeSession();
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
-  const { data: trips = [], isLoading: isLoadingTrips, error } = useQuery({
+  const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', session?.user?.id],
     queryFn: fetchTrips,
     enabled: !!session?.user?.id,
   });
 
-  // Handle loading state first
-  if (loading || isLoadingTrips) {
+  if (!session) {
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (isLoading) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-screen">
@@ -102,22 +95,15 @@ const Index = () => {
     );
   }
 
-  // Then handle authentication
-  if (!session) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  // Handle error state
   if (error) {
     console.error('Error in trips query:', error);
     toast.error('Unable to load trips. Please try again.');
   }
 
-  // Finally render the dashboard
   return (
     <Layout>
       <div className="space-y-8">
-        <DashboardHeader />
+        <DashboardHeader session={session} />
         <TripGrid trips={trips} isLoading={false} />
       </div>
     </Layout>
