@@ -69,15 +69,11 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               variant="outline"
               className={cn(
                 "w-[240px] justify-start text-left font-normal",
-                !date && "text-gray-600"
+                !date && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? (
-                format(date, "MMMM d, yyyy")
-              ) : (
-                <span>Pick a date</span>
-              )}
+              {date ? format(date, "MMMM d, yyyy") : "Pick a date"}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -85,8 +81,8 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               mode="single"
               selected={date}
               onSelect={handleDateSelect}
-              initialFocus
               disabled={(date) => date < today}
+              defaultMonth={date}
             />
           </PopoverContent>
         </Popover>
