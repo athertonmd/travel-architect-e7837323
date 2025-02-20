@@ -16,6 +16,7 @@ interface FlightDateSectionProps {
 }
 
 export function FlightDateSection({ details, onDetailsChange }: FlightDateSectionProps) {
+  const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     details.departureDate ? new Date(details.departureDate) : undefined
   );
@@ -25,21 +26,23 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
 
   useEffect(() => {
     if (details.departureDate) {
-      setDate(new Date(details.departureDate));
-      setTime(format(new Date(details.departureDate), "HH:mm"));
+      const newDate = new Date(details.departureDate);
+      setDate(newDate);
+      setTime(format(newDate, "HH:mm"));
     }
   }, [details.departureDate]);
 
   const today = new Date();
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
-    setDate(selectedDate);
     if (selectedDate) {
+      setDate(selectedDate);
       const hours = time ? parseInt(time.split(':')[0]) : 0;
       const minutes = time ? parseInt(time.split(':')[1]) : 0;
       const newDate = new Date(selectedDate);
       newDate.setHours(hours, minutes);
       onDetailsChange("departureDate", newDate.toISOString());
+      setOpen(false);
     }
   };
 
@@ -60,7 +63,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
         Departure Date and Time
       </Label>
       <div className="flex gap-2">
-        <Popover>
+        <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
               variant="outline"
