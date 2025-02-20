@@ -8,7 +8,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Auth from "@/pages/Auth";
-import { ProtectedContent } from "@/components/auth/ProtectedContent";
 import Index from "@/pages/Index";
 import CreateTrip from "@/pages/CreateTrip";
 import ViewTrip from "@/pages/ViewTrip";
@@ -21,7 +20,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { Session } from '@supabase/supabase-js';
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 export default function App() {
   const [isInitialized, setIsInitialized] = useState(false);
@@ -58,41 +64,35 @@ export default function App() {
     },
     {
       path: "/",
-      element: session ? <ProtectedContent /> : <Navigate to="/auth" replace />,
-      children: [
-        {
-          path: "/",
-          element: <Navigate to="/dashboard" />,
-        },
-        {
-          path: "/dashboard",
-          element: <Index />,
-        },
-        {
-          path: "/trips/create",
-          element: <CreateTrip />,
-        },
-        {
-          path: "/trips/:id",
-          element: <ViewTrip />,
-        },
-        {
-          path: "/trips/archive",
-          element: <Archive />,
-        },
-        {
-          path: "/travellers",
-          element: <ManageTravellers />,
-        },
-        {
-          path: "/hotels",
-          element: <HotelBank />,
-        },
-        {
-          path: "/notifications",
-          element: <Notifications />,
-        },
-      ],
+      element: <Navigate to="/dashboard" replace />,
+    },
+    {
+      path: "/dashboard",
+      element: session ? <Index /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/trips/create",
+      element: session ? <CreateTrip /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/trips/:id",
+      element: session ? <ViewTrip /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/trips/archive",
+      element: session ? <Archive /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/travellers",
+      element: session ? <ManageTravellers /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/hotels",
+      element: session ? <HotelBank /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/notifications",
+      element: session ? <Notifications /> : <Navigate to="/auth" replace />,
     },
   ]);
 
