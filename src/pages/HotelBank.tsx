@@ -5,37 +5,24 @@ import { Plus } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { HotelsRow } from "@/integrations/supabase/types/hotels";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { HotelForm } from "@/components/hotels/HotelForm";
 import { HotelsTable } from "@/components/hotels/HotelsTable";
 import { HotelSearch } from "@/components/hotels/HotelSearch";
-import { useNavigate } from "react-router-dom";
 
 const HotelBank = () => {
   const session = useSession();
-  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedHotel, setSelectedHotel] = useState<HotelsRow | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  useEffect(() => {
-    if (!session) {
-      console.log('No active session, redirecting to auth page');
-      navigate('/auth', { replace: true });
-    }
-  }, [session, navigate]);
-
   const { data: hotels = [], isLoading } = useQuery({
     queryKey: ['hotels'],
     queryFn: async () => {
-      if (!session?.user?.id) {
-        throw new Error('Authentication required');
-      }
-
-      console.log('Fetching hotels...');
+      console.log('Fetching hotels with session:', session?.user?.id);
       const { data, error } = await supabase
         .from('hotels')
         .select('*')
@@ -48,7 +35,6 @@ const HotelBank = () => {
       console.log('Fetched hotels:', data);
       return data;
     },
-    enabled: !!session?.user?.id,
   });
 
   const filteredHotels = hotels.filter((hotel) => {
