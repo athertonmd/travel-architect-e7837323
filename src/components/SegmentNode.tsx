@@ -18,6 +18,21 @@ export function SegmentNode({ data, id, selected }: {
   const isLimoType = data.label.toLowerCase() === 'limo service' || data.label.toLowerCase() === 'limo';
   const isTransfer = data.label.toLowerCase() === 'transfer';
   
+  // Helper function to safely convert value to string
+  const safeToString = (value: unknown): string => {
+    if (typeof value === 'string') return value;
+    if (typeof value === 'number') return value.toString();
+    if (value === null || value === undefined) return '';
+    if (typeof value === 'object') {
+      try {
+        return JSON.stringify(value);
+      } catch {
+        return '';
+      }
+    }
+    return String(value);
+  };
+
   return (
     <div className="flex items-center justify-center">
       <Handle type="target" position={Position.Top} />
@@ -30,13 +45,13 @@ export function SegmentNode({ data, id, selected }: {
           <span>{data.label}</span>
           {data.details?.time && <span className="text-sm text-muted-foreground">({data.details.time})</span>}
           {data.label.toLowerCase() === 'flight' && destinationAirport && (
-            <span className="text-sm text-muted-foreground">→ {destinationAirport}</span>
+            <span className="text-sm text-muted-foreground">→ {safeToString(destinationAirport)}</span>
           )}
           {data.label.toLowerCase() === 'train' && destinationStation && (
-            <span className="text-sm text-muted-foreground">→ {destinationStation}</span>
+            <span className="text-sm text-muted-foreground">→ {safeToString(destinationStation)}</span>
           )}
           {data.label.toLowerCase() === 'hotel' && hotelName && (
-            <span className="text-sm text-muted-foreground">- {String(hotelName)}</span>
+            <span className="text-sm text-muted-foreground">- {safeToString(hotelName)}</span>
           )}
           {(data.label.toLowerCase() === 'car' || isLimoType || isTransfer) && showProvider && (
             <span className="text-sm text-muted-foreground">({provider})</span>
