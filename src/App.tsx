@@ -19,17 +19,25 @@ import Notifications from "@/pages/Notifications";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
+import { Session } from '@supabase/supabase-js';
 
 const queryClient = new QueryClient();
 
 export default function App() {
   const [isInitialized, setIsInitialized] = useState(false);
+  const [session, setSession] = useState<Session | null>(null);
 
   useEffect(() => {
     const initializeAuth = async () => {
-      // Wait for initial session check
-      await supabase.auth.getSession();
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      setSession(initialSession);
       setIsInitialized(true);
+
+      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        setSession(session);
+      });
+
+      return () => subscription.unsubscribe();
     };
 
     initializeAuth();
@@ -43,55 +51,55 @@ export default function App() {
     );
   }
 
+  const router = createBrowserRouter([
+    {
+      path: "/auth",
+      element: session ? <Navigate to="/dashboard" replace /> : <Auth />,
+    },
+    {
+      path: "/",
+      element: session ? <ProtectedContent /> : <Navigate to="/auth" replace />,
+      children: [
+        {
+          path: "/",
+          element: <Navigate to="/dashboard" />,
+        },
+        {
+          path: "/dashboard",
+          element: <Index />,
+        },
+        {
+          path: "/trips/create",
+          element: <CreateTrip />,
+        },
+        {
+          path: "/trips/:id",
+          element: <ViewTrip />,
+        },
+        {
+          path: "/trips/archive",
+          element: <Archive />,
+        },
+        {
+          path: "/travellers",
+          element: <ManageTravellers />,
+        },
+        {
+          path: "/hotels",
+          element: <HotelBank />,
+        },
+        {
+          path: "/notifications",
+          element: <Notifications />,
+        },
+      ],
+    },
+  ]);
+
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <RouterProvider
-          router={createBrowserRouter([
-            {
-              path: "/",
-              element: <ProtectedContent />,
-              children: [
-                {
-                  path: "/",
-                  element: <Navigate to="/dashboard" />,
-                },
-                {
-                  path: "/dashboard",
-                  element: <Index />,
-                },
-                {
-                  path: "/trips/create",
-                  element: <CreateTrip />,
-                },
-                {
-                  path: "/trips/:id",
-                  element: <ViewTrip />,
-                },
-                {
-                  path: "/trips/archive",
-                  element: <Archive />,
-                },
-                {
-                  path: "/travellers",
-                  element: <ManageTravellers />,
-                },
-                {
-                  path: "/hotels",
-                  element: <HotelBank />,
-                },
-                {
-                  path: "/notifications",
-                  element: <Notifications />,
-                },
-              ],
-            },
-            {
-              path: "/auth",
-              element: <Auth />,
-            },
-          ])}
-        />
+        <RouterProvider router={router} />
         <Toaster />
       </ThemeProvider>
     </QueryClientProvider>
