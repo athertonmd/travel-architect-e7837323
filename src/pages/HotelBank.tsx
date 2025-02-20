@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/Layout";
 import { useSession } from '@supabase/auth-helpers-react';
 import { HotelsRow } from "@/integrations/supabase/types/hotels";
@@ -19,17 +18,24 @@ const HotelBank = () => {
   const [selectedHotel, setSelectedHotel] = useState<HotelsRow | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   const { data: hotels = [], isLoading } = useHotels();
   const { addHotelMutation, updateHotelMutation, deleteHotelMutation } = useHotelMutations();
 
   useEffect(() => {
     const checkSession = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      if (!currentSession) {
-        console.log('No active session, redirecting to auth page');
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        if (!currentSession) {
+          console.log('No active session, redirecting to auth page');
+          navigate('/auth');
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
         navigate('/auth');
-        return;
+      } finally {
+        setIsCheckingAuth(false);
       }
     };
 
@@ -73,11 +79,14 @@ const HotelBank = () => {
     );
   });
 
-  if (!session) {
+  if (isCheckingAuth || !session) {
     return (
       <Layout>
         <div className="flex items-center justify-center min-h-screen">
-          <p className="text-white">Loading...</p>
+          <div className="text-center">
+            <p className="text-white text-lg mb-2">Loading...</p>
+            <p className="text-gray-400 text-sm">Please wait while we verify your session</p>
+          </div>
         </div>
       </Layout>
     );
@@ -103,7 +112,10 @@ const HotelBank = () => {
         </div>
 
         {isLoading ? (
-          <p className="text-white">Loading hotels...</p>
+          <div className="text-center py-8">
+            <p className="text-white text-lg mb-2">Loading hotels...</p>
+            <p className="text-gray-400 text-sm">Please wait while we fetch your hotel data</p>
+          </div>
         ) : (
           <HotelsTable
             hotels={filteredHotels}
