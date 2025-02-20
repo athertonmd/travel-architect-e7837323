@@ -14,6 +14,7 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
 import { useLogout } from "@/hooks/useLogout";
+import { Button } from "./ui/button";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
@@ -56,15 +57,16 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="mt-auto p-4">
-        <SidebarMenuButton
+      <SidebarFooter>
+        <Button
           onClick={handleLogout}
           disabled={!session}
-          className="flex w-full items-center gap-2 text-destructive hover:text-destructive/90 disabled:opacity-50"
+          variant="ghost"
+          className="w-full flex items-center gap-2 text-destructive hover:text-destructive/90 hover:bg-background/10"
         >
           <LogOut className="h-4 w-4" />
           <span>Log Out</span>
-        </SidebarMenuButton>
+        </Button>
       </SidebarFooter>
     </Sidebar>
   );
