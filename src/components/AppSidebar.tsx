@@ -11,15 +11,15 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
-import { useSession } from '@supabase/auth-helpers-react';
+import { useSessionContext } from '@supabase/auth-helpers-react';
 import { useLogout } from "@/hooks/useLogout";
 
 export function AppSidebar() {
-  const session = useSession();
+  const { session } = useSessionContext();
   const { handleLogout } = useLogout();
   const location = useLocation();
 
-  console.log('Session state:', session); // Debug session state
+  console.log('Session state in sidebar:', session?.user?.email);
 
   const menuItems = [
     { title: "Dashboard", icon: Home, url: "/dashboard" },

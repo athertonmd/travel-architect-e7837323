@@ -3,13 +3,12 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useRef } from 'react';
-import { useSession } from '@supabase/auth-helpers-react';
+import { useSessionContext } from '@supabase/auth-helpers-react';
 
 export const useLogout = () => {
   const navigate = useNavigate();
-  const session = useSession();
+  const { supabaseClient } = useSessionContext();
   const isLoggingOutRef = useRef(false);
-  const toastIdRef = useRef<string | number>();
 
   const handleLogout = async () => {
     // Prevent multiple logout attempts
@@ -22,8 +21,8 @@ export const useLogout = () => {
     console.log('Starting logout process...');
 
     try {
-      // First attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      // Use the supabaseClient from the context instead of the imported client
+      const { error } = await supabaseClient.auth.signOut();
       
       if (error) {
         console.error('Error during Supabase signOut:', error);
