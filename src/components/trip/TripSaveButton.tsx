@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
-import { useUser } from "@supabase/auth-helpers-react";
+import { useSession } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Node } from "@xyflow/react";
@@ -15,13 +15,12 @@ interface TripSaveButtonProps {
 
 export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps) => {
   const navigate = useNavigate();
-  const user = useUser();
+  const session = useSession();
 
   const handleSaveTrip = async () => {
-    console.log('Save trip clicked', { user, title, nodes, travelers });
-
-    if (!user) {
+    if (!session?.user) {
       toast.error("You must be logged in to save a trip");
+      navigate('/auth', { replace: true });
       return;
     }
 
@@ -31,11 +30,11 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
     }
 
     try {
-      console.log('Fetching profile for user:', user.id);
+      console.log('Fetching profile for user:', session.user.id);
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
         .select('id')
-        .eq('id', user.id)
+        .eq('id', session.user.id)
         .single();
 
       if (profileError) {
@@ -45,7 +44,7 @@ export const TripSaveButton = ({ title, nodes, travelers }: TripSaveButtonProps)
       }
 
       if (!profile) {
-        console.error('No profile found for user:', user.id);
+        console.error('No profile found for user:', session.user.id);
         toast.error("Profile not found");
         return;
       }

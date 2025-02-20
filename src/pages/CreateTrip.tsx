@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/Layout";
 import { SegmentPalette } from "@/components/SegmentPalette";
 import { useState } from "react";
@@ -7,10 +8,13 @@ import { TripSaveButton } from "@/components/trip/TripSaveButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
+import { useSession } from '@supabase/auth-helpers-react';
+import { Navigate } from 'react-router-dom';
 
 const CreateTrip = () => {
+  const session = useSession();
   const [tripTitle, setTripTitle] = useState("Create New Trip");
-  const [travelers, setTravelers] = useState(1); // Keep state for data consistency
+  const [travelers, setTravelers] = useState(1);
   const {
     nodes,
     selectedNode,
@@ -21,6 +25,10 @@ const CreateTrip = () => {
   } = useNodeManagement();
 
   console.log('Selected Node:', selectedNode);
+
+  if (!session) {
+    return <Navigate to="/auth" replace />;
+  }
 
   return (
     <Layout>
