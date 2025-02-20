@@ -16,7 +16,6 @@ interface FlightDateSectionProps {
 }
 
 export function FlightDateSection({ details, onDetailsChange }: FlightDateSectionProps) {
-  const [open, setOpen] = useState(false);
   const [date, setDate] = useState<Date | undefined>(
     details.departureDate ? new Date(details.departureDate) : undefined
   );
@@ -37,12 +36,12 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
   const handleDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
       setDate(selectedDate);
-      const hours = time ? parseInt(time.split(':')[0]) : 0;
-      const minutes = time ? parseInt(time.split(':')[1]) : 0;
+      // Preserve existing time if any, or default to current time
+      const hours = time ? parseInt(time.split(':')[0]) : new Date().getHours();
+      const minutes = time ? parseInt(time.split(':')[1]) : new Date().getMinutes();
       const newDate = new Date(selectedDate);
       newDate.setHours(hours, minutes);
       onDetailsChange("departureDate", newDate.toISOString());
-      setOpen(false);
     }
   };
 
