@@ -19,30 +19,14 @@ export const useLogout = () => {
       return;
     }
 
-    // Clear any existing timeouts
-    if (navigationTimeoutRef.current) {
-      clearTimeout(navigationTimeoutRef.current);
-    }
-
-    // Clear any existing toasts
-    if (toastIdRef.current) {
-      toast.dismiss(toastIdRef.current);
-    }
-
     isLoggingOutRef.current = true;
     toastIdRef.current = toast.loading('Signing out...', {
       duration: Infinity
     });
 
     try {
-      // If no session exists, just navigate away
-      if (!session) {
-        console.log('No active session found, proceeding with navigation');
-        toast.dismiss(toastIdRef.current);
-        navigate('/', { replace: true });
-        return;
-      }
-
+      console.log('Starting logout process...');
+      
       // Clear local storage and cookies
       localStorage.clear();
       document.cookie.split(";").forEach((c) => {
@@ -56,30 +40,23 @@ export const useLogout = () => {
       
       if (error) {
         console.error('Error during Supabase signOut:', error);
-        toast.dismiss(toastIdRef.current);
         toast.error('Error during logout. Please try again.');
       } else {
         console.log('Logout successful');
-        toast.dismiss(toastIdRef.current);
         toast.success('Logged out successfully');
       }
 
-      // Set a timeout for navigation to ensure cleanup is complete
-      navigationTimeoutRef.current = setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 100);
+      // Force navigation regardless of logout success
+      navigate('/', { replace: true });
 
     } catch (error) {
       console.error('Unexpected logout error:', error);
-      toast.dismiss(toastIdRef.current);
       toast.error('Error during logout. Please try again.');
-      
-      // Force navigation on error after a short delay
-      navigationTimeoutRef.current = setTimeout(() => {
-        navigate('/', { replace: true });
-      }, 100);
-
+      navigate('/', { replace: true });
     } finally {
+      if (toastIdRef.current) {
+        toast.dismiss(toastIdRef.current);
+      }
       isLoggingOutRef.current = false;
     }
   };
