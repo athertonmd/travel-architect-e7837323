@@ -130,6 +130,38 @@ export type Database = {
         }
         Relationships: []
       }
+      sent_notifications: {
+        Row: {
+          id: string
+          recipients: Json
+          sent_at: string
+          sent_by: string
+          trip_id: string
+        }
+        Insert: {
+          id?: string
+          recipients: Json
+          sent_at?: string
+          sent_by: string
+          trip_id: string
+        }
+        Update: {
+          id?: string
+          recipients?: Json
+          sent_at?: string
+          sent_by?: string
+          trip_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sent_notifications_trip_id_fkey"
+            columns: ["trip_id"]
+            isOneToOne: false
+            referencedRelation: "trips"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trips: {
         Row: {
           archived: boolean | null

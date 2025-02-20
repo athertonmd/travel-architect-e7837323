@@ -21,7 +21,7 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
   const queryClient = useQueryClient();
   
   const handleSend = async () => {
-    if (!userEmail) {
+    if (!userEmail || !session?.user?.id) {
       toast.error("You must be logged in to send itineraries");
       return;
     }
@@ -57,8 +57,20 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
 
       if (updateError) throw updateError;
 
+      // Record the notification
+      const { error: notificationError } = await supabase
+        .from('sent_notifications')
+        .insert({
+          trip_id: tripId,
+          sent_by: session.user.id,
+          recipients: selectedEmails,
+        });
+
+      if (notificationError) throw notificationError;
+
       // Invalidate queries to refresh UI
       await queryClient.invalidateQueries({ queryKey: ['trips'] });
+      await queryClient.invalidateQueries({ queryKey: ['notifications'] });
       
       console.log("Response from send-itinerary function:", data);
       toast.success("Itinerary sent successfully!");
