@@ -1,3 +1,4 @@
+
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
 import { useLocation } from "react-router-dom";
@@ -6,7 +7,7 @@ import { useSession } from '@supabase/auth-helpers-react';
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const session = useSession();
-  const isAuthPage = location.pathname === "/";
+  const isAuthPage = location.pathname === "/auth";
 
   if (isAuthPage) {
     return (
