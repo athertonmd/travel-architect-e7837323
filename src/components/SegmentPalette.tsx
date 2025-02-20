@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
@@ -12,6 +13,7 @@ const segmentTypes: SegmentType[] = [
   { id: "traveller", type: "traveller", label: "Traveller", icon: "👤" },
   { id: "flight", type: "flight", label: "Flight", icon: "✈️" },
   { id: "hotel", type: "hotel", label: "Hotel", icon: "🏨" },
+  { id: "train", type: "train", label: "Train", icon: "🚂" },
   { id: "limo", type: "limo", label: "Limo Service", icon: "🚙" },
   { id: "car", type: "car", label: "Car Hire", icon: "🚗" },
   { id: "restaurant", type: "restaurant", label: "Restaurant", icon: "🍽️" },

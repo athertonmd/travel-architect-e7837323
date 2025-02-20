@@ -9,6 +9,7 @@ import { TransferSegmentForm } from "./TransferSegmentForm";
 import { RestaurantSegmentForm } from "./RestaurantSegmentForm";
 import { ActivitySegmentForm } from "./ActivitySegmentForm";
 import { VipSegmentForm } from "./VipSegmentForm";
+import { TrainSegmentForm } from "./TrainSegmentForm";
 import { DefaultSegmentForm } from "./DefaultSegmentForm";
 
 interface SegmentFormSelectorProps {
@@ -33,6 +34,8 @@ export function SegmentFormSelector({
       return <HotelSegmentForm details={details} onDetailsChange={onDetailsChange} />;
     case 'car':
       return <CarSegmentForm details={details} onDetailsChange={onDetailsChange} />;
+    case 'train':
+      return <TrainSegmentForm details={details} onDetailsChange={onDetailsChange} />;
     case 'limo service':
     case 'limo':
       return <LimoSegmentForm details={details} onDetailsChange={onDetailsChange} />;
