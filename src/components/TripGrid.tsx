@@ -1,3 +1,4 @@
+
 import { TripCard } from "./TripCard";
 import { LoadingSkeleton } from "./LoadingSkeleton";
 import { EmptyTrips } from "./EmptyTrips";
@@ -9,7 +10,7 @@ interface Trip {
   startDate: string;
   endDate: string;
   travelers: number;
-  status: "draft" | "in-progress" | "confirmed";
+  status: "draft" | "sent";
   archived?: boolean;
   segments?: any[];
 }
