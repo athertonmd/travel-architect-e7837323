@@ -24,7 +24,7 @@ export function DashboardHeader({ session }: DashboardHeaderProps) {
       </div>
       <Link to="/trips/create">
         <Button 
-          className="bg-navy hover:bg-navy-light border border-white"
+          className="bg-navy hover:bg-navy-light border border-white text-white"
         >
           <Plus className="h-4 w-4 mr-2" />
           Create New Trip
