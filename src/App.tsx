@@ -3,13 +3,12 @@ import {
   createBrowserRouter,
   RouterProvider,
   Navigate,
-  Outlet,
 } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Auth from "@/pages/Auth";
-import { useSession } from '@supabase/auth-helpers-react';
+import { ProtectedContent } from "@/components/auth/ProtectedContent";
 import Index from "@/pages/Index";
 import CreateTrip from "@/pages/CreateTrip";
 import ViewTrip from "@/pages/ViewTrip";
@@ -19,16 +18,6 @@ import HotelBank from "@/pages/HotelBank";
 import Notifications from "@/pages/Notifications";
 
 const queryClient = new QueryClient();
-
-function ProtectedContent() {
-  const session = useSession();
-
-  if (!session) {
-    return <Navigate to="/auth" replace />;
-  }
-
-  return <Outlet />;
-}
 
 export default function App() {
   return (

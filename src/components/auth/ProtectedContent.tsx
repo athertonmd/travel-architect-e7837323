@@ -1,16 +1,13 @@
+
 import { useSession } from '@supabase/auth-helpers-react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Outlet } from 'react-router-dom';
 
-interface ProtectedContentProps {
-  children: React.ReactNode;
-}
-
-export const ProtectedContent = ({ children }: ProtectedContentProps) => {
+export function ProtectedContent() {
   const session = useSession();
 
   if (!session) {
-    return <Navigate to="/" replace />;
+    return <Navigate to="/auth" replace />;
   }
 
-  return <>{children}</>;
-};
+  return <Outlet />;
+}
