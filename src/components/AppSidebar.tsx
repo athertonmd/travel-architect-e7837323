@@ -19,21 +19,15 @@ export function AppSidebar() {
   const { handleLogout } = useLogout();
   const location = useLocation();
 
+  console.log('Session state:', session); // Debug session state
+
   const menuItems = [
     { title: "Dashboard", icon: Home, url: "/dashboard" },
     { title: "Create Trip", icon: Plus, url: "/trips/create" },
     { title: "Manage Travellers", icon: Users, url: "/travellers" },
     { title: "Sent Notifications", icon: Bell, url: "/notifications" },
     { title: "Hotel Bank", icon: Building2, url: "/hotels" },
-    { title: "Archive", icon: Archive, url: "/trips/archive" },
-    { 
-      title: "Log Out", 
-      icon: LogOut, 
-      url: "#",
-      onClick: handleLogout,
-      className: "text-destructive hover:text-destructive/90",
-      disabled: !session
-    }
+    { title: "Archive", icon: Archive, url: "/trips/archive" }
   ];
 
   return (
@@ -46,28 +40,30 @@ export function AppSidebar() {
               {menuItems.map((item) => (
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
-                    asChild={!item.onClick}
-                    onClick={item.onClick}
-                    disabled={item.disabled}
-                    className={item.className}
+                    asChild
+                    data-active={location.pathname === item.url}
                   >
-                    {item.onClick ? (
-                      <button className="flex items-center gap-2 text-white w-full">
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </button>
-                    ) : (
-                      <Link 
-                        to={item.url} 
-                        className="flex items-center gap-2 text-white w-full"
-                      >
-                        <item.icon className="h-4 w-4" />
-                        <span>{item.title}</span>
-                      </Link>
-                    )}
+                    <Link 
+                      to={item.url} 
+                      className="flex items-center gap-2 text-white w-full"
+                    >
+                      <item.icon className="h-4 w-4" />
+                      <span>{item.title}</span>
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={handleLogout}
+                  className="flex items-center gap-2 text-destructive hover:text-destructive/90 w-full"
+                >
+                  <button className="flex items-center gap-2 w-full">
+                    <LogOut className="h-4 w-4" />
+                    <span>Log Out</span>
+                  </button>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
