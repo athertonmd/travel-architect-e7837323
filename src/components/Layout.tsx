@@ -1,13 +1,18 @@
 
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "./AppSidebar";
-import { useLocation } from "react-router-dom";
+import { useLocation, Navigate } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
 
 export function Layout({ children }: { children: React.ReactNode }) {
   const location = useLocation();
   const session = useSession();
   const isAuthPage = location.pathname === "/auth";
+
+  // If not on auth page and no session, redirect to auth
+  if (!isAuthPage && !session) {
+    return <Navigate to="/auth" replace />;
+  }
 
   if (isAuthPage) {
     return (
