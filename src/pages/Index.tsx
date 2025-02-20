@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/Layout";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { TripGrid } from "@/components/TripGrid";
@@ -13,13 +14,13 @@ interface Trip {
   startDate: string;
   endDate: string;
   travelers: number;
-  status: "draft" | "in-progress" | "confirmed";
+  status: "draft" | "sent";
   archived?: boolean;
   segments?: any[];
 }
 
-const isValidStatus = (status: string): status is "draft" | "in-progress" | "confirmed" => {
-  return ["draft", "in-progress", "confirmed"].includes(status);
+const isValidStatus = (status: string): status is "draft" | "sent" => {
+  return ["draft", "sent"].includes(status);
 };
 
 const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
