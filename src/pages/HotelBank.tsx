@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useSession } from '@supabase/auth-helpers-react';
@@ -22,12 +23,17 @@ const HotelBank = () => {
   const { data: hotels = [], isLoading } = useQuery({
     queryKey: ['hotels'],
     queryFn: async () => {
+      console.log('Fetching hotels...');
       const { data, error } = await supabase
         .from('hotels')
         .select('*')
         .order('created_at', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching hotels:', error);
+        throw error;
+      }
+      console.log('Fetched hotels:', data);
       return data;
     },
   });
@@ -44,13 +50,25 @@ const HotelBank = () => {
 
   const addHotelMutation = useMutation({
     mutationFn: async (values: Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
+      console.log('Adding hotel with values:', values);
+      console.log('Current user ID:', session?.user?.id);
+      
+      if (!session?.user?.id) {
+        throw new Error('User must be logged in to add hotels');
+      }
+
       const { data, error } = await supabase
         .from('hotels')
-        .insert([{ ...values, user_id: session?.user?.id }])
+        .insert([{ ...values, user_id: session.user.id }])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding hotel:', error);
+        throw error;
+      }
+      
+      console.log('Successfully added hotel:', data);
       return data;
     },
     onSuccess: () => {
@@ -60,12 +78,15 @@ const HotelBank = () => {
       setSelectedHotel(null);
     },
     onError: (error) => {
+      console.error('Mutation error:', error);
       toast.error('Failed to add hotel: ' + error.message);
     },
   });
 
   const updateHotelMutation = useMutation({
     mutationFn: async (values: Omit<HotelsRow, 'created_at' | 'updated_at' | 'user_id'>) => {
+      console.log('Updating hotel with values:', values);
+      
       const { data, error } = await supabase
         .from('hotels')
         .update(values)
@@ -73,7 +94,12 @@ const HotelBank = () => {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating hotel:', error);
+        throw error;
+      }
+      
+      console.log('Successfully updated hotel:', data);
       return data;
     },
     onSuccess: () => {
@@ -83,24 +109,33 @@ const HotelBank = () => {
       setSelectedHotel(null);
     },
     onError: (error) => {
+      console.error('Update error:', error);
       toast.error('Failed to update hotel: ' + error.message);
     },
   });
 
   const deleteHotelMutation = useMutation({
     mutationFn: async (id: string) => {
+      console.log('Deleting hotel with ID:', id);
+      
       const { error } = await supabase
         .from('hotels')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting hotel:', error);
+        throw error;
+      }
+      
+      console.log('Successfully deleted hotel');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotels'] });
       toast.success('Hotel deleted successfully');
     },
     onError: (error) => {
+      console.error('Delete error:', error);
       toast.error('Failed to delete hotel: ' + error.message);
     },
   });
