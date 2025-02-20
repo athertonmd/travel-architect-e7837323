@@ -1,13 +1,12 @@
 
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useRef } from 'react';
 import { useSessionContext } from '@supabase/auth-helpers-react';
 
 export const useLogout = () => {
   const navigate = useNavigate();
-  const { supabaseClient } = useSessionContext();
+  const { supabaseClient, session } = useSessionContext();
   const isLoggingOutRef = useRef(false);
 
   const handleLogout = async () => {
@@ -17,8 +16,14 @@ export const useLogout = () => {
       return;
     }
 
+    if (!session) {
+      console.log('No active session found, redirecting to auth...');
+      navigate('/auth', { replace: true });
+      return;
+    }
+
     isLoggingOutRef.current = true;
-    console.log('Starting logout process...');
+    console.log('Starting logout process with session:', session.user?.email);
 
     try {
       // Use the supabaseClient from the context instead of the imported client
