@@ -70,11 +70,11 @@ const Index = () => {
     }
 
     try {
-      console.log('Fetching trips for user:', session.user.email);
+      console.log('Fetching trips...');
       
-      const { data: trips, error, count } = await supabase
+      const { data: trips, error } = await supabase
         .from('trips')
-        .select('*', { count: 'exact' })
+        .select('*')
         .eq('archived', false)
         .order('created_at', { ascending: false });
 
@@ -83,9 +83,14 @@ const Index = () => {
         throw error;
       }
 
-      console.log(`Fetched ${count} trips:`, trips);
+      if (!trips) {
+        console.log('No trips found');
+        return [];
+      }
+
+      console.log('Successfully fetched trips:', trips.length);
       
-      return (trips || []).map(trip => ({
+      return trips.map(trip => ({
         id: trip.id,
         title: trip.title || '',
         destination: trip.destination || '',
@@ -98,6 +103,7 @@ const Index = () => {
       }));
     } catch (error) {
       console.error('Error in fetchTrips:', error);
+      toast.error('Failed to load trips');
       return [];
     }
   }, [session?.user?.id]);
