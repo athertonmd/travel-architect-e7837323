@@ -3,11 +3,11 @@ import { Layout } from "@/components/Layout";
 import { DashboardHeader } from "@/components/DashboardHeader";
 import { TripGrid } from "@/components/TripGrid";
 import { supabase } from "@/integrations/supabase/client";
-import { useUser, useSession } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+import { Session } from '@supabase/supabase-js';
 
 interface Trip {
   id: string;
@@ -25,13 +25,12 @@ const isValidStatus = (status: string): status is "draft" | "sent" => {
   return ["draft", "sent"].includes(status);
 };
 
-const fetchTrips = async (session: any): Promise<Trip[]> => {
-  if (!session?.user?.id) {
-    console.log('No valid session for fetchTrips');
+const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
+  if (!userId) {
+    console.log('No user ID provided to fetchTrips');
     return [];
   }
 
-  const userId = session.user.id;
   console.log('Fetching trips for user:', userId);
 
   const { data: trips, error } = await supabase
@@ -66,25 +65,31 @@ const fetchTrips = async (session: any): Promise<Trip[]> => {
 };
 
 const Index = () => {
-  const session = useSession();
-  const user = useUser();
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('Session state:', session);
-    console.log('User state:', user);
-  }, [session, user]);
+    // Get initial session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setLoading(false);
+    });
 
-  const { data: trips = [], isLoading, error } = useQuery({
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setLoading(false);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const { data: trips = [], isLoading: isLoadingTrips, error } = useQuery({
     queryKey: ['trips', session?.user?.id],
-    queryFn: () => fetchTrips(session),
+    queryFn: () => fetchTrips(session?.user?.id),
     enabled: !!session?.user?.id,
     staleTime: 1000 * 60 * 5, // 5 minutes
     gcTime: 1000 * 60 * 30, // 30 minutes
-    retry: 3,
-    retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
-    meta: {
-      errorMessage: 'Unable to load trips. Please try again.'
-    }
   });
 
   // Handle error state
@@ -93,10 +98,16 @@ const Index = () => {
     toast.error('Unable to load trips. Please try again.');
   }
 
-  // Add loading state feedback
-  useEffect(() => {
-    console.log('Query state:', { isLoading, error: error ? 'Error present' : 'No error', tripsCount: trips.length });
-  }, [isLoading, error, trips]);
+  // Show loading state
+  if (loading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-screen">
+          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-gray-900"></div>
+        </div>
+      </Layout>
+    );
+  }
 
   // If there's no session, redirect to auth
   if (!session) {
@@ -109,7 +120,7 @@ const Index = () => {
       <Layout>
         <div className="space-y-8">
           <DashboardHeader />
-          <TripGrid trips={trips} isLoading={isLoading} />
+          <TripGrid trips={trips} isLoading={isLoadingTrips} />
         </div>
       </Layout>
     );
