@@ -25,18 +25,33 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
     return undefined;
   });
 
-  const [departureHours, setDepartureHours] = useState<string>(
-    details.departureTime?.split(':')?.[0] || "09"
-  );
-  const [departureMinutes, setDepartureMinutes] = useState<string>(
-    details.departureTime?.split(':')?.[1] || "00"
-  );
-  const [arrivalHours, setArrivalHours] = useState<string>(
-    details.arrivalTime?.split(':')?.[0] || "10"
-  );
-  const [arrivalMinutes, setArrivalMinutes] = useState<string>(
-    details.arrivalTime?.split(':')?.[1] || "00"
-  );
+  const [departureHours, setDepartureHours] = useState<string>(() => {
+    if (typeof details.departureTime === 'string') {
+      return details.departureTime.split(':')[0] || "09";
+    }
+    return "09";
+  });
+
+  const [departureMinutes, setDepartureMinutes] = useState<string>(() => {
+    if (typeof details.departureTime === 'string') {
+      return details.departureTime.split(':')[1] || "00";
+    }
+    return "00";
+  });
+
+  const [arrivalHours, setArrivalHours] = useState<string>(() => {
+    if (typeof details.arrivalTime === 'string') {
+      return details.arrivalTime.split(':')[0] || "10";
+    }
+    return "10";
+  });
+
+  const [arrivalMinutes, setArrivalMinutes] = useState<string>(() => {
+    if (typeof details.arrivalTime === 'string') {
+      return details.arrivalTime.split(':')[1] || "00";
+    }
+    return "00";
+  });
 
   const handleDepartureDateSelect = (selectedDate: Date | undefined) => {
     if (selectedDate) {
@@ -115,6 +130,10 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
     });
   };
 
+  const getStringValue = (value: unknown): string => {
+    return typeof value === 'string' ? value : '';
+  };
+
   return (
     <div className="space-y-4">
       <div className="grid gap-2">
@@ -123,7 +142,7 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
         </Label>
         <Input
           id="departureStation"
-          value={details.departureStation || ""}
+          value={getStringValue(details.departureStation)}
           onChange={(e) => handleInputChange("departureStation", e.target.value)}
           placeholder="Enter departure station"
         />
@@ -148,7 +167,7 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
         </Label>
         <Input
           id="trainOperator"
-          value={details.trainOperator || ""}
+          value={getStringValue(details.trainOperator)}
           onChange={(e) => handleInputChange("trainOperator", e.target.value)}
           placeholder="Enter train operator"
         />
@@ -160,7 +179,7 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
         </Label>
         <Input
           id="destinationStation"
-          value={details.destinationStation || ""}
+          value={getStringValue(details.destinationStation)}
           onChange={(e) => handleInputChange("destinationStation", e.target.value)}
           placeholder="Enter destination station"
         />
@@ -185,7 +204,7 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
         </Label>
         <Input
           id="ticketReference"
-          value={details.ticketReference || ""}
+          value={getStringValue(details.ticketReference)}
           onChange={(e) => handleInputChange("ticketReference", e.target.value)}
           placeholder="Enter ticket reference number"
         />
@@ -197,7 +216,7 @@ export function TrainSegmentForm({ details, onDetailsChange }: TrainSegmentFormP
         </Label>
         <Input
           id="ticketClass"
-          value={details.ticketClass || ""}
+          value={getStringValue(details.ticketClass)}
           onChange={(e) => handleInputChange("ticketClass", e.target.value)}
           placeholder="Enter ticket class"
         />
