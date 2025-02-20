@@ -21,6 +21,7 @@ export function TrainStationInput({ id, label, value, onChange, placeholder }: T
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder={placeholder}
+        className="text-gray-900 placeholder:text-gray-500"
       />
     </div>
   );
