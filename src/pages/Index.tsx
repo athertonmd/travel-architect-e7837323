@@ -31,38 +31,43 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
     return [];
   }
 
-  console.log('Fetching trips for user:', userId);
+  try {
+    console.log('Fetching trips for user:', userId);
 
-  const { data: trips, error } = await supabase
-    .from('trips')
-    .select('*')
-    .eq('user_id', userId)
-    .eq('archived', false)
-    .order('created_at', { ascending: false });
+    const { data: trips, error } = await supabase
+      .from('trips')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('archived', false)
+      .order('created_at', { ascending: false });
 
-  if (error) {
-    console.error('Error fetching trips:', error);
-    throw error;
+    if (error) {
+      console.error('Error fetching trips:', error);
+      throw error;
+    }
+
+    console.log('Raw trips data from Supabase:', trips);
+
+    // Transform and validate the data
+    const transformedTrips = trips?.map(trip => ({
+      id: trip.id,
+      title: trip.title || '',
+      destination: trip.destination || '',
+      startDate: trip.start_date || '',
+      endDate: trip.end_date || '',
+      travelers: trip.travelers || 0,
+      status: isValidStatus(trip.status) ? trip.status : 'draft',
+      archived: trip.archived || false,
+      segments: Array.isArray(trip.segments) ? trip.segments : []
+    })) || [];
+
+    console.log('Transformed trips:', transformedTrips);
+    return transformedTrips;
+  } catch (error) {
+    console.error('Error in fetchTrips:', error);
+    return [];
   }
-
-  console.log('Raw trips data from Supabase:', trips);
-
-  // Transform and validate the data
-  const transformedTrips = trips?.map(trip => ({
-    id: trip.id,
-    title: trip.title || '',
-    destination: trip.destination || '',
-    startDate: trip.start_date || '',
-    endDate: trip.end_date || '',
-    travelers: trip.travelers || 0,
-    status: isValidStatus(trip.status) ? trip.status : 'draft',
-    archived: trip.archived || false,
-    segments: Array.isArray(trip.segments) ? trip.segments : []
-  })) || [];
-
-  console.log('Transformed trips:', transformedTrips);
-  return transformedTrips;
-};
+}
 
 const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
@@ -90,7 +95,7 @@ const Index = () => {
     queryKey: ['trips', session?.user?.id],
     queryFn: () => fetchTrips(session?.user?.id),
     enabled: !!session?.user?.id,
-    staleTime: 0, // Disable cache to always fetch fresh data
+    staleTime: 0,
     gcTime: 0,
   });
 
