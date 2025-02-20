@@ -1,7 +1,8 @@
+
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
 import { toast } from "sonner";
@@ -10,6 +11,7 @@ const Auth = () => {
   const navigate = useNavigate();
   const navigationAttemptedRef = useRef(false);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const checkSession = async () => {
@@ -22,6 +24,8 @@ const Auth = () => {
         }
       } catch (error) {
         console.error('Session check error:', error);
+      } finally {
+        setIsLoading(false);
       }
     };
 
@@ -46,6 +50,11 @@ const Auth = () => {
       }
     };
   }, [navigate]);
+
+  // Show nothing while checking session
+  if (isLoading) {
+    return null;
+  }
 
   return (
     <Layout>
