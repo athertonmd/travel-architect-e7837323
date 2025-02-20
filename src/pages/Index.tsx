@@ -5,7 +5,7 @@ import { TripGrid } from "@/components/TripGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Navigate } from "react-router-dom";
 import { Session } from '@supabase/supabase-js';
 
@@ -28,18 +28,20 @@ const isValidStatus = (status: string): status is "draft" | "sent" => {
 const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
 
-  // Initialize session on mount
-  useState(() => {
+  // Initialize session on mount with useEffect instead of useState
+  useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session);
       setSession(session);
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Session changed:', session);
       setSession(session);
     });
 
     return () => subscription.unsubscribe();
-  });
+  }, []); // Empty dependency array ensures this runs only on mount
 
   const fetchTrips = useCallback(async () => {
     if (!session?.user?.id) {
@@ -47,6 +49,7 @@ const Index = () => {
     }
 
     try {
+      console.log('Fetching trips for user:', session.user.id);
       const { data: trips, error } = await supabase
         .from('trips')
         .select('*')
@@ -58,6 +61,7 @@ const Index = () => {
         throw error;
       }
 
+      console.log('Fetched trips:', trips);
       return (trips || []).map(trip => ({
         id: trip.id,
         title: trip.title || '',
