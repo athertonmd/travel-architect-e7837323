@@ -29,9 +29,8 @@ export const useLogout = () => {
       console.log("Successfully logged out!");
       toast.success("Successfully logged out!");
       
-      // Immediate navigation and force page reload to ensure clean state
+      // Only use navigate, remove window.location.reload()
       navigate('/auth', { replace: true });
-      window.location.reload();
       
     } catch (err) {
       console.error("Unexpected error during logout:", err);
