@@ -9,12 +9,10 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  SidebarFooter,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { useSession } from '@supabase/auth-helpers-react';
 import { useLogout } from "@/hooks/useLogout";
-import { Button } from "./ui/button";
 
 const menuItems = [
   { title: "Dashboard", icon: Home, url: "/dashboard" },
