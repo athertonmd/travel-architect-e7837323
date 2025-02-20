@@ -31,6 +31,12 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
     }
   }, [details.departureDate]);
 
+  useEffect(() => {
+    // Log the current date state for debugging
+    console.log('Current date state:', date);
+    console.log('Current details:', details);
+  }, [date, details]);
+
   const today = new Date();
 
   const handleDateSelect = (selectedDate: Date | undefined) => {
@@ -41,7 +47,8 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
       const newDate = new Date(selectedDate);
       newDate.setHours(hours, minutes);
       
-      setDate(selectedDate);
+      console.log('Selected new date:', newDate);
+      setDate(newDate);
       onDetailsChange("departureDate", newDate.toISOString());
     }
   };
@@ -57,6 +64,8 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
     }
   };
 
+  const formattedDate = date ? format(date, "MMMM d, yyyy") : "Pick a date";
+
   return (
     <div className="grid gap-2">
       <Label htmlFor="departureDate" className="text-blue-500">
@@ -66,6 +75,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
         <Popover>
           <PopoverTrigger asChild>
             <Button
+              id="date-picker-button"
               variant="outline"
               className={cn(
                 "w-[240px] justify-start text-left font-normal",
@@ -73,7 +83,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {date ? format(date, "MMMM d, yyyy") : "Pick a date"}
+              <span className="text-foreground">{formattedDate}</span>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
@@ -83,6 +93,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               onSelect={handleDateSelect}
               disabled={(date) => date < today}
               defaultMonth={date}
+              initialFocus
             />
           </PopoverContent>
         </Popover>
