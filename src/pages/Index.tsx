@@ -5,7 +5,7 @@ import { TripGrid } from "@/components/TripGrid";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { Navigate } from "react-router-dom";
 import { Session } from '@supabase/supabase-js';
 
@@ -25,65 +25,59 @@ const isValidStatus = (status: string): status is "draft" | "sent" => {
   return ["draft", "sent"].includes(status);
 };
 
-const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
-  if (!userId) {
-    console.log('No user ID provided to fetchTrips');
-    return [];
-  }
-
-  try {
-    console.log('Fetching trips for user:', userId);
-
-    const { data: trips, error } = await supabase
-      .from('trips')
-      .select('*')
-      .eq('user_id', userId)
-      .eq('archived', false)
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching trips:', error);
-      throw error;
-    }
-
-    console.log('Raw trips data from Supabase:', trips);
-
-    // Transform and validate the data
-    const transformedTrips = trips?.map(trip => ({
-      id: trip.id,
-      title: trip.title || '',
-      destination: trip.destination || '',
-      startDate: trip.start_date || '',
-      endDate: trip.end_date || '',
-      travelers: trip.travelers || 0,
-      status: isValidStatus(trip.status) ? trip.status : 'draft',
-      archived: trip.archived || false,
-      segments: Array.isArray(trip.segments) ? trip.segments : []
-    })) || [];
-
-    console.log('Transformed trips:', transformedTrips);
-    return transformedTrips;
-  } catch (error) {
-    console.error('Error in fetchTrips:', error);
-    return [];
-  }
-}
-
 const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    // Get initial session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session?.user?.id);
-      setSession(session);
-      setLoading(false);
-    });
+  const fetchTrips = useCallback(async () => {
+    if (!session?.user?.id) {
+      return [];
+    }
 
-    // Listen for auth changes
+    try {
+      const { data: trips, error } = await supabase
+        .from('trips')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .eq('archived', false)
+        .order('created_at', { ascending: false });
+
+      if (error) {
+        throw error;
+      }
+
+      return (trips || []).map(trip => ({
+        id: trip.id,
+        title: trip.title || '',
+        destination: trip.destination || '',
+        startDate: trip.start_date || '',
+        endDate: trip.end_date || '',
+        travelers: trip.travelers || 0,
+        status: isValidStatus(trip.status) ? trip.status : 'draft',
+        archived: trip.archived || false,
+        segments: Array.isArray(trip.segments) ? trip.segments : []
+      }));
+    } catch (error) {
+      console.error('Error fetching trips:', error);
+      return [];
+    }
+  }, [session?.user?.id]);
+
+  useEffect(() => {
+    const initializeSession = async () => {
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+      } catch (error) {
+        console.error('Error getting session:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    initializeSession();
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Auth state changed, new user ID:', session?.user?.id);
       setSession(session);
       setLoading(false);
     });
@@ -93,20 +87,9 @@ const Index = () => {
 
   const { data: trips = [], isLoading: isLoadingTrips, error } = useQuery({
     queryKey: ['trips', session?.user?.id],
-    queryFn: () => fetchTrips(session?.user?.id),
+    queryFn: fetchTrips,
     enabled: !!session?.user?.id,
-    staleTime: 0,
-    gcTime: 0,
   });
-
-  useEffect(() => {
-    console.log('Current session state:', {
-      userId: session?.user?.id,
-      isLoading: loading,
-      tripsCount: trips.length,
-      trips: trips
-    });
-  }, [session, loading, trips]);
 
   // Handle error state
   if (error) {
@@ -130,20 +113,14 @@ const Index = () => {
     return <Navigate to="/auth" replace />;
   }
 
-  // If on /dashboard route, show the dashboard
-  if (window.location.pathname === '/dashboard') {
-    return (
-      <Layout>
-        <div className="space-y-8">
-          <DashboardHeader />
-          <TripGrid trips={trips} isLoading={isLoadingTrips} />
-        </div>
-      </Layout>
-    );
-  }
-
-  // Otherwise, redirect to /dashboard
-  return <Navigate to="/dashboard" replace />;
+  return (
+    <Layout>
+      <div className="space-y-8">
+        <DashboardHeader />
+        <TripGrid trips={trips} isLoading={isLoadingTrips} />
+      </div>
+    </Layout>
+  );
 };
 
 export default Index;
