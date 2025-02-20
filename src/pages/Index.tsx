@@ -6,6 +6,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUser } from '@supabase/auth-helpers-react';
 import { toast } from "sonner";
 import { useQuery } from "@tanstack/react-query";
+import { useEffect } from "react";
 
 interface Trip {
   id: string;
@@ -31,9 +32,30 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
 
   console.log('Fetching trips for user:', userId);
 
+  // First, verify the current session
+  const { data: { session }, error: sessionError } = await supabase.auth.getSession();
+  
+  if (sessionError) {
+    console.error('Session error:', sessionError);
+    throw sessionError;
+  }
+
+  if (!session) {
+    console.error('No active session found');
+    return [];
+  }
+
+  // Log the current user's session information
+  console.log('Current session:', {
+    user: session.user.id,
+    email: session.user.email,
+    aud: session.user.aud
+  });
+
+  // Fetch trips with detailed logging
   const { data: trips, error } = await supabase
     .from('trips')
-    .select('id, title, destination, start_date, end_date, travelers, status, archived, segments')
+    .select('*')
     .eq('user_id', userId)
     .eq('archived', false)
     .order('created_at', { ascending: false });
@@ -43,9 +65,10 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
     throw error;
   }
 
-  console.log('Fetched trips:', trips);
+  console.log('Raw trips data:', trips);
 
-  return trips?.map(trip => ({
+  // Transform and validate the data
+  const transformedTrips = trips?.map(trip => ({
     id: trip.id,
     title: trip.title || '',
     destination: trip.destination || '',
@@ -56,10 +79,26 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
     archived: trip.archived || false,
     segments: Array.isArray(trip.segments) ? trip.segments : []
   })) || [];
+
+  console.log('Transformed trips:', transformedTrips);
+  return transformedTrips;
 };
 
 const Index = () => {
   const user = useUser();
+
+  // Log user information when it changes
+  useEffect(() => {
+    if (user) {
+      console.log('Current user:', {
+        id: user.id,
+        email: user.email,
+        role: user.role
+      });
+    } else {
+      console.log('No user found');
+    }
+  }, [user]);
 
   const { data: trips = [], isLoading, error } = useQuery({
     queryKey: ['trips', user?.id],
@@ -76,9 +115,14 @@ const Index = () => {
 
   // Handle error state
   if (error) {
-    console.error('Error fetching trips:', error);
+    console.error('Error in trips query:', error);
     toast.error('Unable to load trips. Please try again.');
   }
+
+  // Add loading state feedback
+  useEffect(() => {
+    console.log('Query state:', { isLoading, error: error ? 'Error present' : 'No error', tripsCount: trips.length });
+  }, [isLoading, error, trips]);
 
   return (
     <Layout>
