@@ -1,12 +1,11 @@
 
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 
 export function DashboardHeader() {
-  const navigate = useNavigate();
   const [userEmail, setUserEmail] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,10 +25,6 @@ export function DashboardHeader() {
     return () => subscription.unsubscribe();
   }, []);
 
-  const handleCreateTrip = () => {
-    navigate('/trips/create');
-  };
-
   return (
     <div className="flex justify-between items-center">
       <div>
@@ -41,13 +36,14 @@ export function DashboardHeader() {
           )}
         </div>
       </div>
-      <Button 
-        className="bg-navy hover:bg-navy-light border border-white"
-        onClick={handleCreateTrip}
-      >
-        <Plus className="h-4 w-4 mr-2" />
-        Create New Trip
-      </Button>
+      <Link to="/trips/create">
+        <Button 
+          className="bg-navy hover:bg-navy-light border border-white"
+        >
+          <Plus className="h-4 w-4 mr-2" />
+          Create New Trip
+        </Button>
+      </Link>
     </div>
   );
 }
