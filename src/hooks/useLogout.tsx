@@ -2,11 +2,10 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { useRef } from 'react';
-import { useSessionContext } from '@supabase/auth-helpers-react';
+import { supabase } from '@/integrations/supabase/client';
 
 export const useLogout = () => {
   const navigate = useNavigate();
-  const { supabaseClient, session } = useSessionContext();
   const isLoggingOutRef = useRef(false);
 
   const handleLogout = async () => {
@@ -16,18 +15,18 @@ export const useLogout = () => {
       return;
     }
 
-    if (!session) {
-      console.log('No active session found, redirecting to auth...');
-      navigate('/auth', { replace: true });
-      return;
-    }
-
     isLoggingOutRef.current = true;
-    console.log('Starting logout process with session:', session.user?.email);
+    console.log('Starting logout process...');
 
     try {
-      // Use the supabaseClient from the context instead of the imported client
-      const { error } = await supabaseClient.auth.signOut();
+      // First, try to get the current session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session?.user?.email);
+
+      // Proceed with logout
+      const { error } = await supabase.auth.signOut({
+        scope: 'local'  // Only clear the current tab's session
+      });
       
       if (error) {
         console.error('Error during Supabase signOut:', error);
