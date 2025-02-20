@@ -15,7 +15,7 @@ export function DashboardHeader() {
         <div className="flex items-center gap-2">
           <p className="text-white mt-1">Manage your travel itineraries</p>
           {session?.user?.email && (
-            <p className="text-white/70 mt-1">• Logged in as {session.user.email}</p>
+            <p className="text-white/70 mt-1">• {session.user.email}</p>
           )}
         </div>
       </div>
