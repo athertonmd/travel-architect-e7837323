@@ -17,7 +17,7 @@ export function useHotelMutations() {
 
       const { data, error } = await supabase
         .from('hotels')
-        .insert([{ ...values, user_id: session.user.id }])
+        .insert([values])
         .select()
         .single();
 
