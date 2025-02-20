@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/Layout";
 import { useSession } from '@supabase/auth-helpers-react';
 import { HotelsRow } from "@/integrations/supabase/types/hotels";
@@ -20,14 +21,16 @@ const HotelBank = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
-  const { data: hotels = [], isLoading } = useHotels();
+  const { data: hotels = [], isLoading, error } = useHotels();
   const { addHotelMutation, updateHotelMutation, deleteHotelMutation } = useHotelMutations();
 
   useEffect(() => {
+    let mounted = true;
+
     const checkSession = async () => {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
-        if (!currentSession) {
+        if (!currentSession && mounted) {
           console.log('No active session, redirecting to auth page');
           navigate('/auth');
         }
@@ -35,11 +38,17 @@ const HotelBank = () => {
         console.error('Error checking session:', error);
         navigate('/auth');
       } finally {
-        setIsCheckingAuth(false);
+        if (mounted) {
+          setIsCheckingAuth(false);
+        }
       }
     };
 
     checkSession();
+
+    return () => {
+      mounted = false;
+    };
   }, [navigate]);
 
   const handleSubmit = async (values: Partial<HotelsRow>) => {
@@ -98,6 +107,7 @@ const HotelBank = () => {
         <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
           <HotelHeader onAddNewClick={() => {
             setSelectedHotel(null);
+            setIsDialogOpen(true);
           }} />
           <HotelDialog 
             isOpen={isDialogOpen}
@@ -115,6 +125,11 @@ const HotelBank = () => {
           <div className="text-center py-8">
             <p className="text-white text-lg mb-2">Loading hotels...</p>
             <p className="text-gray-400 text-sm">Please wait while we fetch your hotel data</p>
+          </div>
+        ) : error ? (
+          <div className="text-center py-8 text-red-500">
+            <p className="text-lg mb-2">Error loading hotels</p>
+            <p className="text-sm">Please try refreshing the page</p>
           </div>
         ) : (
           <HotelsTable
