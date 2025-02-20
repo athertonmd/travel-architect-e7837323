@@ -36,10 +36,12 @@ export default function App() {
   useEffect(() => {
     const initializeAuth = async () => {
       const { data: { session: initialSession } } = await supabase.auth.getSession();
+      console.log('App: Initial session loaded:', initialSession);
       setSession(initialSession);
       setIsInitialized(true);
 
       const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+        console.log('App: Auth state changed:', session);
         setSession(session);
       });
 
