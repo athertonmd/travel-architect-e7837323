@@ -23,11 +23,17 @@ const HotelBank = () => {
   const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
-    if (!session) {
-      console.log('No active session, redirecting to auth page');
-      navigate('/auth');
-    }
-  }, [session, navigate]);
+    const checkSession = async () => {
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      if (!currentSession) {
+        console.log('No active session, redirecting to auth page');
+        navigate('/auth');
+        return;
+      }
+    };
+
+    checkSession();
+  }, [navigate]);
 
   const { data: hotels = [], isLoading } = useQuery({
     queryKey: ['hotels'],
@@ -45,17 +51,7 @@ const HotelBank = () => {
       console.log('Fetched hotels:', data);
       return data;
     },
-    enabled: !!session?.user?.id, // Only run query when session is available
-  });
-
-  const filteredHotels = hotels.filter((hotel) => {
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      hotel.name?.toLowerCase().includes(searchLower) ||
-      hotel.address?.toLowerCase().includes(searchLower) ||
-      hotel.city?.toLowerCase().includes(searchLower) ||
-      hotel.country?.toLowerCase().includes(searchLower)
-    );
+    enabled: !!session?.user?.id,
   });
 
   const addHotelMutation = useMutation({
@@ -171,6 +167,16 @@ const HotelBank = () => {
       console.error('Error in handleDelete:', error);
     }
   };
+
+  const filteredHotels = hotels.filter((hotel) => {
+    const searchLower = searchQuery.toLowerCase();
+    return (
+      hotel.name?.toLowerCase().includes(searchLower) ||
+      hotel.address?.toLowerCase().includes(searchLower) ||
+      hotel.city?.toLowerCase().includes(searchLower) ||
+      hotel.country?.toLowerCase().includes(searchLower)
+    );
+  });
 
   if (!session) {
     return (
