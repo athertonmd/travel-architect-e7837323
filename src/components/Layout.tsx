@@ -9,6 +9,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const session = useSession();
   const isAuthPage = location.pathname === "/auth";
 
+  // On auth page with session, redirect to dashboard
+  if (isAuthPage && session) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   // If not on auth page and no session, redirect to auth
   if (!isAuthPage && !session) {
     return <Navigate to="/auth" replace />;

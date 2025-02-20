@@ -2,7 +2,7 @@
 import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Layout } from '@/components/Layout';
 import { toast } from "sonner";
@@ -11,24 +11,8 @@ const Auth = () => {
   const navigate = useNavigate();
   const navigationAttemptedRef = useRef(false);
   const subscriptionRef = useRef<{ unsubscribe: () => void } | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const checkSession = async () => {
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        
-        if (session?.user && !navigationAttemptedRef.current) {
-          navigationAttemptedRef.current = true;
-          navigate('/dashboard', { replace: true });
-        }
-      } catch (error) {
-        console.error('Session check error:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     // Only set up the subscription if we haven't already
     if (!subscriptionRef.current) {
       const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
@@ -41,8 +25,6 @@ const Auth = () => {
       subscriptionRef.current = subscription;
     }
 
-    checkSession();
-
     return () => {
       if (subscriptionRef.current) {
         subscriptionRef.current.unsubscribe();
@@ -50,11 +32,6 @@ const Auth = () => {
       }
     };
   }, [navigate]);
-
-  // Show nothing while checking session
-  if (isLoading) {
-    return null;
-  }
 
   return (
     <Layout>
