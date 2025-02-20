@@ -26,19 +26,35 @@ export function TripSaveButton({ title, nodes, travelers }: TripSaveButtonProps)
         return;
       }
 
-      console.log('Saving trip:', { title, nodes, travelers });
+      // Transform nodes to a format compatible with Supabase's Json type
+      const transformedSegments = nodes.map(node => ({
+        id: node.id,
+        type: node.type,
+        position: node.position,
+        data: {
+          label: node.data.label,
+          icon: node.data.icon,
+          details: node.data.details
+        }
+      }));
+
+      // Get destination from first node if available
+      const firstSegmentDestination = nodes[0]?.data?.details?.location || 
+                                    nodes[0]?.data?.details?.destinationAirport || 
+                                    undefined;
+
+      console.log('Saving trip:', { title, segments: transformedSegments, travelers });
 
       const { data: trip, error } = await supabase
         .from('trips')
-        .insert([
-          {
-            title,
-            segments: nodes,
-            travelers,
-            user_id: session.user.id,
-            status: 'draft'
-          }
-        ])
+        .insert({
+          title,
+          segments: transformedSegments,
+          travelers,
+          user_id: session.user.id,
+          status: 'draft',
+          destination: firstSegmentDestination
+        })
         .select()
         .single();
 
