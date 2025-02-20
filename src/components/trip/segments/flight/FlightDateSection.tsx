@@ -5,7 +5,7 @@ import { format, parse } from "date-fns";
 import { SegmentDetails } from "@/types/segment";
 import { Calendar } from "@/components/ui/calendar";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, Clock } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
@@ -72,6 +72,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
   };
 
   const formattedDate = date ? format(date, "MMMM d, yyyy") : "Pick a date";
+  const formattedTime = `${hours}:${minutes}`;
 
   // Generate hours and minutes arrays for the selectors
   const hoursArray = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
@@ -111,35 +112,57 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
           </PopoverContent>
         </Popover>
         
-        <div className="flex gap-1">
-          <Select value={hours} onValueChange={(value) => handleTimeChange('hours', value)}>
-            <SelectTrigger className="w-[70px]">
-              <SelectValue placeholder="HH" />
-            </SelectTrigger>
-            <SelectContent>
-              {hoursArray.map((hour) => (
-                <SelectItem key={hour} value={hour}>
-                  {hour}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          
-          <span className="flex items-center px-1">:</span>
-          
-          <Select value={minutes} onValueChange={(value) => handleTimeChange('minutes', value)}>
-            <SelectTrigger className="w-[70px]">
-              <SelectValue placeholder="MM" />
-            </SelectTrigger>
-            <SelectContent>
-              {minutesArray.map((minute) => (
-                <SelectItem key={minute} value={minute}>
-                  {minute}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-[120px] justify-start text-left font-normal",
+                !date && "text-muted-foreground"
+              )}
+            >
+              <div className="flex items-center w-full">
+                <Clock className="mr-2 h-4 w-4 text-gray-500" />
+                <span className="flex-grow text-foreground">{formattedTime}</span>
+              </div>
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-4" align="start">
+            <div className="flex flex-col gap-4">
+              <div className="grid gap-2">
+                <Label className="text-xs text-muted-foreground">Hours</Label>
+                <Select value={hours} onValueChange={(value) => handleTimeChange('hours', value)}>
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="HH" />
+                  </SelectTrigger>
+                  <SelectContent className="h-[200px]">
+                    {hoursArray.map((hour) => (
+                      <SelectItem key={hour} value={hour}>
+                        {hour}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="grid gap-2">
+                <Label className="text-xs text-muted-foreground">Minutes</Label>
+                <Select value={minutes} onValueChange={(value) => handleTimeChange('minutes', value)}>
+                  <SelectTrigger className="w-[100px]">
+                    <SelectValue placeholder="MM" />
+                  </SelectTrigger>
+                  <SelectContent className="h-[200px]">
+                    {minutesArray.map((minute) => (
+                      <SelectItem key={minute} value={minute}>
+                        {minute}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          </PopoverContent>
+        </Popover>
       </div>
     </div>
   );
