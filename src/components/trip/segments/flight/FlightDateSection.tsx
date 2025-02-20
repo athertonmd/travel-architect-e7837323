@@ -32,7 +32,6 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
   }, [details.departureDate]);
 
   useEffect(() => {
-    // Log the current date state for debugging
     console.log('Current date state:', date);
     console.log('Current details:', details);
   }, [date, details]);
@@ -82,8 +81,10 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
                 !date && "text-muted-foreground"
               )}
             >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              <span className="text-foreground">{formattedDate}</span>
+              <div className="flex items-center w-full">
+                <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
+                <span className="flex-grow text-foreground">{formattedDate}</span>
+              </div>
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0" align="start">
