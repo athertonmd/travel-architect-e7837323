@@ -8,13 +8,17 @@ import { TripSaveButton } from "@/components/trip/TripSaveButton";
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "@/components/ui/resizable";
 import { SegmentDetails } from "@/components/trip/SegmentDetails";
 import { useNodeManagement } from "@/hooks/useNodeManagement";
-import { useSession } from '@supabase/auth-helpers-react';
 import { Navigate } from 'react-router-dom';
+import { supabase } from "@/integrations/supabase/client";
+import { useEffect, useState as useReactState } from "react";
+import { Session } from '@supabase/supabase-js';
 
 const CreateTrip = () => {
-  const session = useSession();
   const [tripTitle, setTripTitle] = useState("Create New Trip");
   const [travelers, setTravelers] = useState(1);
+  const [session, setSession] = useReactState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
   const {
     nodes,
     selectedNode,
@@ -24,9 +28,25 @@ const CreateTrip = () => {
     setNodes
   } = useNodeManagement();
 
-  console.log('Selected Node:', selectedNode);
+  useEffect(() => {
+    const getSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setSession(session);
+      setIsLoading(false);
+    };
+
+    getSession();
+  }, []);
+
+  console.log('CreateTrip: Session state:', session);
+  console.log('CreateTrip: Loading state:', isLoading);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   if (!session) {
+    console.log('CreateTrip: No session, redirecting to auth');
     return <Navigate to="/auth" replace />;
   }
 
