@@ -45,7 +45,7 @@ const fetchTrips = async (userId: string | undefined): Promise<Trip[]> => {
     throw error;
   }
 
-  console.log('Raw trips data:', trips);
+  console.log('Raw trips data from Supabase:', trips);
 
   // Transform and validate the data
   const transformedTrips = trips?.map(trip => ({
@@ -71,12 +71,14 @@ const Index = () => {
   useEffect(() => {
     // Get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      console.log('Initial session:', session?.user?.id);
       setSession(session);
       setLoading(false);
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed, new user ID:', session?.user?.id);
       setSession(session);
       setLoading(false);
     });
@@ -88,9 +90,18 @@ const Index = () => {
     queryKey: ['trips', session?.user?.id],
     queryFn: () => fetchTrips(session?.user?.id),
     enabled: !!session?.user?.id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 30, // 30 minutes
+    staleTime: 0, // Disable cache to always fetch fresh data
+    gcTime: 0,
   });
+
+  useEffect(() => {
+    console.log('Current session state:', {
+      userId: session?.user?.id,
+      isLoading: loading,
+      tripsCount: trips.length,
+      trips: trips
+    });
+  }, [session, loading, trips]);
 
   // Handle error state
   if (error) {
