@@ -53,21 +53,20 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  onClick={handleLogout}
+                  disabled={!session}
+                  className="flex items-center gap-2 text-destructive hover:text-destructive/90 w-full"
+                >
+                  <LogOut className="h-4 w-4" />
+                  <span>Log Out</span>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter>
-        <Button
-          onClick={handleLogout}
-          disabled={!session}
-          variant="ghost"
-          className="w-full flex items-center gap-2 text-destructive hover:text-destructive/90 hover:bg-background/10"
-        >
-          <LogOut className="h-4 w-4" />
-          <span>Log Out</span>
-        </Button>
-      </SidebarFooter>
     </Sidebar>
   );
 }
