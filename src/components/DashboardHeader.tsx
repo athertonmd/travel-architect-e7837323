@@ -31,8 +31,13 @@ export function DashboardHeader() {
   }, []);
 
   const handleCreateTrip = () => {
-    console.log('Navigating to create trip page');
-    navigate('/trips/create');
+    console.log('Attempting to navigate to create trip page...');
+    try {
+      navigate('/create');
+      console.log('Navigation completed');
+    } catch (error) {
+      console.error('Navigation error:', error);
+    }
   };
 
   return (
