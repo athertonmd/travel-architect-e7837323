@@ -11,9 +11,11 @@ export function useHotels() {
     queryKey: ['hotels'],
     queryFn: async () => {
       if (!session?.user?.id) {
+        console.error('No authenticated user found when fetching hotels');
         throw new Error('No authenticated user');
       }
 
+      console.log('Fetching hotels for user:', session.user.id);
       const { data, error } = await supabase
         .from('hotels')
         .select('*')
@@ -25,10 +27,11 @@ export function useHotels() {
         throw error;
       }
 
-      console.log('Fetched hotels:', data);
-      return data;
+      console.log('Successfully fetched hotels:', data?.length || 0, 'hotels found');
+      return data || [];
     },
     enabled: !!session?.user?.id,
     retry: 1,
+    staleTime: 1000 * 60 * 5, // Cache for 5 minutes
   });
 }

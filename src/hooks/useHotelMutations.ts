@@ -6,7 +6,7 @@ import { toast } from "sonner";
 import { useSession } from "@supabase/auth-helpers-react";
 
 type HotelInput = Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'> & {
-  name: string; // Ensure name is required
+  name: string;
 };
 
 export function useHotelMutations() {
@@ -16,16 +16,23 @@ export function useHotelMutations() {
   const addHotelMutation = useMutation({
     mutationFn: async (values: HotelInput) => {
       if (!session?.user?.id) {
+        console.error('No authenticated user found when adding hotel');
         throw new Error('User must be logged in to add hotels');
       }
 
+      console.log('Adding hotel with values:', values);
       const { data, error } = await supabase
         .from('hotels')
-        .insert({ ...values, user_id: session.user.id })
+        .insert([{ ...values, user_id: session.user.id }])
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error adding hotel:', error);
+        throw error;
+      }
+      
+      console.log('Successfully added hotel:', data);
       return data;
     },
     onSuccess: () => {
@@ -41,9 +48,11 @@ export function useHotelMutations() {
   const updateHotelMutation = useMutation({
     mutationFn: async (values: HotelInput & { id: string }) => {
       if (!session?.user?.id) {
+        console.error('No authenticated user found when updating hotel');
         throw new Error('User must be logged in to update hotels');
       }
 
+      console.log('Updating hotel with values:', values);
       const { data, error } = await supabase
         .from('hotels')
         .update(values)
@@ -51,7 +60,12 @@ export function useHotelMutations() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error updating hotel:', error);
+        throw error;
+      }
+
+      console.log('Successfully updated hotel:', data);
       return data;
     },
     onSuccess: () => {
@@ -67,15 +81,22 @@ export function useHotelMutations() {
   const deleteHotelMutation = useMutation({
     mutationFn: async (id: string) => {
       if (!session?.user?.id) {
+        console.error('No authenticated user found when deleting hotel');
         throw new Error('User must be logged in to delete hotels');
       }
 
+      console.log('Deleting hotel with id:', id);
       const { error } = await supabase
         .from('hotels')
         .delete()
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error deleting hotel:', error);
+        throw error;
+      }
+
+      console.log('Successfully deleted hotel with id:', id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotels'] });
