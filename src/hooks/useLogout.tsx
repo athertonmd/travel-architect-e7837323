@@ -9,7 +9,6 @@ export const useLogout = () => {
   const navigate = useNavigate();
   const session = useSession();
   const isLoggingOutRef = useRef(false);
-  const navigationTimeoutRef = useRef<NodeJS.Timeout>();
   const toastIdRef = useRef<string | number>();
 
   const handleLogout = async () => {
@@ -20,14 +19,19 @@ export const useLogout = () => {
     }
 
     isLoggingOutRef.current = true;
-    toastIdRef.current = toast.loading('Signing out...', {
-      duration: Infinity
-    });
+    console.log('Starting logout process...');
 
     try {
-      console.log('Starting logout process...');
+      // First attempt to sign out from Supabase
+      const { error } = await supabase.auth.signOut();
       
-      // Clear local storage and cookies
+      if (error) {
+        console.error('Error during Supabase signOut:', error);
+        toast.error('Error during logout. Please try again.');
+        return;
+      }
+
+      // Clear local storage and cookies after successful signout
       localStorage.clear();
       document.cookie.split(";").forEach((c) => {
         document.cookie = c
@@ -35,28 +39,16 @@ export const useLogout = () => {
           .replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
       });
 
-      // Attempt to sign out from Supabase
-      const { error } = await supabase.auth.signOut();
+      console.log('Logout successful, redirecting...');
+      toast.success('Logged out successfully');
       
-      if (error) {
-        console.error('Error during Supabase signOut:', error);
-        toast.error('Error during logout. Please try again.');
-      } else {
-        console.log('Logout successful');
-        toast.success('Logged out successfully');
-      }
-
-      // Force navigation regardless of logout success
-      navigate('/', { replace: true });
+      // Immediate navigation after successful logout
+      navigate('/auth', { replace: true });
 
     } catch (error) {
       console.error('Unexpected logout error:', error);
       toast.error('Error during logout. Please try again.');
-      navigate('/', { replace: true });
     } finally {
-      if (toastIdRef.current) {
-        toast.dismiss(toastIdRef.current);
-      }
       isLoggingOutRef.current = false;
     }
   };
