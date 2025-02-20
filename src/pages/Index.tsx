@@ -91,14 +91,8 @@ const Index = () => {
     enabled: !!session?.user?.id,
   });
 
-  // Handle error state
-  if (error) {
-    console.error('Error in trips query:', error);
-    toast.error('Unable to load trips. Please try again.');
-  }
-
-  // Show loading state
-  if (loading) {
+  // Handle loading state first
+  if (loading || isLoadingTrips) {
     return (
       <Layout>
         <div className="flex items-center justify-center h-screen">
@@ -108,16 +102,23 @@ const Index = () => {
     );
   }
 
-  // If there's no session, redirect to auth
+  // Then handle authentication
   if (!session) {
     return <Navigate to="/auth" replace />;
   }
 
+  // Handle error state
+  if (error) {
+    console.error('Error in trips query:', error);
+    toast.error('Unable to load trips. Please try again.');
+  }
+
+  // Finally render the dashboard
   return (
     <Layout>
       <div className="space-y-8">
         <DashboardHeader />
-        <TripGrid trips={trips} isLoading={isLoadingTrips} />
+        <TripGrid trips={trips} isLoading={false} />
       </div>
     </Layout>
   );
