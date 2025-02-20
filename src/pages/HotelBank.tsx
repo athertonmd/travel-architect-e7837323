@@ -1,3 +1,4 @@
+
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useSession } from '@supabase/auth-helpers-react';
@@ -11,6 +12,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { HotelForm } from "@/components/hotels/HotelForm";
 import { HotelsTable } from "@/components/hotels/HotelsTable";
 import { HotelSearch } from "@/components/hotels/HotelSearch";
+import { useNavigate } from "react-router-dom";
 
 const HotelBank = () => {
   const session = useSession();
@@ -49,9 +51,6 @@ const HotelBank = () => {
 
   const addHotelMutation = useMutation({
     mutationFn: async (values: Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'>) => {
-      console.log('Adding hotel with values:', values);
-      console.log('Current user ID:', session?.user?.id);
-      
       if (!session?.user?.id) {
         throw new Error('User must be logged in to add hotels');
       }
@@ -66,8 +65,7 @@ const HotelBank = () => {
         console.error('Error adding hotel:', error);
         throw error;
       }
-      
-      console.log('Successfully added hotel:', data);
+
       return data;
     },
     onSuccess: () => {
@@ -84,8 +82,10 @@ const HotelBank = () => {
 
   const updateHotelMutation = useMutation({
     mutationFn: async (values: Omit<HotelsRow, 'created_at' | 'updated_at' | 'user_id'>) => {
-      console.log('Updating hotel with values:', values);
-      
+      if (!session?.user?.id) {
+        throw new Error('User must be logged in to update hotels');
+      }
+
       const { data, error } = await supabase
         .from('hotels')
         .update(values)
@@ -97,8 +97,7 @@ const HotelBank = () => {
         console.error('Error updating hotel:', error);
         throw error;
       }
-      
-      console.log('Successfully updated hotel:', data);
+
       return data;
     },
     onSuccess: () => {
@@ -115,8 +114,10 @@ const HotelBank = () => {
 
   const deleteHotelMutation = useMutation({
     mutationFn: async (id: string) => {
-      console.log('Deleting hotel with ID:', id);
-      
+      if (!session?.user?.id) {
+        throw new Error('User must be logged in to delete hotels');
+      }
+
       const { error } = await supabase
         .from('hotels')
         .delete()
@@ -126,8 +127,6 @@ const HotelBank = () => {
         console.error('Error deleting hotel:', error);
         throw error;
       }
-      
-      console.log('Successfully deleted hotel');
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['hotels'] });
@@ -140,10 +139,14 @@ const HotelBank = () => {
   });
 
   const handleSubmit = async (values: Partial<HotelsRow>) => {
-    if (selectedHotel) {
-      await updateHotelMutation.mutateAsync({ ...values, id: selectedHotel.id } as HotelsRow);
-    } else {
-      await addHotelMutation.mutateAsync(values as Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'>);
+    try {
+      if (selectedHotel) {
+        await updateHotelMutation.mutateAsync({ ...values, id: selectedHotel.id } as HotelsRow);
+      } else {
+        await addHotelMutation.mutateAsync(values as Omit<HotelsRow, 'id' | 'created_at' | 'updated_at' | 'user_id'>);
+      }
+    } catch (error) {
+      console.error('Error in handleSubmit:', error);
     }
   };
 
@@ -153,7 +156,11 @@ const HotelBank = () => {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteHotelMutation.mutateAsync(id);
+    try {
+      await deleteHotelMutation.mutateAsync(id);
+    } catch (error) {
+      console.error('Error in handleDelete:', error);
+    }
   };
 
   return (
