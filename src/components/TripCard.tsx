@@ -1,3 +1,4 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -14,7 +15,7 @@ interface TripCardProps {
   startDate: string;
   endDate: string;
   travelers: number;
-  status: "draft" | "in-progress" | "confirmed";
+  status: "draft" | "sent";
   archived?: boolean;
   segments?: any[];
 }
