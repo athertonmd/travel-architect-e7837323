@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Node } from "@xyflow/react";
@@ -24,13 +25,13 @@ const transformSegmentsToNodes = (segments: any[]): Node<SegmentNodeData>[] => {
   if (!Array.isArray(segments)) return [];
   
   return segments.map((segment: any) => ({
-    id: segment.id || crypto.randomUUID(),
+    id: segment.id,
     type: 'segment',
     position: segment.position || { x: 0, y: 0 },
     data: {
-      label: segment.type || 'Unknown',
-      icon: segment.icon || '📍',
-      details: segment.details || {}
+      label: segment.data?.label || segment.type || 'Unknown',
+      icon: segment.data?.icon || segment.icon || '📍',
+      details: segment.data?.details || segment.details || {}
     }
   }));
 };
@@ -71,6 +72,7 @@ export function useTripData(
       if (trip.segments && Array.isArray(trip.segments)) {
         console.log('Setting nodes from segments:', trip.segments);
         const nodes = transformSegmentsToNodes(trip.segments);
+        console.log('Transformed nodes:', nodes);
         setNodes(nodes);
       }
 
