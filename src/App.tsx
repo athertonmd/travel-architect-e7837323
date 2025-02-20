@@ -77,12 +77,12 @@ export default function App() {
       element: session ? <CreateTrip /> : <Navigate to="/auth" replace />,
     },
     {
-      path: "/trips/:id",
-      element: session ? <ViewTrip /> : <Navigate to="/auth" replace />,
-    },
-    {
       path: "/trips/archive",
       element: session ? <Archive /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/trips/:id",
+      element: session ? <ViewTrip /> : <Navigate to="/auth" replace />,
     },
     {
       path: "/travellers",
