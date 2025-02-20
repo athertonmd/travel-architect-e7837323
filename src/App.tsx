@@ -7,6 +7,8 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from "@/integrations/supabase/client";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
 import CreateTrip from "@/pages/CreateTrip";
@@ -16,9 +18,9 @@ import ManageTravellers from "@/pages/ManageTravellers";
 import HotelBank from "@/pages/HotelBank";
 import Notifications from "@/pages/Notifications";
 import { useEffect, useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { Session } from '@supabase/supabase-js';
+import { toast } from "sonner";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -35,20 +37,28 @@ export default function App() {
 
   useEffect(() => {
     const initializeAuth = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      console.log('App: Initial session loaded:', initialSession);
-      setSession(initialSession);
-      setIsInitialized(true);
-
-      const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-        console.log('App: Auth state changed:', session);
-        setSession(session);
-      });
-
-      return () => subscription.unsubscribe();
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        console.log('Initial session loaded:', initialSession?.user?.email);
+        setSession(initialSession);
+      } catch (error) {
+        console.error('Error getting initial session:', error);
+        toast.error('Error initializing session');
+      } finally {
+        setIsInitialized(true);
+      }
     };
 
     initializeAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed, new session:', session?.user?.email);
+      setSession(session);
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
   if (!isInitialized) {
@@ -100,10 +110,12 @@ export default function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <RouterProvider router={router} />
-        <Toaster />
-      </ThemeProvider>
+      <SessionContextProvider supabaseClient={supabase} initialSession={session}>
+        <ThemeProvider>
+          <RouterProvider router={router} />
+          <Toaster />
+        </ThemeProvider>
+      </SessionContextProvider>
     </QueryClientProvider>
   );
 }
