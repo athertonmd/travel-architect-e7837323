@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useSession } from '@supabase/auth-helpers-react';
@@ -6,19 +5,32 @@ import { Plus } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { HotelsRow } from "@/integrations/supabase/types/hotels";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { HotelForm } from "@/components/hotels/HotelForm";
 import { HotelsTable } from "@/components/hotels/HotelsTable";
 import { HotelSearch } from "@/components/hotels/HotelSearch";
+import { useNavigate } from "react-router-dom";
 
 const HotelBank = () => {
   const session = useSession();
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [selectedHotel, setSelectedHotel] = useState<HotelsRow | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useEffect(() => {
+    if (!session) {
+      toast.error('Please log in to access the Hotel Bank');
+      navigate('/auth');
+    }
+  }, [session, navigate]);
+
+  if (!session) {
+    return null;
+  }
 
   const { data: hotels = [], isLoading } = useQuery({
     queryKey: ['hotels'],
