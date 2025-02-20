@@ -27,24 +27,45 @@ const isValidStatus = (status: string): status is "draft" | "sent" => {
 
 const Index = () => {
   const [session, setSession] = useState<Session | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Initialize session on mount with useEffect instead of useState
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      console.log('Initial session:', session);
-      setSession(session);
+    let mounted = true;
+
+    async function getInitialSession() {
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
+        if (mounted) {
+          console.log('Initial session loaded:', initialSession);
+          setSession(initialSession);
+        }
+      } catch (error) {
+        console.error('Error getting initial session:', error);
+      } finally {
+        if (mounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    getInitialSession();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, currentSession) => {
+      if (mounted) {
+        console.log('Auth state changed:', currentSession);
+        setSession(currentSession);
+      }
     });
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      console.log('Session changed:', session);
-      setSession(session);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []); // Empty dependency array ensures this runs only on mount
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const fetchTrips = useCallback(async () => {
     if (!session?.user?.id) {
+      console.log('No session user ID, returning empty array');
       return [];
     }
 
@@ -58,6 +79,7 @@ const Index = () => {
         .order('created_at', { ascending: false });
 
       if (error) {
+        console.error('Error fetching trips:', error);
         throw error;
       }
 
@@ -74,20 +96,16 @@ const Index = () => {
         segments: Array.isArray(trip.segments) ? trip.segments : []
       }));
     } catch (error) {
-      console.error('Error fetching trips:', error);
+      console.error('Error in fetchTrips:', error);
       return [];
     }
   }, [session?.user?.id]);
 
-  const { data: trips = [], isLoading, error } = useQuery({
+  const { data: trips = [], error: queryError, isLoading: isQueryLoading } = useQuery({
     queryKey: ['trips', session?.user?.id],
     queryFn: fetchTrips,
     enabled: !!session?.user?.id,
   });
-
-  if (!session) {
-    return <Navigate to="/auth" replace />;
-  }
 
   if (isLoading) {
     return (
@@ -99,8 +117,13 @@ const Index = () => {
     );
   }
 
-  if (error) {
-    console.error('Error in trips query:', error);
+  if (!session) {
+    console.log('No session, redirecting to auth');
+    return <Navigate to="/auth" replace />;
+  }
+
+  if (queryError) {
+    console.error('Error in trips query:', queryError);
     toast.error('Unable to load trips. Please try again.');
   }
 
@@ -108,7 +131,7 @@ const Index = () => {
     <Layout>
       <div className="space-y-8">
         <DashboardHeader session={session} />
-        <TripGrid trips={trips} isLoading={false} />
+        <TripGrid trips={trips} isLoading={isQueryLoading} />
       </div>
     </Layout>
   );
