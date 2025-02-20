@@ -26,7 +26,7 @@ const menuItems = [
 
 export function AppSidebar() {
   const session = useSession();
-  const { handleLogout, isLoggingOut } = useLogout();
+  const { handleLogout } = useLogout();
   const location = useLocation();
 
   return (
@@ -59,8 +59,8 @@ export function AppSidebar() {
       <SidebarFooter className="mt-auto p-4">
         <SidebarMenuButton
           onClick={handleLogout}
-          disabled={isLoggingOut || !session}
-          className="flex w-full items-center gap-2 text-destructive hover:text-destructive disabled:opacity-50"
+          disabled={!session}
+          className="flex w-full items-center gap-2 text-destructive hover:text-destructive/90 disabled:opacity-50"
         >
           <LogOut className="h-4 w-4" />
           <span>Log Out</span>
