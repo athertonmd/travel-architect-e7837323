@@ -78,7 +78,7 @@ export function TripCard({
 
   return (
     <Card 
-      className="hover:shadow-lg transition-shadow cursor-pointer relative animate-in fade-in-50 duration-300 w-full" 
+      className="transform transition-all duration-300 hover:scale-[1.02] hover:shadow-xl cursor-pointer relative animate-in fade-in-50 w-full" 
       onClick={handleCardClick}
     >
       <TripCardHeader
