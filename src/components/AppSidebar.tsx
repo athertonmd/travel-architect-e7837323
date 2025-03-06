@@ -2,11 +2,13 @@
 import { NavLink } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
-import { Archive, Bell, FileText, Hotel, Layout, LogOut, Plus, Settings, Users } from "lucide-react";
+import { Archive, Bell, ChevronDown, ChevronRight, FileText, Hotel, Layout, LogOut, Plus, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
 
 export function AppSidebar() {
   const { handleLogout, isLoading } = useLogout();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   return (
     <Sidebar className="border-r border-navy-light bg-navy">
@@ -64,31 +66,48 @@ export function AppSidebar() {
           <span>Notifications</span>
         </NavLink>
         
-        <h3 className="mt-6 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Settings</h3>
-        
-        <NavLink 
-          to="/settings/sabre" 
-          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
-        >
-          <Settings className="h-5 w-5" />
-          <span>Sabre Credentials</span>
-        </NavLink>
-        
-        <NavLink 
-          to="/settings/travelport" 
-          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
-        >
-          <Settings className="h-5 w-5" />
-          <span>Travelport Credentials</span>
-        </NavLink>
-        
-        <NavLink 
-          to="/settings/pdf-design" 
-          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
-        >
-          <FileText className="h-5 w-5" />
-          <span>PDF Design</span>
-        </NavLink>
+        {/* Settings Menu with Collapsible Submenu */}
+        <div className="mt-6">
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className="flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-gray-300 hover:bg-navy-light transition-colors"
+          >
+            <div className="flex items-center gap-3">
+              <Settings className="h-5 w-5" />
+              <span>Settings</span>
+            </div>
+            {settingsOpen ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+          </button>
+          
+          {settingsOpen && (
+            <div className="ml-4 mt-1 space-y-1 border-l border-navy-light pl-4">
+              <NavLink 
+                to="/settings/sabre" 
+                className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
+              >
+                <span>Sabre Credentials</span>
+              </NavLink>
+              
+              <NavLink 
+                to="/settings/travelport" 
+                className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
+              >
+                <span>Travelport Credentials</span>
+              </NavLink>
+              
+              <NavLink 
+                to="/settings/pdf-design" 
+                className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
+              >
+                <span>PDF Design</span>
+              </NavLink>
+            </div>
+          )}
+        </div>
       </SidebarContent>
       
       <SidebarFooter className="p-4">
