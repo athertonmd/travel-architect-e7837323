@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
@@ -12,14 +11,7 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-navy-light bg-navy">
       <SidebarHeader className="p-4">
-        <Link to="/trips/create">
-          <Button 
-            className="w-full bg-navy hover:bg-navy-light border border-white text-white"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Create Trip
-          </Button>
-        </Link>
+        {/* Create Trip button removed from header */}
       </SidebarHeader>
       
       <SidebarContent className="flex flex-col gap-2 p-4">
