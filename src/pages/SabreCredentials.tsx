@@ -1,4 +1,3 @@
-
 import { Layout } from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FileKey } from "lucide-react";
@@ -8,16 +7,14 @@ import { SabreIntegrationProcess } from "@/components/sabre/SabreIntegrationProc
 import { SabreFormNote } from "@/components/sabre/SabreFormNote";
 import { LoadingCredentials } from "@/components/sabre/LoadingCredentials";
 import { useSabreCredentials } from "@/hooks/useSabreCredentials";
-
 export default function SabreCredentials() {
-  const { isLoading } = useSabreCredentials();
-  
+  const {
+    isLoading
+  } = useSabreCredentials();
   if (isLoading) {
     return <LoadingCredentials />;
   }
-  
-  return (
-    <Layout>
+  return <Layout>
       <div className="space-y-6">
         <div className="flex items-center gap-2">
           <FileKey className="h-6 w-6 text-gold" />
@@ -27,9 +24,7 @@ export default function SabreCredentials() {
         <Card>
           <CardHeader>
             <CardTitle>GDS Requirements – Setting Up a New Sabre TMC</CardTitle>
-            <CardDescription>
-              Please provide your Sabre GDS credentials to enable integration with Tripscape
-            </CardDescription>
+            <CardDescription>Please provide your Sabre GDS credentials to enable integration with Trip Builder</CardDescription>
           </CardHeader>
           <CardContent>
             <SabreInformationAlert />
@@ -40,6 +35,5 @@ export default function SabreCredentials() {
         
         <SabreFormNote />
       </div>
-    </Layout>
-  );
+    </Layout>;
 }
