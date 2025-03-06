@@ -2,8 +2,9 @@
 import { NavLink } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
-import { Archive, FileText, Layout, LogOut, Settings, Users } from "lucide-react";
+import { Archive, Bell, FileText, Hotel, Layout, LogOut, Plus, Send, Settings, User, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
 export function AppSidebar() {
   const { handleLogout, isLoading } = useLogout();
@@ -11,9 +12,14 @@ export function AppSidebar() {
   return (
     <Sidebar className="border-r border-navy-light bg-navy">
       <SidebarHeader className="p-4">
-        <div className="flex items-center justify-center">
-          <img src="/lovable-uploads/3d5d9396-0e98-4c13-a4da-15a0d219e9d6.png" alt="Trip Builder" className="h-8" />
-        </div>
+        <Link to="/trips/create">
+          <Button 
+            className="w-full bg-navy hover:bg-navy-light border border-white text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Create Trip
+          </Button>
+        </Link>
       </SidebarHeader>
       
       <SidebarContent className="flex flex-col gap-2 p-4">
@@ -30,8 +36,8 @@ export function AppSidebar() {
           to="/hotels" 
           className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
         >
-          <Layout className="h-5 w-5" />
-          <span>Hotels</span>
+          <Hotel className="h-5 w-5" />
+          <span>Hotel Bank</span>
         </NavLink>
         
         <NavLink 
@@ -39,7 +45,7 @@ export function AppSidebar() {
           className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
         >
           <Users className="h-5 w-5" />
-          <span>Travellers</span>
+          <span>Manage Travellers</span>
         </NavLink>
         
         <NavLink 
@@ -48,6 +54,22 @@ export function AppSidebar() {
         >
           <Archive className="h-5 w-5" />
           <span>Archive</span>
+        </NavLink>
+
+        <NavLink 
+          to="/notifications" 
+          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
+        >
+          <Bell className="h-5 w-5" />
+          <span>Notifications</span>
+        </NavLink>
+        
+        <NavLink 
+          to="/sent-notifications" 
+          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
+        >
+          <Send className="h-5 w-5" />
+          <span>Sent Notifications</span>
         </NavLink>
         
         <h3 className="mt-6 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Settings</h3>
@@ -58,6 +80,14 @@ export function AppSidebar() {
         >
           <Settings className="h-5 w-5" />
           <span>Sabre Credentials</span>
+        </NavLink>
+        
+        <NavLink 
+          to="/settings/travelport" 
+          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
+        >
+          <Settings className="h-5 w-5" />
+          <span>Travelport Credentials</span>
         </NavLink>
         
         <NavLink 
