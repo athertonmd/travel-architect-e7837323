@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
@@ -64,7 +63,7 @@ export function PdfDesignForm() {
   });
 
   // Load saved settings on mount
-  useState(() => {
+  useEffect(() => {
     const loadSettings = async () => {
       if (!session?.user?.id) return;
       
@@ -79,9 +78,7 @@ export function PdfDesignForm() {
         if (error) throw error;
         
         if (data) {
-          // Remove user_id from data before setting form values
-          const { user_id, id, created_at, ...settings } = data;
-          form.reset(settings);
+          form.reset(data);
         }
       } catch (error) {
         console.error('Error loading PDF settings:', error);
@@ -91,7 +88,7 @@ export function PdfDesignForm() {
     };
     
     loadSettings();
-  }, [session?.user?.id]);
+  }, [session?.user?.id, form]);
 
   const onSubmit = async (values: PdfDesignFormValues) => {
     if (!session?.user?.id) {

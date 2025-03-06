@@ -6,7 +6,7 @@ import { Archive, FileText, Layout, LogOut, Settings, Users } from "lucide-react
 import { Button } from "@/components/ui/button";
 
 export function AppSidebar() {
-  const { logout, isPending } = useLogout();
+  const { handleLogout, isLoading } = useLogout();
 
   return (
     <Sidebar className="border-r border-navy-light bg-navy">
@@ -70,9 +70,9 @@ export function AppSidebar() {
       </SidebarContent>
       
       <SidebarFooter className="p-4">
-        <Button variant="ghost" className="w-full justify-start" onClick={logout} disabled={isPending}>
+        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout} disabled={isLoading}>
           <LogOut className="mr-2 h-4 w-4" />
-          {isPending ? "Logging out..." : "Logout"}
+          {isLoading ? "Logging out..." : "Logout"}
         </Button>
       </SidebarFooter>
     </Sidebar>

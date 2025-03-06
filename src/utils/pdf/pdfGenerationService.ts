@@ -16,13 +16,15 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
     
     let pdfSettings = null;
     if (user) {
-      const { data: settingsData } = await supabase
+      const { data: settingsData, error } = await supabase
         .from('pdf_settings')
         .select('*')
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
       
-      pdfSettings = settingsData;
+      if (!error) {
+        pdfSettings = settingsData;
+      }
       console.log("Using custom PDF settings:", pdfSettings ? "Yes" : "No");
     }
     

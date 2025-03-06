@@ -2,12 +2,15 @@
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { useState } from 'react';
 
 export const useLogout = () => {
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
     try {
+      setIsLoading(true);
       console.log("Starting logout process...");
       
       // First check if we have a session
@@ -37,10 +40,13 @@ export const useLogout = () => {
       toast.error("An unexpected error occurred during logout.");
       // Even if there's an error, try to redirect to auth
       navigate('/auth', { replace: true });
+    } finally {
+      setIsLoading(false);
     }
   };
 
   return {
-    handleLogout
+    handleLogout,
+    isLoading
   };
 };
