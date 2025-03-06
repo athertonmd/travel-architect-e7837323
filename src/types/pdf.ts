@@ -37,26 +37,42 @@ export type PdfDesignFormValues = {
   footerText?: string;
 }
 
-export function mapDbSettingsToFormValues(settings: PdfSettings): PdfDesignFormValues {
+export function mapDbSettingsToFormValues(settings: any): PdfDesignFormValues {
   return {
-    primaryColor: settings.primary_color,
-    secondaryColor: settings.secondary_color,
-    accentColor: settings.accent_color,
-    headerFont: settings.header_font,
-    bodyFont: settings.body_font,
+    primaryColor: settings.primary_color || "#1A1F2C",
+    secondaryColor: settings.secondary_color || "#D6BCFA",
+    accentColor: settings.accent_color || "#9b87f5",
+    headerFont: settings.header_font || "Helvetica",
+    bodyFont: settings.body_font || "Helvetica",
     logoUrl: settings.logo_url,
-    showPageNumbers: settings.show_page_numbers,
-    includeNotes: settings.include_notes,
-    includeContactInfo: settings.include_contact_info,
-    dateFormat: settings.date_format,
-    timeFormat: settings.time_format,
+    showPageNumbers: settings.show_page_numbers !== null ? settings.show_page_numbers : true,
+    includeNotes: settings.include_notes !== null ? settings.include_notes : true,
+    includeContactInfo: settings.include_contact_info !== null ? settings.include_contact_info : true,
+    dateFormat: (settings.date_format as "MM/DD/YYYY" | "DD/MM/YYYY" | "YYYY-MM-DD") || "MM/DD/YYYY",
+    timeFormat: (settings.time_format as "12h" | "24h") || "12h",
     companyName: settings.company_name,
     headerText: settings.header_text,
     footerText: settings.footer_text
   };
 }
 
-export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: string): Omit<PdfSettings, 'id' | 'created_at' | 'updated_at'> {
+export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: string): {
+  user_id: string;
+  primary_color: string;
+  secondary_color: string;
+  accent_color: string;
+  header_font: string;
+  body_font: string;
+  logo_url?: string;
+  show_page_numbers: boolean;
+  include_notes: boolean;
+  include_contact_info: boolean;
+  date_format: string;
+  time_format: string;
+  company_name?: string;
+  header_text?: string;
+  footer_text?: string;
+} {
   return {
     user_id: userId,
     primary_color: values.primaryColor,

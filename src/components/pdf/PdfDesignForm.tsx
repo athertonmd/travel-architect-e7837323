@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -77,10 +76,7 @@ export function PdfDesignForm() {
         console.log("Loading PDF settings for user:", userId);
         
         const { data, error } = await supabase
-          .from('pdf_settings')
-          .select('*')
-          .eq('user_id', userId)
-          .maybeSingle();
+          .rpc('get_pdf_settings_for_user', { user_id_param: userId });
           
         if (error) {
           console.error('Error loading PDF settings:', error);

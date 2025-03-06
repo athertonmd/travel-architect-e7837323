@@ -322,6 +322,12 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      get_pdf_settings_for_user: {
+        Args: {
+          user_id_param: string
+        }
+        Returns: Json
+      }
       is_farquhar: {
         Args: {
           userid: string

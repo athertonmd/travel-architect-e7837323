@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
-import { PdfDesignFormValues } from "./PdfDesignForm";
+import { PdfDesignFormValues } from "@/types/pdf";
 
 interface PdfPreviewProps {
   settings: PdfDesignFormValues;
