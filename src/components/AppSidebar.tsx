@@ -49,7 +49,7 @@ export function AppSidebar() {
         </NavLink>
         
         <NavLink 
-          to="/archive" 
+          to="/trips/archive" 
           className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
         >
           <Archive className="h-5 w-5" />

@@ -121,6 +121,11 @@ export default function App() {
       path: "/settings/pdf-design",
       element: session ? <PdfDesignSettings /> : <Navigate to="/auth" replace />,
     },
+    // Add a redirect for the old route
+    {
+      path: "/archive",
+      element: <Navigate to="/trips/archive" replace />,
+    },
   ]);
 
   return (
