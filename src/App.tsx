@@ -17,6 +17,7 @@ import Archive from "@/pages/Archive";
 import ManageTravellers from "@/pages/ManageTravellers";
 import HotelBank from "@/pages/HotelBank";
 import Notifications from "@/pages/Notifications";
+import SentNotifications from "@/pages/SentNotifications";
 import SabreCredentials from "@/pages/SabreCredentials";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
@@ -106,6 +107,10 @@ export default function App() {
     {
       path: "/notifications",
       element: session ? <Notifications /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/sent-notifications",
+      element: session ? <SentNotifications /> : <Navigate to="/auth" replace />,
     },
     {
       path: "/settings/sabre",
