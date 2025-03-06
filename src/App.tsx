@@ -19,6 +19,7 @@ import HotelBank from "@/pages/HotelBank";
 import Notifications from "@/pages/Notifications";
 import SentNotifications from "@/pages/SentNotifications";
 import SabreCredentials from "@/pages/SabreCredentials";
+import PdfDesignSettings from "@/pages/PdfDesignSettings";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { Session } from '@supabase/supabase-js';
@@ -115,6 +116,10 @@ export default function App() {
     {
       path: "/settings/sabre",
       element: session ? <SabreCredentials /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/settings/pdf-design",
+      element: session ? <PdfDesignSettings /> : <Navigate to="/auth" replace />,
     },
   ]);
 

@@ -1,9 +1,9 @@
+
 import { NavLink } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
 import { Archive, Bell, FileText, Hotel, Layout, LogOut, Plus, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 
 export function AppSidebar() {
   const { handleLogout, isLoading } = useLogout();
