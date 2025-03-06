@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 
 interface GeneratePdfResponse {
@@ -8,15 +9,36 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
   console.log("Initiating PDF generation for trip:", tripId);
   
   try {
+    // First, try to get the user's PDF design settings
+    const {
+      data: { user },
+    } = await supabase.auth.getUser(sessionToken);
+    
+    let pdfSettings = null;
+    if (user) {
+      const { data: settingsData } = await supabase
+        .from('pdf_settings')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+      
+      pdfSettings = settingsData;
+      console.log("Using custom PDF settings:", pdfSettings ? "Yes" : "No");
+    }
+    
     console.log("Making request to generate-pdf function");
     console.log("Request details:", {
       tripId,
       hasSessionToken: !!sessionToken,
-      tokenLength: sessionToken?.length
+      tokenLength: sessionToken?.length,
+      hasPdfSettings: !!pdfSettings
     });
 
     const { data, error } = await supabase.functions.invoke('generate-pdf', {
-      body: { tripId },
+      body: { 
+        tripId,
+        pdfSettings 
+      },
       headers: {
         Authorization: `Bearer ${sessionToken}`,
         'Content-Type': 'application/json',

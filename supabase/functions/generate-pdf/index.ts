@@ -1,50 +1,128 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { corsHeaders } from "../_shared/cors.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { generatePDF } from "../send-itinerary/pdfGenerator.ts";
 
-console.log('Hello from generate-pdf function!')
+console.log("Edge function loaded: generate-pdf");
 
-serve(async (req) => {
-  // Handle CORS
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: corsHeaders })
+interface PdfSettings {
+  primaryColor: string;
+  secondaryColor: string;
+  accentColor: string;
+  headerFont: string;
+  bodyFont: string;
+  logoUrl?: string;
+  showPageNumbers: boolean;
+  includeNotes: boolean;
+  includeContactInfo: boolean;
+  dateFormat: string;
+  timeFormat: string;
+  companyName?: string;
+  headerText?: string;
+  footerText?: string;
+}
+
+const handler = async (req: Request): Promise<Response> => {
+  console.log("Received request to generate-pdf function");
+  
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    console.log("Handling OPTIONS request");
+    return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    // Parse the request body
-    const { tripId } = await req.json()
-    console.log('Received request for tripId:', tripId)
-
-    if (!tripId) {
-      throw new Error('Trip ID is required')
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      throw new Error("Missing Authorization header");
     }
 
-    // For now, return a simple base64 encoded PDF (just for testing)
-    // In production, you would generate a real PDF here
-    const mockPdfBase64 = 'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwogIC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAvTWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0KPj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAgL1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9udAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2JqCgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJUCjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVuZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4gCjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAwMDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9vdCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G'
+    const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
+    const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
+    const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
-    console.log('Returning mock PDF')
+    // Parse request body
+    const requestBody = await req.json();
+    const { tripId, pdfSettings } = requestBody;
+    
+    console.log("Processing PDF generation for trip:", tripId);
+    console.log("Custom PDF settings provided:", pdfSettings ? "Yes" : "No");
 
+    if (!tripId) {
+      throw new Error("Trip ID is required");
+    }
+
+    // Create authenticated Supabase client
+    const supabaseClient = createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY,
+      {
+        global: {
+          headers: {
+            Authorization: authHeader,
+          },
+        },
+      }
+    );
+
+    // Get user session
+    const {
+      data: { user },
+    } = await supabaseClient.auth.getUser();
+
+    if (!user) {
+      throw new Error("Unauthorized");
+    }
+
+    // Retrieve trip data
+    const { data: trip, error: tripError } = await supabaseClient
+      .from("trips")
+      .select("*")
+      .eq("id", tripId)
+      .single();
+
+    if (tripError) {
+      console.error("Error fetching trip:", tripError);
+      throw tripError;
+    }
+
+    if (!trip) {
+      throw new Error("Trip not found");
+    }
+
+    // Generate PDF with optional custom settings
+    const pdfBytes = await generatePDF(trip, pdfSettings as PdfSettings | undefined);
+    
+    // Convert PDF bytes to base64
+    const pdfBase64 = btoa(
+      String.fromCharCode(...new Uint8Array(pdfBytes))
+    );
+
+    console.log("PDF generated successfully, returning base64 data");
     return new Response(
-      JSON.stringify({ pdfBase64: mockPdfBase64 }),
+      JSON.stringify({ pdfBase64 }),
       {
         headers: {
           ...corsHeaders,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         status: 200,
-      },
-    )
+      }
+    );
   } catch (error) {
-    console.error('Error:', error.message)
+    console.error("Error in generate-pdf function:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
       {
         headers: {
           ...corsHeaders,
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         status: 400,
-      },
-    )
+      }
+    );
   }
-})
+};
+
+serve(handler);

@@ -1,30 +1,73 @@
+
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { drawText, drawDivider, createBasePDF, addHeader, drawSectionHeader, drawDetailRow } from "./utils/pdfUtils.ts";
 
-export const generatePDF = async (trip: any) => {
+interface PdfSettings {
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  headerFont?: string;
+  bodyFont?: string;
+  logoUrl?: string;
+  showPageNumbers?: boolean;
+  includeNotes?: boolean;
+  includeContactInfo?: boolean;
+  dateFormat?: string;
+  timeFormat?: string;
+  companyName?: string;
+  headerText?: string;
+  footerText?: string;
+}
+
+// Helper function to convert hex color to RGB
+const hexToRgb = (hex: string) => {
+  // Remove # if present
+  hex = hex.replace(/^#/, '');
+  
+  // Parse hex values
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  
+  return rgb(r, g, b);
+};
+
+export const generatePDF = async (trip: any, settings?: PdfSettings) => {
   console.log("Starting PDF generation for trip:", trip.title);
+  console.log("Using custom settings:", settings ? "Yes" : "No");
   
   try {
     const { pdfDoc, page, font, boldFont } = await createBasePDF();
     console.log("Base PDF created successfully");
     
     let yOffset = page.getSize().height - 50;
+    
+    // Get colors from settings or use defaults
+    const primaryColor = settings?.primaryColor ? hexToRgb(settings.primaryColor) : rgb(0.1, 0.2, 0.4);
+    const secondaryColor = settings?.secondaryColor ? hexToRgb(settings.secondaryColor) : rgb(0.5, 0.5, 0.8);
+    const accentColor = settings?.accentColor ? hexToRgb(settings.accentColor) : rgb(0.6, 0.5, 0.9);
 
     // Add header with image
     console.log("Adding header...");
-    yOffset = await addHeader(pdfDoc, page, font, yOffset);
+    yOffset = await addHeader(pdfDoc, page, font, yOffset, settings);
     console.log("Header added successfully");
     
     // Add trip title
     if (trip.title) {
       console.log("Adding trip title:", trip.title);
-      drawText(page, trip.title, 50, yOffset, boldFont, 18, rgb(0.1, 0.2, 0.4));
+      drawText(page, trip.title, 50, yOffset, boldFont, 18, primaryColor);
       yOffset -= 30;
+    }
+
+    // Add company name if provided
+    if (settings?.companyName) {
+      drawText(page, settings.companyName, 50, yOffset, boldFont, 14, secondaryColor);
+      yOffset -= 20;
     }
 
     // Add trip details section
     console.log("Adding trip details section...");
-    yOffset = drawSectionHeader(page, "Trip Details", yOffset, boldFont);
+    yOffset = drawSectionHeader(page, "Trip Details", yOffset, boldFont, primaryColor);
 
     // Add destination and dates
     if (trip.destination) {
@@ -32,7 +75,23 @@ export const generatePDF = async (trip: any) => {
     }
     
     if (trip.start_date || trip.end_date) {
-      const dateText = `${trip.start_date || 'TBD'} - ${trip.end_date || 'TBD'}`;
+      let dateText = "";
+      
+      // Format dates according to settings
+      if (settings?.dateFormat === "DD/MM/YYYY") {
+        dateText = `${trip.start_date?.split('-').reverse().join('/') || 'TBD'} - ${trip.end_date?.split('-').reverse().join('/') || 'TBD'}`;
+      } else if (settings?.dateFormat === "YYYY-MM-DD") {
+        dateText = `${trip.start_date || 'TBD'} - ${trip.end_date || 'TBD'}`;
+      } else {
+        // Default MM/DD/YYYY
+        const formatDate = (dateStr: string) => {
+          if (!dateStr) return 'TBD';
+          const [year, month, day] = dateStr.split('-');
+          return `${month}/${day}/${year}`;
+        };
+        dateText = `${formatDate(trip.start_date)} - ${formatDate(trip.end_date)}`;
+      }
+      
       yOffset = drawDetailRow(page, "Dates", dateText, yOffset, font, boldFont);
     }
 
@@ -43,6 +102,12 @@ export const generatePDF = async (trip: any) => {
       console.log("Processing trip segments...");
       for (const segment of trip.segments) {
         if (!segment?.type) continue;
+        
+        // Skip notes if includeNotes is false
+        if (segment.type.toLowerCase() === "notes" && settings?.includeNotes === false) {
+          console.log("Skipping notes segment due to settings");
+          continue;
+        }
 
         // Check if we need a new page
         if (yOffset < 100) {
@@ -52,10 +117,18 @@ export const generatePDF = async (trip: any) => {
         }
 
         console.log("Adding segment:", segment.type);
-        yOffset = drawSectionHeader(page, segment.type.toUpperCase(), yOffset, boldFont);
+        yOffset = drawSectionHeader(page, segment.type.toUpperCase(), yOffset, boldFont, primaryColor);
 
         if (segment.details && typeof segment.details === 'object') {
           for (const [key, value] of Object.entries(segment.details)) {
+            // Skip contact info if includeContactInfo is false
+            if (settings?.includeContactInfo === false && 
+                (key.toLowerCase().includes('contact') || 
+                 key.toLowerCase().includes('phone') || 
+                 key.toLowerCase().includes('email'))) {
+              continue;
+            }
+            
             if (value && typeof value !== 'object') {
               const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
               yOffset = drawDetailRow(page, label, String(value), yOffset, font, boldFont);
@@ -68,20 +141,40 @@ export const generatePDF = async (trip: any) => {
       console.log("All segments processed successfully");
     }
 
-    // Add page numbers
-    console.log("Adding page numbers...");
-    const pageCount = pdfDoc.getPageCount();
-    for (let i = 0; i < pageCount; i++) {
-      const currentPage = pdfDoc.getPage(i);
-      drawText(
-        currentPage,
-        `Page ${i + 1} of ${pageCount}`,
-        currentPage.getSize().width / 2 - 30,
-        30,
-        font,
-        10,
-        rgb(0.5, 0.5, 0.5)
-      );
+    // Add custom footer text if provided
+    if (settings?.footerText) {
+      // Footer appears on every page
+      const pageCount = pdfDoc.getPageCount();
+      for (let i = 0; i < pageCount; i++) {
+        const currentPage = pdfDoc.getPage(i);
+        drawText(
+          currentPage,
+          settings.footerText,
+          currentPage.getSize().width / 2 - 100,
+          30,
+          font,
+          10,
+          rgb(0.5, 0.5, 0.5)
+        );
+      }
+    }
+
+    // Add page numbers if showPageNumbers is true or undefined (default)
+    if (settings?.showPageNumbers !== false) {
+      console.log("Adding page numbers...");
+      const pageCount = pdfDoc.getPageCount();
+      for (let i = 0; i < pageCount; i++) {
+        const currentPage = pdfDoc.getPage(i);
+        drawText(
+          currentPage,
+          `Page ${i + 1} of ${pageCount}`,
+          currentPage.getSize().width / 2 - 30,
+          15,
+          font,
+          10,
+          rgb(0.5, 0.5, 0.5)
+        );
+      }
     }
 
     console.log("Saving PDF document...");
