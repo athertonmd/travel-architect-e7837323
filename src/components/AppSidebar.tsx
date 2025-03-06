@@ -2,7 +2,7 @@
 import { NavLink } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
-import { Archive, Bell, FileText, Hotel, Layout, LogOut, Plus, Send, Settings, User, Users } from "lucide-react";
+import { Archive, Bell, FileText, Hotel, Layout, LogOut, Plus, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
 
@@ -30,6 +30,14 @@ export function AppSidebar() {
         >
           <Layout className="h-5 w-5" />
           <span>Dashboard</span>
+        </NavLink>
+        
+        <NavLink 
+          to="/trips/create" 
+          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'} ml-6`}
+        >
+          <Plus className="h-5 w-5" />
+          <span>Create Trip</span>
         </NavLink>
         
         <NavLink 
@@ -62,14 +70,6 @@ export function AppSidebar() {
         >
           <Bell className="h-5 w-5" />
           <span>Notifications</span>
-        </NavLink>
-        
-        <NavLink 
-          to="/sent-notifications" 
-          className={({ isActive }) => `flex items-center gap-3 rounded-md px-3 py-2 hover:bg-navy-light transition-colors ${isActive ? 'bg-navy-light text-white' : 'text-gray-300'}`}
-        >
-          <Send className="h-5 w-5" />
-          <span>Sent Notifications</span>
         </NavLink>
         
         <h3 className="mt-6 mb-2 px-3 text-xs font-semibold text-gray-400 uppercase">Settings</h3>
