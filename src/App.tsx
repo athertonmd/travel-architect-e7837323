@@ -17,6 +17,7 @@ import Archive from "@/pages/Archive";
 import ManageTravellers from "@/pages/ManageTravellers";
 import HotelBank from "@/pages/HotelBank";
 import Notifications from "@/pages/Notifications";
+import SabreCredentials from "@/pages/SabreCredentials";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
 import { Session } from '@supabase/supabase-js';
@@ -105,6 +106,10 @@ export default function App() {
     {
       path: "/notifications",
       element: session ? <Notifications /> : <Navigate to="/auth" replace />,
+    },
+    {
+      path: "/settings/sabre",
+      element: session ? <SabreCredentials /> : <Navigate to="/auth" replace />,
     },
   ]);
 
