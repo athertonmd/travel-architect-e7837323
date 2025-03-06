@@ -130,6 +130,45 @@ export type Database = {
         }
         Relationships: []
       }
+      sabre_credentials: {
+        Row: {
+          additional_notes: string | null
+          created_at: string
+          fnbts_entry: string | null
+          id: string
+          pcc_p4sh: string | null
+          pcc_p4uh: string | null
+          queue_assignment: string | null
+          queue_number: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          created_at?: string
+          fnbts_entry?: string | null
+          id?: string
+          pcc_p4sh?: string | null
+          pcc_p4uh?: string | null
+          queue_assignment?: string | null
+          queue_number?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          created_at?: string
+          fnbts_entry?: string | null
+          id?: string
+          pcc_p4sh?: string | null
+          pcc_p4uh?: string | null
+          queue_assignment?: string | null
+          queue_number?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       sent_notifications: {
         Row: {
           id: string

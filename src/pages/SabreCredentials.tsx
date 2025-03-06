@@ -6,10 +6,12 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
-import { FileKey, Info, Save } from "lucide-react";
+import { useState, useEffect } from "react";
+import { FileKey, Info, Loader2, Save } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useSession } from "@supabase/auth-helpers-react";
 
 interface SabreCredentialsFormValues {
   pcc_p4uh: string;
@@ -22,6 +24,8 @@ interface SabreCredentialsFormValues {
 
 export default function SabreCredentials() {
   const [isSaving, setIsSaving] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const session = useSession();
   
   const form = useForm<SabreCredentialsFormValues>({
     defaultValues: {
@@ -34,12 +38,85 @@ export default function SabreCredentials() {
     },
   });
   
+  // Fetch existing Sabre credentials when the component mounts
+  useEffect(() => {
+    const fetchSabreCredentials = async () => {
+      if (!session?.user?.id) {
+        setIsLoading(false);
+        return;
+      }
+      
+      try {
+        const { data, error } = await supabase
+          .from('sabre_credentials')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .maybeSingle();
+        
+        if (error) {
+          console.error("Error fetching Sabre credentials:", error);
+          toast.error("Failed to load your Sabre credentials");
+        } else if (data) {
+          // Pre-populate form with existing data
+          form.reset({
+            pcc_p4uh: data.pcc_p4uh || "",
+            pcc_p4sh: data.pcc_p4sh || "",
+            queue_assignment: data.queue_assignment || "",
+            queue_number: data.queue_number || "",
+            fnbts_entry: data.fnbts_entry || "FNBTS-P4UH/xxx/11-MANTIC POINT",
+            additional_notes: data.additional_notes || "",
+          });
+          toast.info("Loaded your existing Sabre credentials");
+        }
+      } catch (error) {
+        console.error("Error in fetch operation:", error);
+        toast.error("Something went wrong while loading your credentials");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchSabreCredentials();
+  }, [session, form]);
+  
   const onSubmit = async (values: SabreCredentialsFormValues) => {
+    if (!session?.user?.id) {
+      toast.error("You must be logged in to save credentials");
+      return;
+    }
+    
     setIsSaving(true);
+    
     try {
-      // In a real implementation, this would save to Supabase or another backend
-      console.log("Saving Sabre credentials:", values);
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Check if credentials already exist for this user
+      const { data } = await supabase
+        .from('sabre_credentials')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .maybeSingle();
+      
+      let result;
+      
+      if (data) {
+        // Update existing record
+        result = await supabase
+          .from('sabre_credentials')
+          .update(values)
+          .eq('id', data.id);
+      } else {
+        // Insert new record
+        result = await supabase
+          .from('sabre_credentials')
+          .insert({
+            ...values,
+            user_id: session.user.id
+          });
+      }
+      
+      if (result.error) {
+        throw result.error;
+      }
+      
       toast.success("Sabre credentials saved successfully");
     } catch (error) {
       console.error("Error saving credentials:", error);
@@ -48,6 +125,19 @@ export default function SabreCredentials() {
       setIsSaving(false);
     }
   };
+  
+  if (isLoading) {
+    return (
+      <Layout>
+        <div className="flex items-center justify-center h-[60vh]">
+          <div className="text-center space-y-4">
+            <Loader2 className="h-8 w-8 animate-spin text-gold mx-auto" />
+            <p className="text-white/80">Loading your Sabre credentials...</p>
+          </div>
+        </div>
+      </Layout>
+    );
+  }
   
   return (
     <Layout>
@@ -201,8 +291,17 @@ export default function SabreCredentials() {
                     disabled={isSaving}
                     className="bg-gold hover:bg-gold-light text-navy"
                   >
-                    {isSaving ? "Saving..." : "Save Credentials"}
-                    <Save className="ml-2 h-4 w-4" />
+                    {isSaving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Saving...
+                      </>
+                    ) : (
+                      <>
+                        Save Credentials
+                        <Save className="ml-2 h-4 w-4" />
+                      </>
+                    )}
                   </Button>
                 </div>
               </form>
