@@ -1,5 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
+import { PdfSettings } from "@/types/pdf";
 
 interface GeneratePdfResponse {
   pdfBase64: string;
@@ -17,12 +18,9 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
     let pdfSettings = null;
     if (user) {
       const { data: settingsData, error } = await supabase
-        .from('pdf_settings')
-        .select('*')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .rpc('get_pdf_settings_for_user', { user_id_param: user.id });
       
-      if (!error) {
+      if (!error && settingsData) {
         pdfSettings = settingsData;
       }
       console.log("Using custom PDF settings:", pdfSettings ? "Yes" : "No");

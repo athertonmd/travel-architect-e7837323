@@ -109,6 +109,69 @@ export type Database = {
           },
         ]
       }
+      pdf_settings: {
+        Row: {
+          accent_color: string | null
+          body_font: string | null
+          company_name: string | null
+          created_at: string
+          date_format: string | null
+          footer_text: string | null
+          header_font: string | null
+          header_text: string | null
+          id: string
+          include_contact_info: boolean | null
+          include_notes: boolean | null
+          logo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          show_page_numbers: boolean | null
+          time_format: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          accent_color?: string | null
+          body_font?: string | null
+          company_name?: string | null
+          created_at?: string
+          date_format?: string | null
+          footer_text?: string | null
+          header_font?: string | null
+          header_text?: string | null
+          id?: string
+          include_contact_info?: boolean | null
+          include_notes?: boolean | null
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          show_page_numbers?: boolean | null
+          time_format?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          accent_color?: string | null
+          body_font?: string | null
+          company_name?: string | null
+          created_at?: string
+          date_format?: string | null
+          footer_text?: string | null
+          header_font?: string | null
+          header_text?: string | null
+          id?: string
+          include_contact_info?: boolean | null
+          include_notes?: boolean | null
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          show_page_numbers?: boolean | null
+          time_format?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null

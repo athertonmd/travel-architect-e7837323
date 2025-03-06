@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -14,7 +15,7 @@ import { PdfSectionOrder } from "./PdfSectionOrder";
 import { FontSelector } from "./FontSelector";
 import { ColorSelector } from "./ColorSelector";
 import { supabase } from "@/integrations/supabase/client";
-import { useSession } from "@supabase/auth-helpers-react";
+import { PdfDesignFormValues, mapDbSettingsToFormValues, mapFormValuesToDbSettings } from "@/types/pdf";
 
 const formSchema = z.object({
   // Appearance settings
@@ -38,11 +39,8 @@ const formSchema = z.object({
   footerText: z.string().optional(),
 });
 
-export type PdfDesignFormValues = z.infer<typeof formSchema>;
-
 export function PdfDesignForm() {
   const { toast } = useToast();
-  const session = useSession();
   const [isLoading, setIsLoading] = useState(false);
   
   // Initialize form with default values
@@ -65,49 +63,73 @@ export function PdfDesignForm() {
   // Load saved settings on mount
   useEffect(() => {
     const loadSettings = async () => {
-      if (!session?.user?.id) return;
-      
       setIsLoading(true);
       try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        
+        if (!sessionData.session?.user?.id) {
+          console.log("No user session found");
+          setIsLoading(false);
+          return;
+        }
+        
+        const userId = sessionData.session.user.id;
+        console.log("Loading PDF settings for user:", userId);
+        
         const { data, error } = await supabase
           .from('pdf_settings')
           .select('*')
-          .eq('user_id', session.user.id)
-          .single();
+          .eq('user_id', userId)
+          .maybeSingle();
           
-        if (error) throw error;
+        if (error) {
+          console.error('Error loading PDF settings:', error);
+          throw error;
+        }
         
         if (data) {
-          form.reset(data);
+          console.log("Found PDF settings:", data);
+          form.reset(mapDbSettingsToFormValues(data));
+        } else {
+          console.log("No PDF settings found for user");
         }
       } catch (error) {
         console.error('Error loading PDF settings:', error);
+        toast({
+          title: "Error loading settings",
+          description: "There was a problem loading your settings",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
     };
     
     loadSettings();
-  }, [session?.user?.id, form]);
+  }, [form, toast]);
 
   const onSubmit = async (values: PdfDesignFormValues) => {
-    if (!session?.user?.id) {
-      toast({
-        title: "Authentication required",
-        description: "You must be logged in to save PDF settings",
-        variant: "destructive",
-      });
-      return;
-    }
-    
     setIsLoading(true);
     try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session?.user?.id) {
+        toast({
+          title: "Authentication required",
+          description: "You must be logged in to save PDF settings",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      const userId = sessionData.session.user.id;
+      const dbValues = mapFormValuesToDbSettings(values, userId);
+      
+      console.log("Saving PDF settings:", dbValues);
+      
       const { error } = await supabase
         .from('pdf_settings')
-        .upsert({
-          user_id: session.user.id,
-          ...values,
-        }, {
+        .upsert(dbValues, {
           onConflict: 'user_id',
         });
         
