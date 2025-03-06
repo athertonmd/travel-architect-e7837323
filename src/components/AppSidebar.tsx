@@ -1,4 +1,3 @@
-
 import { NavLink } from "react-router-dom";
 import { useLogout } from "@/hooks/useLogout";
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
@@ -10,7 +9,6 @@ export function AppSidebar() {
   const { handleLogout, isLoading } = useLogout();
   const [settingsOpen, setSettingsOpen] = useState(false);
   
-  // Load the initial state from localStorage
   useEffect(() => {
     const savedState = localStorage.getItem('settings_menu_open');
     if (savedState) {
@@ -18,7 +16,6 @@ export function AppSidebar() {
     }
   }, []);
   
-  // Toggle function that also updates localStorage
   const toggleSettingsMenu = () => {
     const newState = !settingsOpen;
     setSettingsOpen(newState);
@@ -81,7 +78,6 @@ export function AppSidebar() {
           <span>Notifications</span>
         </NavLink>
         
-        {/* Settings Menu with Collapsible Submenu */}
         <div className="mt-6">
           <button
             onClick={toggleSettingsMenu}
