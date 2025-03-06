@@ -1,5 +1,5 @@
 
-import { CalendarDays, Home, Plus, LogOut, Users, Archive, Building2, Bell } from "lucide-react";
+import { CalendarDays, Home, Plus, LogOut, Users, Archive, Building2, Bell, Settings } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -53,6 +53,20 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+              <SidebarMenuItem>
+                <SidebarMenuButton
+                  asChild
+                >
+                  <Link 
+                    to="/settings" 
+                    className="flex items-center gap-2 text-white w-full"
+                    data-active={location.pathname === "/settings"}
+                  >
+                    <Settings className="h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
                   onClick={handleLogout}
