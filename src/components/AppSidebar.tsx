@@ -4,11 +4,26 @@ import { useLogout } from "@/hooks/useLogout";
 import { Sidebar, SidebarFooter, SidebarHeader, SidebarContent } from "@/components/ui/sidebar";
 import { Archive, Bell, ChevronDown, ChevronRight, FileText, Hotel, Layout, LogOut, Plus, Settings, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function AppSidebar() {
   const { handleLogout, isLoading } = useLogout();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  
+  // Load the initial state from localStorage
+  useEffect(() => {
+    const savedState = localStorage.getItem('settings_menu_open');
+    if (savedState) {
+      setSettingsOpen(savedState === 'true');
+    }
+  }, []);
+  
+  // Toggle function that also updates localStorage
+  const toggleSettingsMenu = () => {
+    const newState = !settingsOpen;
+    setSettingsOpen(newState);
+    localStorage.setItem('settings_menu_open', String(newState));
+  };
 
   return (
     <Sidebar className="border-r border-navy-light bg-navy">
@@ -69,7 +84,7 @@ export function AppSidebar() {
         {/* Settings Menu with Collapsible Submenu */}
         <div className="mt-6">
           <button
-            onClick={() => setSettingsOpen(!settingsOpen)}
+            onClick={toggleSettingsMenu}
             className="flex w-full items-center justify-between gap-3 rounded-md px-3 py-2 text-gray-300 hover:bg-navy-light transition-colors"
           >
             <div className="flex items-center gap-3">
