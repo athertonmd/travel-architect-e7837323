@@ -100,8 +100,13 @@ export function AppSidebar() {
       </SidebarContent>
       
       <SidebarFooter className="p-4">
-        <Button variant="ghost" className="w-full justify-start" onClick={handleLogout} disabled={isLoading}>
-          <LogOut className="mr-2 h-4 w-4" />
+        <Button 
+          variant="destructive" 
+          className="w-full justify-start font-medium text-white hover:bg-red-600"
+          onClick={handleLogout} 
+          disabled={isLoading}
+        >
+          <LogOut className="mr-2 h-5 w-5" />
           {isLoading ? "Logging out..." : "Logout"}
         </Button>
       </SidebarFooter>
