@@ -18,7 +18,7 @@ export function AppearanceTab({ form }: AppearanceTabProps) {
           control={form.control}
           name="primaryColor"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="color-selector-step">
               <FormLabel>Primary Color</FormLabel>
               <ColorSelector value={field.value} onChange={field.onChange} />
             </FormItem>
@@ -53,7 +53,7 @@ export function AppearanceTab({ form }: AppearanceTabProps) {
           control={form.control}
           name="headerFont"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="font-selector-step">
               <FormLabel>Header Font</FormLabel>
               <FontSelector value={field.value} onChange={field.onChange} />
             </FormItem>

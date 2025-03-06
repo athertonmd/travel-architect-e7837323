@@ -96,7 +96,7 @@ export function PdfDesignForm() {
         </form>
       </Form>
       
-      <div className="border-t pt-6">
+      <div className="border-t pt-6 preview-section">
         <h3 className="text-lg font-semibold mb-4">Preview</h3>
         <PdfPreview settings={form.watch()} />
       </div>

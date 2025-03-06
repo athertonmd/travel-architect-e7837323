@@ -2,6 +2,7 @@
 import { Layout } from "@/components/Layout";
 import { FileText } from "lucide-react";
 import { PdfDesignForm } from "@/components/pdf/PdfDesignForm";
+import { PdfDesignTutorial } from "@/components/pdf/PdfDesignTutorial";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function PdfDesignSettings() {
@@ -22,6 +23,8 @@ export default function PdfDesignSettings() {
             <PdfDesignForm />
           </CardContent>
         </Card>
+
+        <PdfDesignTutorial />
       </div>
     </Layout>
   );
