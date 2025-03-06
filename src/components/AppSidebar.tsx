@@ -1,5 +1,5 @@
 
-import { CalendarDays, Home, Plus, LogOut, Users, Archive, Building2, Bell, Settings } from "lucide-react";
+import { CalendarDays, Home, Plus, LogOut, Users, Archive, Building2, Bell, Settings, FileKey, FileText } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -9,6 +9,9 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarMenuSub,
+  SidebarMenuSubItem,
+  SidebarMenuSubButton,
 } from "@/components/ui/sidebar";
 import { Link, useLocation } from "react-router-dom";
 import { useSessionContext } from '@supabase/auth-helpers-react';
@@ -28,6 +31,12 @@ export function AppSidebar() {
     { title: "Sent Notifications", icon: Bell, url: "/notifications" },
     { title: "Hotel Bank", icon: Building2, url: "/hotels" },
     { title: "Archive", icon: Archive, url: "/trips/archive" }
+  ];
+
+  const settingsSubItems = [
+    { title: "Sabre Credentials", url: "/settings/sabre" },
+    { title: "Travelport Credentials", url: "/settings/travelport" },
+    { title: "PDF Design", url: "/settings/pdf-design" },
   ];
 
   return (
@@ -56,16 +65,30 @@ export function AppSidebar() {
               <SidebarMenuItem>
                 <SidebarMenuButton
                   asChild
+                  data-active={location.pathname.startsWith("/settings")}
                 >
                   <Link 
                     to="/settings" 
                     className="flex items-center gap-2 text-white w-full"
-                    data-active={location.pathname === "/settings"}
                   >
                     <Settings className="h-4 w-4" />
                     <span>Settings</span>
                   </Link>
                 </SidebarMenuButton>
+                <SidebarMenuSub>
+                  {settingsSubItems.map((subItem) => (
+                    <SidebarMenuSubItem key={subItem.title}>
+                      <SidebarMenuSubButton
+                        asChild
+                        isActive={location.pathname === subItem.url}
+                      >
+                        <Link to={subItem.url} className="text-white">
+                          {subItem.title}
+                        </Link>
+                      </SidebarMenuSubButton>
+                    </SidebarMenuSubItem>
+                  ))}
+                </SidebarMenuSub>
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
