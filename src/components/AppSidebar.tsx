@@ -1,5 +1,5 @@
 
-import { CalendarDays, Home, Plus, LogOut, Users, Archive, Building2, Bell, Settings, FileKey, FileText } from "lucide-react";
+import { CalendarDays, Home, Plus, LogOut, Users, Archive, Building2, Bell, Settings, FileKey, FileText, ChevronDown, ChevronRight } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -16,11 +16,13 @@ import {
 import { Link, useLocation } from "react-router-dom";
 import { useSessionContext } from '@supabase/auth-helpers-react';
 import { useLogout } from "@/hooks/useLogout";
+import { useState } from "react";
 
 export function AppSidebar() {
   const { session } = useSessionContext();
   const { handleLogout } = useLogout();
   const location = useLocation();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   console.log('Session state in sidebar:', session?.user?.email);
 
@@ -38,6 +40,12 @@ export function AppSidebar() {
     { title: "Travelport Credentials", url: "/settings/travelport" },
     { title: "PDF Design", url: "/settings/pdf-design" },
   ];
+
+  // Toggle the settings submenu
+  const toggleSettings = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setSettingsOpen(!settingsOpen);
+  };
 
   return (
     <Sidebar>
@@ -63,32 +71,39 @@ export function AppSidebar() {
                 </SidebarMenuItem>
               ))}
               <SidebarMenuItem>
-                <SidebarMenuButton
-                  asChild
-                  data-active={location.pathname.startsWith("/settings")}
-                >
-                  <Link 
-                    to="/settings" 
-                    className="flex items-center gap-2 text-white w-full"
+                <div className="relative">
+                  <SidebarMenuButton
+                    className="flex items-center gap-2 text-white w-full relative pr-8"
+                    onClick={toggleSettings}
+                    data-active={location.pathname.startsWith("/settings")}
                   >
                     <Settings className="h-4 w-4" />
                     <span>Settings</span>
-                  </Link>
-                </SidebarMenuButton>
-                <SidebarMenuSub>
-                  {settingsSubItems.map((subItem) => (
-                    <SidebarMenuSubItem key={subItem.title}>
-                      <SidebarMenuSubButton
-                        asChild
-                        isActive={location.pathname === subItem.url}
-                      >
-                        <Link to={subItem.url} className="text-white">
-                          {subItem.title}
-                        </Link>
-                      </SidebarMenuSubButton>
-                    </SidebarMenuSubItem>
-                  ))}
-                </SidebarMenuSub>
+                    <span className="absolute right-2">
+                      {settingsOpen ? (
+                        <ChevronDown className="h-4 w-4" />
+                      ) : (
+                        <ChevronRight className="h-4 w-4" />
+                      )}
+                    </span>
+                  </SidebarMenuButton>
+                </div>
+                {settingsOpen && (
+                  <SidebarMenuSub>
+                    {settingsSubItems.map((subItem) => (
+                      <SidebarMenuSubItem key={subItem.title}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={location.pathname === subItem.url}
+                        >
+                          <Link to={subItem.url} className="text-white">
+                            {subItem.title}
+                          </Link>
+                        </SidebarMenuSubButton>
+                      </SidebarMenuSubItem>
+                    ))}
+                  </SidebarMenuSub>
+                )}
               </SidebarMenuItem>
               <SidebarMenuItem>
                 <SidebarMenuButton
