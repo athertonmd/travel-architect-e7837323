@@ -1,4 +1,3 @@
-
 export interface PdfSettings {
   id?: string;
   user_id?: string;
@@ -36,6 +35,12 @@ export type PdfDesignFormValues = {
   headerText?: string;
   footerText?: string;
 }
+
+export type PdfSection = {
+  id: string;
+  name: string;
+  included: boolean;
+};
 
 export function mapDbSettingsToFormValues(settings: any): PdfDesignFormValues {
   return {
