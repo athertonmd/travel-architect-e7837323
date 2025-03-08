@@ -64,6 +64,7 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
           description: "You must be logged in to save PDF settings",
           variant: "destructive",
         });
+        setIsLoading(false);
         return;
       }
       
@@ -71,6 +72,9 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
       const dbValues = mapFormValuesToDbSettings(values, userId);
       
       console.log("Saving PDF settings:", dbValues);
+      
+      // Add a slight delay to ensure loading state is visible
+      await new Promise(resolve => setTimeout(resolve, 300));
       
       // Using the unique constraint on user_id for the upsert operation
       const { error } = await supabase
@@ -84,13 +88,12 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         console.error('Error details:', error);
         throw error;
       }
+      
+      // Add a small delay after successful save to ensure loading state is visible
+      await new Promise(resolve => setTimeout(resolve, 300));
+      
     } catch (error) {
       console.error('Error saving PDF settings:', error);
-      toast({
-        title: "Error saving settings",
-        description: "There was a problem saving your settings",
-        variant: "destructive",
-      });
       throw error; // Re-throw the error so the component can handle it
     } finally {
       setIsLoading(false);
