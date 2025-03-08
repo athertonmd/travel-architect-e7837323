@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
 import { PdfDesignFormValues } from "@/types/pdf";
+import { toast } from "sonner";
 
 interface PdfPreviewProps {
   settings: PdfDesignFormValues;
@@ -292,9 +293,49 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     setPreviewHtml(preview);
   }, [settings]);
 
-  const handleDownloadClick = () => {
-    // Implementation to generate sample PDF
-    console.log("Download sample button clicked");
+  const handleDownloadClick = async () => {
+    try {
+      console.log("Generating sample PDF...");
+      
+      // Create a simple PDF document using the browser's print functionality
+      // Create a new window with the preview HTML
+      const printWindow = window.open('', '_blank');
+      if (!printWindow) {
+        toast.error("Pop-up was blocked. Please allow pop-ups to download the sample PDF.");
+        return;
+      }
+      
+      // Write the preview HTML to the new window
+      printWindow.document.write(`
+        <html>
+          <head>
+            <title>Trip Itinerary Sample</title>
+            <style>
+              body { font-family: ${settings.bodyFont || 'Arial'}, sans-serif; }
+              h1, h2, h3 { font-family: ${settings.headerFont || 'Arial'}, sans-serif; }
+              a { color: ${settings.primaryColor}; }
+            </style>
+          </head>
+          <body>
+            ${previewHtml}
+            <script>
+              // Auto print once loaded
+              window.onload = function() {
+                setTimeout(() => {
+                  window.print();
+                  setTimeout(() => window.close(), 500);
+                }, 300);
+              };
+            </script>
+          </body>
+        </html>
+      `);
+      
+      toast.success("Sample PDF prepared for download");
+    } catch (error) {
+      console.error("Error generating sample PDF:", error);
+      toast.error("Failed to generate sample PDF");
+    }
   };
 
   return (
