@@ -12,7 +12,29 @@ export const processSegments = (pdfDoc: any, page: any, trip: any, colors: any, 
     return { currentY, currentPage };
   }
   
-  for (const segment of trip.segments) {
+  // Sort segments by date if they have dates
+  let sortedSegments = [...trip.segments];
+  
+  // Only apply chronological ordering to segments with dates
+  // This ensures segments with dates appear in order, and segments without dates maintain their original position
+  sortedSegments.sort((a, b) => {
+    const aDate = a.details?.date || a.details?.start_date || null;
+    const bDate = b.details?.date || b.details?.start_date || null;
+    
+    // If both have dates, compare them
+    if (aDate && bDate) {
+      return new Date(aDate).getTime() - new Date(bDate).getTime();
+    }
+    
+    // If only one has a date, prioritize the one with a date
+    if (aDate) return -1;
+    if (bDate) return 1;
+    
+    // If neither has a date, maintain original order
+    return 0;
+  });
+  
+  for (const segment of sortedSegments) {
     if (!segment?.type) continue;
     
     // Skip notes if includeNotes is false

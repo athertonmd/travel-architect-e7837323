@@ -13,9 +13,11 @@ interface PdfSettings {
   headerFont: string;
   bodyFont: string;
   logoUrl?: string;
+  bannerImageUrl?: string;
   showPageNumbers: boolean;
   includeNotes: boolean;
   includeContactInfo: boolean;
+  includeQuickLinks: boolean;
   dateFormat: string;
   timeFormat: string;
   companyName?: string;

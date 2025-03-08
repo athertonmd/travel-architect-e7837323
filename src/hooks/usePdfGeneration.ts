@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { generatePdfDocument } from "@/utils/pdf/pdfGenerationService";
 import { sendPdfViaEmail } from "@/utils/pdf/pdfEmailService";
@@ -30,7 +31,9 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       const session = await getAuthenticatedSession();
       console.log("Session obtained, generating PDF document");
       
+      // This will fetch user's PDF settings automatically inside the service
       const { pdfBase64 } = await generatePdfDocument(tripId, session.access_token);
+      
       console.log("PDF document generated successfully, data length:", pdfBase64.length);
       setPdfData(pdfBase64);
 
