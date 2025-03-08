@@ -123,6 +123,7 @@ export type Database = {
           id: string
           include_contact_info: boolean | null
           include_notes: boolean | null
+          include_quick_links: boolean | null
           logo_url: string | null
           primary_color: string | null
           secondary_color: string | null
@@ -144,6 +145,7 @@ export type Database = {
           id?: string
           include_contact_info?: boolean | null
           include_notes?: boolean | null
+          include_quick_links?: boolean | null
           logo_url?: string | null
           primary_color?: string | null
           secondary_color?: string | null
@@ -165,6 +167,7 @@ export type Database = {
           id?: string
           include_contact_info?: boolean | null
           include_notes?: boolean | null
+          include_quick_links?: boolean | null
           logo_url?: string | null
           primary_color?: string | null
           secondary_color?: string | null
