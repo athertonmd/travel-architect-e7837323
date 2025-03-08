@@ -13,6 +13,23 @@ export function HeaderFooterTab({ form }: HeaderFooterTabProps) {
     <div className="space-y-6">
       <FormField
         control={form.control}
+        name="bannerImageUrl"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Banner Image URL</FormLabel>
+            <FormControl>
+              <Input placeholder="https://example.com/your-banner-image.jpg" {...field} />
+            </FormControl>
+            <FormDescription>
+              This image will span the full width of the header area
+            </FormDescription>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
+      <FormField
+        control={form.control}
         name="companyName"
         render={({ field }) => (
           <FormItem>

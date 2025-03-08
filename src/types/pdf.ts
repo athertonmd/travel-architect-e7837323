@@ -1,3 +1,4 @@
+
 export interface PdfSettings {
   id?: string;
   user_id?: string;
@@ -7,6 +8,7 @@ export interface PdfSettings {
   header_font: string;
   body_font: string;
   logo_url?: string;
+  banner_image_url?: string;
   show_page_numbers: boolean;
   include_notes: boolean;
   include_contact_info: boolean;
@@ -26,6 +28,7 @@ export type PdfDesignFormValues = {
   headerFont: string;
   bodyFont: string;
   logoUrl?: string;
+  bannerImageUrl?: string;
   showPageNumbers: boolean;
   includeNotes: boolean;
   includeContactInfo: boolean;
@@ -50,6 +53,7 @@ export function mapDbSettingsToFormValues(settings: any): PdfDesignFormValues {
     headerFont: settings.header_font || "Helvetica",
     bodyFont: settings.body_font || "Helvetica",
     logoUrl: settings.logo_url,
+    bannerImageUrl: settings.banner_image_url,
     showPageNumbers: settings.show_page_numbers !== null ? settings.show_page_numbers : true,
     includeNotes: settings.include_notes !== null ? settings.include_notes : true,
     includeContactInfo: settings.include_contact_info !== null ? settings.include_contact_info : true,
@@ -69,6 +73,7 @@ export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: s
   header_font: string;
   body_font: string;
   logo_url?: string;
+  banner_image_url?: string;
   show_page_numbers: boolean;
   include_notes: boolean;
   include_contact_info: boolean;
@@ -86,6 +91,7 @@ export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: s
     header_font: values.headerFont,
     body_font: values.bodyFont,
     logo_url: values.logoUrl,
+    banner_image_url: values.bannerImageUrl,
     show_page_numbers: values.showPageNumbers,
     include_notes: values.includeNotes,
     include_contact_info: values.includeContactInfo,

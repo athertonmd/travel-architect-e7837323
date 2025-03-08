@@ -14,6 +14,7 @@ const formSchema = z.object({
   headerFont: z.string().default("Helvetica"),
   bodyFont: z.string().default("Helvetica"),
   logoUrl: z.string().optional(),
+  bannerImageUrl: z.string().optional(),
   
   // Content settings
   showPageNumbers: z.boolean().default(true),

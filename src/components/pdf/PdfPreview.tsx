@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
@@ -15,12 +14,22 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     // Generate a preview HTML based on current settings that resembles a professional travel itinerary
     const preview = `
       <div style="font-family: ${settings.bodyFont}, sans-serif; color: #333; max-width: 100%; padding: 0; background-color: white;">
-        <!-- Header with logo and company name -->
-        <div style="text-align: center; background-color: #1a365d; color: white; padding: 15px 0;">
-          ${settings.logoUrl ? `<img src="${settings.logoUrl}" alt="Logo" style="max-height: 70px; margin-bottom: 10px;" />` : '<div style="width: 100px; height: 50px; background-color: #e2e8f0; margin: 0 auto;"></div>'}
-          <h2 style="margin: 5px 0; color: white; font-family: ${settings.headerFont}, sans-serif;">${settings.companyName || 'Global Travel Company'}</h2>
-          <div style="font-size: 14px; margin-top: 5px;">${settings.headerText || 'Corporate Travel Department'}</div>
-        </div>
+        <!-- Header with banner image (if provided) or blue background -->
+        ${settings.bannerImageUrl ? 
+          `<div style="text-align: center; position: relative; width: 100%;">
+            <img src="${settings.bannerImageUrl}" alt="Header Banner" style="width: 100%; max-height: 200px; object-fit: cover;" />
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; width: 100%;">
+              <h2 style="margin: 5px 0; color: white; font-family: ${settings.headerFont}, sans-serif; text-shadow: 1px 1px 3px rgba(0,0,0,0.7);">${settings.companyName || 'Global Travel Company'}</h2>
+              <div style="font-size: 14px; margin-top: 5px; color: white; text-shadow: 1px 1px 2px rgba(0,0,0,0.7);">${settings.headerText || 'Corporate Travel Department'}</div>
+            </div>
+          </div>` 
+          : 
+          `<div style="text-align: center; background-color: #1a365d; color: white; padding: 15px 0;">
+            ${settings.logoUrl ? `<img src="${settings.logoUrl}" alt="Logo" style="max-height: 70px; margin-bottom: 10px;" />` : '<div style="width: 100px; height: 50px; background-color: #e2e8f0; margin: 0 auto;"></div>'}
+            <h2 style="margin: 5px 0; color: white; font-family: ${settings.headerFont}, sans-serif;">${settings.companyName || 'Global Travel Company'}</h2>
+            <div style="font-size: 14px; margin-top: 5px;">${settings.headerText || 'Corporate Travel Department'}</div>
+          </div>`
+        }
         
         <!-- Traveler info bar -->
         <div style="display: flex; justify-content: space-between; padding: 8px 15px; border-bottom: 1px solid #ccc; background-color: #f8f9fa; font-size: 12px;">

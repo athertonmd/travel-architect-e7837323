@@ -1,4 +1,3 @@
-
 import { PDFDocument, StandardFonts, rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { drawText, drawDivider, createBasePDF, addHeader, drawSectionHeader, drawDetailRow } from "./utils/pdfUtils.ts";
 
@@ -9,6 +8,7 @@ interface PdfSettings {
   headerFont?: string;
   bodyFont?: string;
   logoUrl?: string;
+  bannerImageUrl?: string;
   showPageNumbers?: boolean;
   includeNotes?: boolean;
   includeContactInfo?: boolean;
@@ -47,9 +47,60 @@ export const generatePDF = async (trip: any, settings?: PdfSettings) => {
     const secondaryColor = settings?.secondaryColor ? hexToRgb(settings.secondaryColor) : rgb(0.5, 0.5, 0.8);
     const accentColor = settings?.accentColor ? hexToRgb(settings.accentColor) : rgb(0.6, 0.5, 0.9);
 
-    // Add header with image
+    // Add header with image (either banner or logo)
     console.log("Adding header...");
-    yOffset = await addHeader(pdfDoc, page, font, yOffset, settings);
+    
+    if (settings?.bannerImageUrl) {
+      console.log("Using banner image for header:", settings.bannerImageUrl);
+      try {
+        // Fetch the banner image
+        const response = await fetch(settings.bannerImageUrl);
+        if (!response.ok) throw new Error(`Failed to fetch banner image: ${response.status}`);
+        const bannerBytes = new Uint8Array(await response.arrayBuffer());
+        
+        // Embed the image
+        const bannerImage = await pdfDoc.embedPng(bannerBytes);
+        
+        // Get page dimensions
+        const { width } = page.getSize();
+        
+        // Calculate banner dimensions to cover full width
+        const bannerHeight = 100; // Fixed height for the banner
+        const bannerWidth = width;
+        
+        // Draw the banner image
+        page.drawImage(bannerImage, {
+          x: 0,
+          y: yOffset - bannerHeight,
+          width: bannerWidth,
+          height: bannerHeight,
+        });
+        
+        // Add overlay text on top of the banner if company name or header text provided
+        let textYPos = yOffset - (bannerHeight / 2);
+        
+        if (settings.companyName) {
+          const headerFont = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
+          drawText(page, settings.companyName, width / 2 - 100, textYPos, headerFont, 16, rgb(1, 1, 1)); // White text
+          textYPos -= 20;
+        }
+        
+        if (settings.headerText) {
+          drawText(page, settings.headerText, width / 2 - 100, textYPos, font, 12, rgb(1, 1, 1)); // White text
+        }
+        
+        // Update yOffset after banner
+        yOffset = yOffset - bannerHeight - 20;
+      } catch (error) {
+        console.error('Error adding banner image:', error);
+        // Fallback to regular header if banner fails
+        yOffset = await addHeader(pdfDoc, page, font, yOffset, settings);
+      }
+    } else {
+      // Use regular header with logo if no banner
+      yOffset = await addHeader(pdfDoc, page, font, yOffset, settings);
+    }
+    
     console.log("Header added successfully");
     
     // Add trip title
@@ -60,7 +111,7 @@ export const generatePDF = async (trip: any, settings?: PdfSettings) => {
     }
 
     // Add company name if provided
-    if (settings?.companyName) {
+    if (settings?.companyName && !settings?.bannerImageUrl) {
       drawText(page, settings.companyName, 50, yOffset, boldFont, 14, secondaryColor);
       yOffset -= 20;
     }
