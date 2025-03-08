@@ -247,28 +247,30 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
           </table>
         </div>
         
-        <!-- Quick Links Panel (Side Panel) -->
-        <div style="position: absolute; top: 230px; right: 15px; width: 150px; border: 1px solid #ddd; background-color: #f8f9fa; padding: 10px; font-size: 12px;">
-          <div style="font-weight: bold; margin-bottom: 10px; border-bottom: 1px solid #eee; padding-bottom: 5px;">Quick links</div>
-          <div style="display: flex; flex-direction: column; gap: 8px;">
-            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center;">
-              <span style="width: 15px; height: 15px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 5px;"></span>
+        <!-- Quick Links Section - Now as a full-width segment -->
+        <div style="margin-top: 30px;">
+          <div style="background-color: #1a365d; color: white; padding: 8px 15px; display: flex; align-items: center;">
+            <div style="font-weight: bold;">QUICK LINKS</div>
+          </div>
+          <div style="padding: 15px; display: flex; flex-wrap: wrap; gap: 15px;">
+            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
+              <span style="width: 24px; height: 24px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
               Company Portal
             </a>
-            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center;">
-              <span style="width: 15px; height: 15px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 5px;"></span>
+            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
+              <span style="width: 24px; height: 24px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
               Weather
             </a>
-            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center;">
-              <span style="width: 15px; height: 15px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 5px;"></span>
+            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
+              <span style="width: 24px; height: 24px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
               Visa & Passport
             </a>
-            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center;">
-              <span style="width: 15px; height: 15px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 5px;"></span>
+            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
+              <span style="width: 24px; height: 24px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
               Currency Converter
             </a>
-            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center;">
-              <span style="width: 15px; height: 15px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 5px;"></span>
+            <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
+              <span style="width: 24px; height: 24px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
               World Clock
             </a>
           </div>

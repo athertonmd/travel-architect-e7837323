@@ -11,6 +11,7 @@ const defaultSections: PdfSection[] = [
   { id: "activities", name: "Activities", included: true },
   { id: "restaurants", name: "Restaurants", included: true },
   { id: "transfers", name: "Transfers", included: false },
+  { id: "quick-links", name: "Quick Links", included: true },
   { id: "notes", name: "Notes", included: true },
 ];
 

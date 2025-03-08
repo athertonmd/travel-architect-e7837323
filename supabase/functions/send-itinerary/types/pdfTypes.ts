@@ -10,6 +10,7 @@ export interface PdfSettings {
   showPageNumbers?: boolean;
   includeNotes?: boolean;
   includeContactInfo?: boolean;
+  includeQuickLinks?: boolean;
   dateFormat?: string;
   timeFormat?: string;
   companyName?: string;

@@ -20,6 +20,7 @@ const formSchema = z.object({
   showPageNumbers: z.boolean().default(true),
   includeNotes: z.boolean().default(true),
   includeContactInfo: z.boolean().default(true),
+  includeQuickLinks: z.boolean().default(true),
   dateFormat: z.enum(["MM/DD/YYYY", "DD/MM/YYYY", "YYYY-MM-DD"]).default("MM/DD/YYYY"),
   timeFormat: z.enum(["12h", "24h"]).default("12h"),
   
@@ -42,6 +43,7 @@ export function usePdfDesignForm() {
       showPageNumbers: true,
       includeNotes: true,
       includeContactInfo: true,
+      includeQuickLinks: true,
       dateFormat: "MM/DD/YYYY",
       timeFormat: "12h",
     },

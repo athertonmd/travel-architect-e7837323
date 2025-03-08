@@ -6,6 +6,7 @@ import { createBasePDF } from "./utils/pdfBaseUtils.ts";
 import { addHeaderSection } from "./sections/headerSection.ts";
 import { addTripDetailsSection } from "./sections/tripDetailsSection.ts";
 import { processSegments } from "./sections/segmentsSection.ts";
+import { addQuickLinksSection } from "./sections/quickLinksSection.ts";
 import { addFooterAndPageNumbers } from "./sections/footerSection.ts";
 
 export const generatePDF = async (trip: TripData, settings?: PdfSettings) => {
@@ -31,9 +32,15 @@ export const generatePDF = async (trip: TripData, settings?: PdfSettings) => {
     yOffset = addTripDetailsSection(page, trip, colors, yOffset, font, boldFont, settings);
     
     // 3. Process all segments
-    const { currentPage } = processSegments(pdfDoc, page, trip, colors, yOffset, font, boldFont, settings);
+    const { currentPage, currentY } = processSegments(pdfDoc, page, trip, colors, yOffset, font, boldFont, settings);
+    yOffset = currentY;
     
-    // 4. Add footer and page numbers
+    // 4. Add quick links section if included
+    if (settings?.includeQuickLinks !== false) {
+      yOffset = addQuickLinksSection(currentPage, colors, yOffset, font, boldFont, settings);
+    }
+    
+    // 5. Add footer and page numbers
     addFooterAndPageNumbers(pdfDoc, font, settings);
 
     console.log("Saving PDF document...");

@@ -1,3 +1,4 @@
+
 export interface PdfSettings {
   id?: string;
   user_id?: string;
@@ -11,6 +12,7 @@ export interface PdfSettings {
   show_page_numbers: boolean;
   include_notes: boolean;
   include_contact_info: boolean;
+  include_quick_links: boolean;
   date_format: "MM/DD/YYYY" | "DD/MM/YYYY" | "YYYY-MM-DD";
   time_format: "12h" | "24h";
   company_name?: string;
@@ -31,6 +33,7 @@ export type PdfDesignFormValues = {
   showPageNumbers: boolean;
   includeNotes: boolean;
   includeContactInfo: boolean;
+  includeQuickLinks: boolean;
   dateFormat: "MM/DD/YYYY" | "DD/MM/YYYY" | "YYYY-MM-DD";
   timeFormat: "12h" | "24h";
   companyName?: string;
@@ -56,6 +59,7 @@ export function mapDbSettingsToFormValues(settings: any): PdfDesignFormValues {
     showPageNumbers: settings.show_page_numbers !== null ? settings.show_page_numbers : true,
     includeNotes: settings.include_notes !== null ? settings.include_notes : true,
     includeContactInfo: settings.include_contact_info !== null ? settings.include_contact_info : true,
+    includeQuickLinks: settings.include_quick_links !== null ? settings.include_quick_links : true,
     dateFormat: (settings.date_format as "MM/DD/YYYY" | "DD/MM/YYYY" | "YYYY-MM-DD") || "MM/DD/YYYY",
     timeFormat: (settings.time_format as "12h" | "24h") || "12h",
     companyName: settings.company_name,
@@ -76,6 +80,7 @@ export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: s
   show_page_numbers: boolean;
   include_notes: boolean;
   include_contact_info: boolean;
+  include_quick_links: boolean;
   date_format: string;
   time_format: string;
   company_name?: string;
@@ -94,6 +99,7 @@ export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: s
     show_page_numbers: values.showPageNumbers,
     include_notes: values.includeNotes,
     include_contact_info: values.includeContactInfo,
+    include_quick_links: values.includeQuickLinks,
     date_format: values.dateFormat,
     time_format: values.timeFormat,
     company_name: values.companyName,
