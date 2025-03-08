@@ -40,17 +40,30 @@ export const addHeaderSection = async (pdfDoc: any, page: any, font: any, boldFo
         height: bannerHeight,
       });
       
-      // Add overlay text on top of the banner if company name or header text provided
-      let textYPos = yOffset - (bannerHeight / 2);
+      // Add semi-transparent overlay for text background
+      const centerX = width / 2;
+      const textBoxWidth = 300;
+      const textBoxHeight = settings.headerText ? 60 : 40;
+      const textYPos = yOffset - (bannerHeight / 2);
       
+      // Draw semi-transparent background rectangle
+      page.drawRectangle({
+        x: centerX - (textBoxWidth / 2),
+        y: textYPos - (textBoxHeight / 2),
+        width: textBoxWidth,
+        height: textBoxHeight,
+        color: rgb(0, 0, 0, 0.5), // Black with 50% opacity
+        borderWidth: 0,
+      });
+      
+      // Add overlay text on top of the banner if company name or header text provided
       if (settings.companyName) {
         const headerFont = await pdfDoc.embedFont('Helvetica-Bold');
-        drawText(page, settings.companyName, width / 2 - 100, textYPos, headerFont, 16, rgb(1, 1, 1)); // White text
-        textYPos -= 20;
+        drawText(page, settings.companyName, centerX - 100, textYPos + 10, headerFont, 16, rgb(1, 1, 1)); // White text
       }
       
       if (settings.headerText) {
-        drawText(page, settings.headerText, width / 2 - 100, textYPos, font, 12, rgb(1, 1, 1)); // White text
+        drawText(page, settings.headerText, centerX - 100, textYPos - 10, font, 12, rgb(1, 1, 1)); // White text
       }
       
       // Update yOffset after banner
