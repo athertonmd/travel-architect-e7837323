@@ -112,6 +112,7 @@ export type Database = {
       pdf_settings: {
         Row: {
           accent_color: string | null
+          banner_image_url: string | null
           body_font: string | null
           company_name: string | null
           created_at: string
@@ -132,6 +133,7 @@ export type Database = {
         }
         Insert: {
           accent_color?: string | null
+          banner_image_url?: string | null
           body_font?: string | null
           company_name?: string | null
           created_at?: string
@@ -152,6 +154,7 @@ export type Database = {
         }
         Update: {
           accent_color?: string | null
+          banner_image_url?: string | null
           body_font?: string | null
           company_name?: string | null
           created_at?: string

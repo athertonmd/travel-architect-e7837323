@@ -1,4 +1,3 @@
-
 export interface PdfSettings {
   id?: string;
   user_id?: string;
