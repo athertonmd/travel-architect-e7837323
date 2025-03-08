@@ -4,6 +4,7 @@ import { FileText } from "lucide-react";
 import { PdfDesignForm } from "@/components/pdf/PdfDesignForm";
 import { PdfDesignTutorial } from "@/components/pdf/PdfDesignTutorial";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Toaster } from "@/components/ui/toaster";
 
 export default function PdfDesignSettings() {
   return (
@@ -26,6 +27,7 @@ export default function PdfDesignSettings() {
 
         <PdfDesignTutorial />
       </div>
+      <Toaster />
     </Layout>
   );
 }

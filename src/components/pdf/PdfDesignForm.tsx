@@ -9,6 +9,7 @@ import { HeaderFooterTab } from "./tabs/HeaderFooterTab";
 import { SectionsTab } from "./tabs/SectionsTab";
 import { usePdfDesignForm } from "./hooks/usePdfDesignForm";
 import { useToast } from "@/hooks/use-toast";
+import { Loader2 } from "lucide-react";
 
 export function PdfDesignForm() {
   const { form, isLoading, onSubmit } = usePdfDesignForm();
@@ -63,7 +64,14 @@ export function PdfDesignForm() {
           
           <div className="flex justify-end">
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? "Saving..." : "Save Settings"}
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                "Save Settings"
+              )}
             </Button>
           </div>
         </form>

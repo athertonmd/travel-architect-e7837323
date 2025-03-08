@@ -84,11 +84,6 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         console.error('Error details:', error);
         throw error;
       }
-      
-      toast({
-        title: "Settings saved",
-        description: "Your PDF design settings have been saved successfully",
-      });
     } catch (error) {
       console.error('Error saving PDF settings:', error);
       toast({
@@ -96,6 +91,7 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         description: "There was a problem saving your settings",
         variant: "destructive",
       });
+      throw error; // Re-throw the error so the component can handle it
     } finally {
       setIsLoading(false);
     }
