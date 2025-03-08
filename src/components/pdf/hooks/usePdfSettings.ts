@@ -72,13 +72,18 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
       
       console.log("Saving PDF settings:", dbValues);
       
+      // Using the unique constraint on user_id for the upsert operation
       const { error } = await supabase
         .from('pdf_settings')
         .upsert(dbValues, {
           onConflict: 'user_id',
+          ignoreDuplicates: false,
         });
         
-      if (error) throw error;
+      if (error) {
+        console.error('Error details:', error);
+        throw error;
+      }
       
       toast({
         title: "Settings saved",
