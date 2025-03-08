@@ -86,7 +86,7 @@ export function AppearanceTab({ form }: AppearanceTabProps) {
               <div className="flex items-end gap-3">
                 <div className="flex-1">
                   <FormControl>
-                    <Input placeholder="https://example.com/logo.png" {...field} className="text-white" />
+                    <Input placeholder="https://example.com/logo.png" {...field} value={field.value || ""} className="text-white" />
                   </FormControl>
                 </div>
                 <Button 

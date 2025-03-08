@@ -13,8 +13,8 @@ const formSchema = z.object({
   accentColor: z.string().default("#9b87f5"),
   headerFont: z.string().default("Helvetica"),
   bodyFont: z.string().default("Helvetica"),
-  logoUrl: z.string().optional(),
-  bannerImageUrl: z.string().optional(),
+  logoUrl: z.string().optional().default(""),
+  bannerImageUrl: z.string().optional().default(""),
   
   // Content settings
   showPageNumbers: z.boolean().default(true),
@@ -25,9 +25,9 @@ const formSchema = z.object({
   timeFormat: z.enum(["12h", "24h"]).default("12h"),
   
   // Header settings
-  companyName: z.string().optional(),
-  headerText: z.string().optional(),
-  footerText: z.string().optional(),
+  companyName: z.string().optional().default(""),
+  headerText: z.string().optional().default(""),
+  footerText: z.string().optional().default(""),
 });
 
 export function usePdfDesignForm() {
@@ -40,12 +40,17 @@ export function usePdfDesignForm() {
       accentColor: "#9b87f5",
       headerFont: "Helvetica",
       bodyFont: "Helvetica",
+      logoUrl: "",
+      bannerImageUrl: "",
       showPageNumbers: true,
       includeNotes: true,
       includeContactInfo: true,
       includeQuickLinks: true,
       dateFormat: "MM/DD/YYYY",
       timeFormat: "12h",
+      companyName: "",
+      headerText: "",
+      footerText: "",
     },
     mode: "onChange" // Add this to ensure form state updates as changes are made
   });
