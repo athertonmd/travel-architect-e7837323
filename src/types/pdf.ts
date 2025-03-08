@@ -39,6 +39,7 @@ export type PdfDesignFormValues = {
   companyName: string;
   headerText: string;
   footerText: string;
+  sectionOrder?: string[];
 }
 
 export type PdfSection = {

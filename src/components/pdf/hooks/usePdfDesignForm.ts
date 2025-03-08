@@ -28,6 +28,9 @@ const formSchema = z.object({
   companyName: z.string().optional().default(""),
   headerText: z.string().optional().default(""),
   footerText: z.string().optional().default(""),
+  
+  // Section order
+  sectionOrder: z.array(z.string()).optional().default(["quick-links", "notes"]),
 });
 
 export function usePdfDesignForm() {
@@ -51,6 +54,7 @@ export function usePdfDesignForm() {
       companyName: "",
       headerText: "",
       footerText: "",
+      sectionOrder: ["quick-links", "notes"],
     },
     mode: "onChange" // Add this to ensure form state updates as changes are made
   });

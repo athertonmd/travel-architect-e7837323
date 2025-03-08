@@ -3,14 +3,6 @@ import { useState } from "react";
 import { PdfSection } from "@/types/pdf";
 
 const defaultSections: PdfSection[] = [
-  { id: "trip-header", name: "Trip Header", included: true },
-  { id: "traveler-info", name: "Traveler Information", included: true },
-  { id: "flight", name: "Flight Details", included: true },
-  { id: "hotel", name: "Hotel Reservations", included: true },
-  { id: "car", name: "Car Rental", included: true },
-  { id: "activities", name: "Activities", included: true },
-  { id: "restaurants", name: "Restaurants", included: true },
-  { id: "transfers", name: "Transfers", included: false },
   { id: "quick-links", name: "Quick Links", included: true },
   { id: "notes", name: "Notes", included: true },
 ];
