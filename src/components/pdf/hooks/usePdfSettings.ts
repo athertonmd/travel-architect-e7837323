@@ -4,6 +4,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { PdfDesignFormValues, mapDbSettingsToFormValues, mapFormValuesToDbSettings } from "@/types/pdf";
 import { UseFormReturn } from "react-hook-form";
+import { getAuthenticatedSession } from "@/utils/pdf/sessionUtils";
 
 export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
   const { toast } = useToast();
@@ -54,6 +55,7 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
   }, [form, toast]);
 
   const saveSettings = async (values: PdfDesignFormValues) => {
+    console.log("Starting saveSettings function with values:", values);
     setIsLoading(true);
     try {
       const { data: sessionData } = await supabase.auth.getSession();
@@ -88,6 +90,8 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         console.error('Error details:', error);
         throw error;
       }
+      
+      console.log("Settings saved successfully");
       
       // Add a small delay after successful save to ensure loading state is visible
       await new Promise(resolve => setTimeout(resolve, 300));

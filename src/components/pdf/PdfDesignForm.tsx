@@ -21,7 +21,7 @@ export function PdfDesignForm() {
 
   const handleSubmit = async (values: any) => {
     try {
-      console.log("Form submitted with values:", values);
+      console.log("Form submission starting with values:", values);
       // Show initial progress
       setSaveProgress(30);
       
@@ -95,6 +95,12 @@ export function PdfDesignForm() {
               disabled={isLoading} 
               className="min-w-[140px]"
               variant="default"
+              onClick={() => {
+                console.log("Save button clicked");
+                // Force the form to submit when the button is clicked
+                // This provides another way to trigger the submission
+                form.handleSubmit(handleSubmit)();
+              }}
             >
               {isLoading ? (
                 <>
