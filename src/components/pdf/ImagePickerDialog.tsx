@@ -8,7 +8,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ImageGallery } from "./ImageGallery";
 
 interface ImagePickerDialogProps {
@@ -32,8 +32,15 @@ export function ImagePickerDialog({
 }: ImagePickerDialogProps) {
   const [selectedImage, setSelectedImage] = useState<string>(currentImageUrl || '');
 
+  // Update selectedImage when currentImageUrl changes (when dialog reopens)
+  useEffect(() => {
+    setSelectedImage(currentImageUrl || '');
+  }, [currentImageUrl, isOpen]);
+
   const handleApply = () => {
-    onSelect(selectedImage);
+    if (selectedImage) {
+      onSelect(selectedImage);
+    }
     onClose();
   };
 
@@ -44,7 +51,7 @@ export function ImagePickerDialog({
   };
   
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[800px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
