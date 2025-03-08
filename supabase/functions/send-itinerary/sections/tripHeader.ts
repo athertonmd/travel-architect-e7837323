@@ -1,3 +1,4 @@
+
 import { drawText, drawDivider } from "../utils/pdfUtils.ts";
 
 export const addTripHeader = (page: any, trip: any, yOffset: number, font: any) => {

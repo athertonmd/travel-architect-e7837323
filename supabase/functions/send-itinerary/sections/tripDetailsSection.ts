@@ -1,6 +1,6 @@
 
 import { PdfSettings } from "../types/pdfTypes.ts";
-import { drawSectionHeader, drawDetailRow } from "../utils/pdfUtils.ts";
+import { drawSectionHeader, drawDetailRow, drawText } from "../utils/pdfUtils.ts";
 
 export const addTripDetailsSection = (page: any, trip: any, colors: any, yOffset: number, font: any, boldFont: any, settings?: PdfSettings) => {
   console.log("Adding trip details section...");
@@ -57,13 +57,3 @@ export const formatDateRange = (startDate?: string, endDate?: string, dateFormat
     return `${formatDate(startDate || '')} - ${formatDate(endDate || '')}`;
   }
 };
-
-function drawText(page: any, text: string, x: number, y: number, font: any, fontSize: number, color: any) {
-  page.drawText(text, {
-    x: Math.max(0, x),
-    y: Math.max(0, y),
-    size: Math.max(1, fontSize),
-    font,
-    color,
-  });
-}

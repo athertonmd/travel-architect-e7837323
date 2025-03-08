@@ -1,3 +1,4 @@
+
 import { drawText, drawDivider } from "../utils/pdfUtils.ts";
 
 const sanitizeDetails = (details: any) => {

@@ -2,7 +2,7 @@
 import { PDFDocument } from "https://esm.sh/pdf-lib@1.17.1";
 import { PdfSettings, TripData } from "./types/pdfTypes.ts";
 import { getColors } from "./utils/colorUtils.ts";
-import { createBasePDF } from "./utils/pdfUtils.ts";
+import { createBasePDF } from "./utils/pdfBaseUtils.ts";
 import { addHeaderSection } from "./sections/headerSection.ts";
 import { addTripDetailsSection } from "./sections/tripDetailsSection.ts";
 import { processSegments } from "./sections/segmentsSection.ts";
