@@ -13,7 +13,7 @@ interface SectionsTabProps {
 export function SectionsTab({ form }: SectionsTabProps) {
   return (
     <div className="space-y-6">
-      <Alert variant="outline" className="mb-4 border-gold/30 bg-navy-light/30">
+      <Alert variant="default" className="mb-4 border border-gold/30 bg-navy-light/30">
         <Info className="h-4 w-4 text-gold" />
         <AlertDescription className="text-sm">
           Trip header is always shown at the top of the itinerary. Segment sections (Flight, Hotel, Car, etc.) 
