@@ -26,7 +26,7 @@ export function HeaderFooterTab({ form }: HeaderFooterTabProps) {
             <div className="flex items-end gap-3">
               <div className="flex-1">
                 <FormControl>
-                  <Input placeholder="https://example.com/banner.jpg" {...field} />
+                  <Input placeholder="https://example.com/banner.jpg" {...field} value={field.value || ""} />
                 </FormControl>
               </div>
               <Button 
@@ -62,7 +62,7 @@ export function HeaderFooterTab({ form }: HeaderFooterTabProps) {
           <FormItem>
             <FormLabel>Company Name</FormLabel>
             <FormControl>
-              <Input placeholder="Your Company Name" {...field} />
+              <Input placeholder="Your Company Name" {...field} value={field.value || ""} />
             </FormControl>
             <FormDescription>
               This will appear in the header of your PDF
@@ -79,7 +79,7 @@ export function HeaderFooterTab({ form }: HeaderFooterTabProps) {
           <FormItem>
             <FormLabel>Header Text</FormLabel>
             <FormControl>
-              <Input placeholder="Custom header text" {...field} />
+              <Input placeholder="Custom header text" {...field} value={field.value || ""} />
             </FormControl>
             <FormDescription>
               Additional text to display in the header
@@ -96,7 +96,7 @@ export function HeaderFooterTab({ form }: HeaderFooterTabProps) {
           <FormItem>
             <FormLabel>Footer Text</FormLabel>
             <FormControl>
-              <Input placeholder="Custom footer text" {...field} />
+              <Input placeholder="Custom footer text" {...field} value={field.value || ""} />
             </FormControl>
             <FormDescription>
               Text to display in the footer of each page

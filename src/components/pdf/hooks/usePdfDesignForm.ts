@@ -47,11 +47,14 @@ export function usePdfDesignForm() {
       dateFormat: "MM/DD/YYYY",
       timeFormat: "12h",
     },
+    mode: "onChange" // Add this to ensure form state updates as changes are made
   });
 
   const { isLoading, saveSettings } = usePdfSettings(form);
 
   const onSubmit = async (values: PdfDesignFormValues) => {
+    // Log the values being submitted to help with debugging
+    console.log("Submitting form values:", values);
     await saveSettings(values);
   };
 

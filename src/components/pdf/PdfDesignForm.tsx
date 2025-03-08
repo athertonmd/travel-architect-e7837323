@@ -8,14 +8,34 @@ import { ContentTab } from "./tabs/ContentTab";
 import { HeaderFooterTab } from "./tabs/HeaderFooterTab";
 import { SectionsTab } from "./tabs/SectionsTab";
 import { usePdfDesignForm } from "./hooks/usePdfDesignForm";
+import { useToast } from "@/hooks/use-toast";
 
 export function PdfDesignForm() {
   const { form, isLoading, onSubmit } = usePdfDesignForm();
+  const { toast } = useToast();
+
+  const handleSubmit = async (values: any) => {
+    try {
+      console.log("Form submitted with values:", values);
+      await onSubmit(values);
+      toast({
+        title: "Settings saved",
+        description: "Your PDF design settings have been saved successfully"
+      });
+    } catch (error) {
+      console.error("Error saving settings:", error);
+      toast({
+        title: "Error saving settings",
+        description: "There was a problem saving your settings",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="flex flex-col space-y-8">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
           <Tabs defaultValue="appearance" className="w-full">
             <TabsList className="bg-navy-light w-full justify-start mb-6">
               <TabsTrigger value="appearance">Appearance</TabsTrigger>
