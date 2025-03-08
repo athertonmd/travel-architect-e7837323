@@ -264,6 +264,45 @@ export type Database = {
           },
         ]
       }
+      travelport_credentials: {
+        Row: {
+          additional_notes: string | null
+          branch_id: string | null
+          created_at: string
+          id: string
+          pcc: string | null
+          profile_name: string | null
+          queue_number: string | null
+          signatory: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          additional_notes?: string | null
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          pcc?: string | null
+          profile_name?: string | null
+          queue_number?: string | null
+          signatory?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          additional_notes?: string | null
+          branch_id?: string | null
+          created_at?: string
+          id?: string
+          pcc?: string | null
+          profile_name?: string | null
+          queue_number?: string | null
+          signatory?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       trips: {
         Row: {
           archived: boolean | null
