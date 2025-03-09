@@ -3,6 +3,7 @@ import { useState } from "react";
 import { generatePdfDocument } from "@/utils/pdf/pdfGenerationService";
 import { sendPdfViaEmail } from "@/utils/pdf/pdfEmailService";
 import { getAuthenticatedSession } from "@/utils/pdf/sessionUtils";
+import { toast } from "sonner";
 
 interface UsePdfGenerationProps {
   tripId?: string;
@@ -31,10 +32,23 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       const session = await getAuthenticatedSession();
       console.log("Session obtained, generating PDF document");
       
-      // This will fetch user's PDF settings automatically inside the service
-      const { pdfBase64 } = await generatePdfDocument(tripId, session.access_token);
+      // Set a timeout to prevent hanging indefinitely
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("PDF generation timed out")), 30000); // 30 seconds timeout
+      });
+      
+      // Race the PDF generation against the timeout
+      const { pdfBase64 } = await Promise.race([
+        generatePdfDocument(tripId, session.access_token),
+        timeoutPromise
+      ]) as { pdfBase64: string };
       
       console.log("PDF document generated successfully, data length:", pdfBase64.length);
+      
+      if (!pdfBase64 || pdfBase64.length === 0) {
+        throw new Error("Received empty PDF data from the server");
+      }
+      
       setPdfData(pdfBase64);
 
       if (userEmail) {
@@ -47,6 +61,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
       setError(errorMessage);
       setPdfData(null);
+      toast.error(`PDF generation failed: ${errorMessage}`);
     } finally {
       console.log("PDF generation process completed");
       setIsGenerating(false);

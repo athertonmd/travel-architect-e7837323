@@ -1,3 +1,4 @@
+
 import {
   Dialog,
   DialogContent,
@@ -5,12 +6,13 @@ import {
   DialogHeader,
   DialogDescription,
 } from "@/components/ui/dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PdfViewer } from "./pdf/PdfViewer";
 import { PdfLoadingState } from "./pdf/PdfLoadingState";
 import { PdfErrorState } from "./pdf/PdfErrorState";
 import { PdfDialogTrigger } from "./pdf/PdfDialogTrigger";
 import { usePdfGeneration } from "@/hooks/usePdfGeneration";
+import { toast } from "sonner";
 
 interface PdfPreviewDialogProps {
   tripId?: string;
@@ -20,6 +22,8 @@ interface PdfPreviewDialogProps {
 
 export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
+  const [generationAttempted, setGenerationAttempted] = useState(false);
+  
   const {
     isGenerating,
     pdfData,
@@ -34,15 +38,41 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     console.log("PDF generation state:", { isGenerating, hasPdfData: !!pdfData, error });
     
     setIsOpen(open);
-    if (open && !pdfData && !isGenerating) {
+    
+    if (open && !pdfData && !isGenerating && !generationAttempted) {
       console.log("Initiating PDF generation");
-      generatePdf();
+      setGenerationAttempted(true);
+      generatePdf().catch(err => {
+        console.error("Error initiating PDF generation:", err);
+        toast.error("Could not generate PDF");
+      });
     }
+    
     if (!open) {
       console.log("Closing dialog, resetting PDF state");
       resetPdfState();
+      setGenerationAttempted(false);
     }
   };
+
+  const handleRetryGeneration = () => {
+    console.log("Retrying PDF generation");
+    generatePdf().catch(err => {
+      console.error("Error retrying PDF generation:", err);
+      toast.error("Could not generate PDF on retry");
+    });
+  };
+
+  useEffect(() => {
+    // Log state changes for debugging
+    console.log("PdfPreviewDialog state changed:", {
+      isOpen,
+      isGenerating,
+      hasPdfData: !!pdfData,
+      error,
+      generationAttempted
+    });
+  }, [isOpen, isGenerating, pdfData, error, generationAttempted]);
 
   const renderContent = () => {
     if (error) {
@@ -50,7 +80,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       return (
         <PdfErrorState 
           error={error}
-          onRetry={generatePdf}
+          onRetry={handleRetryGeneration}
           isGenerating={isGenerating}
         />
       );

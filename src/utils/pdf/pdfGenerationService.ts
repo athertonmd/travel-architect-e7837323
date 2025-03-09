@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { PdfSettings } from "@/types/pdf";
+import { toast } from "sonner";
 
 interface GeneratePdfResponse {
   pdfBase64: string;
@@ -17,13 +18,21 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
     
     let pdfSettings = null;
     if (user) {
+      console.log("Getting PDF settings for user:", user.id);
       const { data: settingsData, error } = await supabase
         .rpc('get_pdf_settings_for_user', { user_id_param: user.id });
       
-      if (!error && settingsData) {
-        pdfSettings = settingsData;
+      if (error) {
+        console.error("Error fetching PDF settings:", error);
+        toast.error("Could not fetch your PDF design settings");
       }
-      console.log("Using custom PDF settings:", pdfSettings ? "Yes" : "No");
+      
+      if (settingsData) {
+        console.log("Found custom PDF settings:", Object.keys(settingsData));
+        pdfSettings = settingsData;
+      } else {
+        console.log("No custom PDF settings found, using defaults");
+      }
     }
     
     console.log("Making request to generate-pdf function");
