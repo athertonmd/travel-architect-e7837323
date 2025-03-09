@@ -7,19 +7,19 @@ import { generatePDF } from "../send-itinerary/pdfGenerator.ts";
 console.log("Edge function loaded: generate-pdf");
 
 interface PdfSettings {
-  primaryColor: string;
-  secondaryColor: string;
-  accentColor: string;
-  headerFont: string;
-  bodyFont: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  accentColor?: string;
+  headerFont?: string;
+  bodyFont?: string;
   logoUrl?: string;
   bannerImageUrl?: string;
-  showPageNumbers: boolean;
-  includeNotes: boolean;
-  includeContactInfo: boolean;
-  includeQuickLinks: boolean;
-  dateFormat: string;
-  timeFormat: string;
+  showPageNumbers?: boolean;
+  includeNotes?: boolean;
+  includeContactInfo?: boolean;
+  includeQuickLinks?: boolean;
+  dateFormat?: string;
+  timeFormat?: string;
   companyName?: string;
   headerText?: string;
   footerText?: string;
@@ -65,6 +65,36 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log("Processing PDF generation for trip:", tripId);
     console.log("Custom PDF settings provided:", pdfSettings ? "Yes" : "No");
+
+    // Debug: Log the actual fields in the pdfSettings to check for mismatches
+    if (pdfSettings) {
+      console.log("PDF Settings keys:", Object.keys(pdfSettings));
+      // Convert database field names to expected PdfSettings interface format
+      const mappedSettings: PdfSettings = {};
+      
+      // Map snake_case database fields to camelCase as used in the interface
+      if (pdfSettings.primary_color) mappedSettings.primaryColor = pdfSettings.primary_color;
+      if (pdfSettings.secondary_color) mappedSettings.secondaryColor = pdfSettings.secondary_color;
+      if (pdfSettings.accent_color) mappedSettings.accentColor = pdfSettings.accent_color;
+      if (pdfSettings.header_font) mappedSettings.headerFont = pdfSettings.header_font;
+      if (pdfSettings.body_font) mappedSettings.bodyFont = pdfSettings.body_font;
+      if (pdfSettings.logo_url) mappedSettings.logoUrl = pdfSettings.logo_url;
+      if (pdfSettings.banner_image_url) mappedSettings.bannerImageUrl = pdfSettings.banner_image_url;
+      if (pdfSettings.show_page_numbers !== undefined) mappedSettings.showPageNumbers = pdfSettings.show_page_numbers;
+      if (pdfSettings.include_notes !== undefined) mappedSettings.includeNotes = pdfSettings.include_notes;
+      if (pdfSettings.include_contact_info !== undefined) mappedSettings.includeContactInfo = pdfSettings.include_contact_info;
+      if (pdfSettings.include_quick_links !== undefined) mappedSettings.includeQuickLinks = pdfSettings.include_quick_links;
+      if (pdfSettings.date_format) mappedSettings.dateFormat = pdfSettings.date_format;
+      if (pdfSettings.time_format) mappedSettings.timeFormat = pdfSettings.time_format;
+      if (pdfSettings.company_name) mappedSettings.companyName = pdfSettings.company_name;
+      if (pdfSettings.header_text) mappedSettings.headerText = pdfSettings.header_text;
+      if (pdfSettings.footer_text) mappedSettings.footerText = pdfSettings.footer_text;
+      
+      console.log("Mapped PDF settings:", mappedSettings);
+      
+      // Replace the original snake_case settings with the mapped camelCase settings
+      pdfSettings = mappedSettings;
+    }
 
     if (!tripId) {
       console.error("No trip ID provided");
@@ -121,10 +151,25 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error("Trip not found");
     }
     
+    // More detailed debugging for trip data
+    console.log("Trip data retrieved:", {
+      id: trip.id,
+      title: trip.title,
+      hasSegments: !!trip.segments,
+      segmentsType: trip.segments ? typeof trip.segments : 'undefined',
+      segmentsIsArray: trip.segments ? Array.isArray(trip.segments) : false,
+      segmentsCount: trip.segments && Array.isArray(trip.segments) ? trip.segments.length : 0
+    });
+    
     // Check if trip data is complete enough to generate a PDF
     if (!trip.segments || !Array.isArray(trip.segments) || trip.segments.length === 0) {
       console.error("Trip has no segments:", tripId);
       throw new Error("Trip has no segments to include in the PDF");
+    }
+
+    // Sample the first segment to see its structure
+    if (trip.segments.length > 0) {
+      console.log("First segment example:", JSON.stringify(trip.segments[0]).substring(0, 500));
     }
 
     console.log("Trip data fetched successfully, segments count:", trip.segments.length);
@@ -138,7 +183,7 @@ const handler = async (req: Request): Promise<Response> => {
     
     try {
       // Generate PDF with optional custom settings
-      const pdfBytes = await generatePDF(trip, pdfSettings as PdfSettings | undefined);
+      const pdfBytes = await generatePDF(trip, pdfSettings);
       
       if (!pdfBytes || pdfBytes.length === 0) {
         console.error("PDF generation returned empty data");
@@ -164,7 +209,19 @@ const handler = async (req: Request): Promise<Response> => {
       );
     } catch (pdfError) {
       console.error("Error in PDF generation:", pdfError);
-      throw new Error(`PDF creation error: ${pdfError.message || "Unknown error in PDF generation"}`);
+      console.error("Error stack:", pdfError instanceof Error ? pdfError.stack : "No stack available");
+      
+      // Try to get more details about the error
+      let errorDetails = "Unknown error in PDF generation";
+      if (pdfError instanceof Error) {
+        errorDetails = pdfError.message;
+        // Check if it contains nested errors
+        if (pdfError.message.includes("Error in")) {
+          errorDetails += " - This may indicate a problem with the PDF content or settings.";
+        }
+      }
+      
+      throw new Error(`PDF creation error: ${errorDetails}`);
     }
   } catch (error) {
     console.error("Error in generate-pdf function:", error);

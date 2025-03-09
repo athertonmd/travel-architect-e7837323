@@ -12,6 +12,11 @@ export const processSegments = (pdfDoc: any, page: any, trip: any, colors: any, 
     return { currentY, currentPage };
   }
   
+  // Debug: Log the structure of the first segment
+  if (trip.segments.length > 0) {
+    console.log("First segment structure:", JSON.stringify(trip.segments[0]).substring(0, 500));
+  }
+  
   // Sort segments by date if they have dates
   let sortedSegments = [...trip.segments];
   
@@ -35,7 +40,11 @@ export const processSegments = (pdfDoc: any, page: any, trip: any, colors: any, 
   });
   
   for (const segment of sortedSegments) {
-    if (!segment?.type) continue;
+    // Defensive programming - ensure the segment has a type
+    if (!segment?.type) {
+      console.log("Skipping segment without type property");
+      continue;
+    }
     
     // Skip notes if includeNotes is false
     if (segment.type.toLowerCase() === "notes" && settings?.includeNotes === false) {
@@ -54,6 +63,9 @@ export const processSegments = (pdfDoc: any, page: any, trip: any, colors: any, 
     currentY = drawSectionHeader(currentPage, segment.type.toUpperCase(), currentY, boldFont, colors.primaryColor);
 
     if (segment.details && typeof segment.details === 'object') {
+      // Debug the segment details
+      console.log(`Segment details for ${segment.type}:`, Object.keys(segment.details));
+      
       for (const [key, value] of Object.entries(segment.details)) {
         // Skip contact info if includeContactInfo is false
         if (settings?.includeContactInfo === false && 
@@ -65,9 +77,19 @@ export const processSegments = (pdfDoc: any, page: any, trip: any, colors: any, 
         
         if (value && typeof value !== 'object') {
           const label = key.charAt(0).toUpperCase() + key.slice(1).replace(/([A-Z])/g, ' $1');
-          currentY = drawDetailRow(currentPage, label, String(value), currentY, font, boldFont);
+          try {
+            currentY = drawDetailRow(currentPage, label, String(value), currentY, font, boldFont);
+          } catch (err) {
+            console.error(`Error drawing detail row for ${label}: ${err}`);
+            // Continue with next detail instead of breaking the entire PDF generation
+          }
+        } else if (value !== null && typeof value === 'object') {
+          // Log complex objects but skip them in the PDF
+          console.log(`Skipping complex object for ${key}:`, value);
         }
       }
+    } else {
+      console.log(`No details or invalid details for segment ${segment.type}`);
     }
 
     currentY -= 20;

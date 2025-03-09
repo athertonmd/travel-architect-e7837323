@@ -103,8 +103,20 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
       if (data.error) {
         console.error('Error returned in response data:', data.error);
         console.error('Error details:', data.details || 'No details available');
+        
+        // More user-friendly error messages
+        let userMessage = 'Failed to generate PDF';
+        
+        if (data.error.includes('No segments')) {
+          userMessage = 'Your trip needs at least one segment to generate a PDF. Please add some segments and try again.';
+        } else if (data.error.includes('PDF creation error')) {
+          userMessage = 'There was a problem creating your PDF. Please check your trip data and try again.';
+        } else if (data.error.includes('Authentication error')) {
+          userMessage = 'Authentication issues detected. Please log out and log back in, then try again.';
+        }
+        
         return { 
-          error: data.error,
+          error: userMessage,
           details: data.details
         };
       }
@@ -121,17 +133,24 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
       
       // Try to extract the detailed error message if available
       let errorMessage = 'Failed to generate PDF';
+      let errorDetails = '';
       
       if (invokeError instanceof Error) {
         errorMessage = invokeError.message;
+        errorDetails = invokeError.stack || '';
         
         // Check if it's an error response that contains JSON
         if (invokeError.message.includes('non-2xx status code')) {
           errorMessage = 'The PDF service encountered an error. Please check that your trip has data and try again.';
+          
+          // Additional context based on the Edge Function logs
+          if (errorDetails.includes('Edge Function')) {
+            errorDetails += '\nThis appears to be an issue with the PDF generation service. The development team has been notified.';
+          }
         }
       }
       
-      return { error: errorMessage };
+      return { error: errorMessage, details: errorDetails };
     }
   } catch (error) {
     console.error('Error in generatePdfDocument:', error);
