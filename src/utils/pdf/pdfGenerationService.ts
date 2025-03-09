@@ -7,7 +7,12 @@ interface GeneratePdfResponse {
   pdfBase64: string;
 }
 
-export async function generatePdfDocument(tripId: string, sessionToken: string): Promise<GeneratePdfResponse | { error: string }> {
+interface PdfGenerationError {
+  error: string;
+  details?: string;
+}
+
+export async function generatePdfDocument(tripId: string, sessionToken: string): Promise<GeneratePdfResponse | PdfGenerationError> {
   console.log("Initiating PDF generation for trip:", tripId);
   
   if (!tripId) {

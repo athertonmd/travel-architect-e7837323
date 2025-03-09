@@ -48,13 +48,15 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       // Check if result is error
       if ('error' in result) {
         const errorMessage = result.error || "Unknown error occurred";
-        const details = 'details' in result ? result.details : null;
+        let details: string | null = null;
         
-        console.error('Error in PDF generation:', errorMessage);
-        if (details) {
+        if ('details' in result && result.details) {
+          details = String(result.details);
           console.error('Error details:', details);
           setErrorDetails(details);
         }
+        
+        console.error('Error in PDF generation:', errorMessage);
         
         throw new Error(`Error from server: ${errorMessage}`);
       }
