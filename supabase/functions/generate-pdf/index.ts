@@ -37,6 +37,7 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
+      console.error("Missing Authorization header");
       throw new Error("Missing Authorization header");
     }
 
@@ -44,14 +45,28 @@ const handler = async (req: Request): Promise<Response> => {
     const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY") ?? "";
     const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+      console.error("Missing Supabase configuration env variables");
+      throw new Error("Server configuration error: Missing Supabase configuration");
+    }
+
     // Parse request body
-    const requestBody = await req.json();
+    let requestBody;
+    try {
+      requestBody = await req.json();
+      console.log("Request body parsed successfully");
+    } catch (e) {
+      console.error("Error parsing request body:", e);
+      throw new Error("Invalid request body format");
+    }
+    
     const { tripId, pdfSettings } = requestBody;
     
     console.log("Processing PDF generation for trip:", tripId);
     console.log("Custom PDF settings provided:", pdfSettings ? "Yes" : "No");
 
     if (!tripId) {
+      console.error("No trip ID provided");
       throw new Error("Trip ID is required");
     }
 
@@ -69,15 +84,26 @@ const handler = async (req: Request): Promise<Response> => {
     );
 
     // Get user session
+    console.log("Getting user from auth token");
     const {
       data: { user },
+      error: userError,
     } = await supabaseClient.auth.getUser();
 
-    if (!user) {
-      throw new Error("Unauthorized");
+    if (userError) {
+      console.error("Error getting user:", userError);
+      throw new Error(`Authentication error: ${userError.message}`);
     }
 
+    if (!user) {
+      console.error("No user found from token");
+      throw new Error("Unauthorized: User not found");
+    }
+
+    console.log("User authenticated successfully:", user.id);
+
     // Retrieve trip data
+    console.log("Fetching trip data from database");
     const { data: trip, error: tripError } = await supabaseClient
       .from("trips")
       .select("*")
@@ -86,36 +112,55 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (tripError) {
       console.error("Error fetching trip:", tripError);
-      throw tripError;
+      throw new Error(`Database error: ${tripError.message}`);
     }
 
     if (!trip) {
+      console.error("Trip not found with ID:", tripId);
       throw new Error("Trip not found");
     }
 
-    // Generate PDF with optional custom settings
-    const pdfBytes = await generatePDF(trip, pdfSettings as PdfSettings | undefined);
+    console.log("Trip data fetched successfully. Generating PDF...");
     
-    // Convert PDF bytes to base64
-    const pdfBase64 = btoa(
-      String.fromCharCode(...new Uint8Array(pdfBytes))
-    );
-
-    console.log("PDF generated successfully, returning base64 data");
-    return new Response(
-      JSON.stringify({ pdfBase64 }),
-      {
-        headers: {
-          ...corsHeaders,
-          "Content-Type": "application/json",
-        },
-        status: 200,
+    try {
+      // Generate PDF with optional custom settings
+      const pdfBytes = await generatePDF(trip, pdfSettings as PdfSettings | undefined);
+      
+      if (!pdfBytes || pdfBytes.length === 0) {
+        console.error("PDF generation returned empty data");
+        throw new Error("PDF generation failed: Empty data returned");
       }
-    );
+      
+      // Convert PDF bytes to base64
+      const pdfBase64 = btoa(
+        String.fromCharCode(...new Uint8Array(pdfBytes))
+      );
+
+      console.log("PDF generated successfully, returning base64 data of length:", pdfBase64.length);
+      
+      return new Response(
+        JSON.stringify({ pdfBase64 }),
+        {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+          status: 200,
+        }
+      );
+    } catch (pdfError) {
+      console.error("Error in PDF generation:", pdfError);
+      throw new Error(`PDF creation error: ${pdfError.message || "Unknown error in PDF generation"}`);
+    }
   } catch (error) {
     console.error("Error in generate-pdf function:", error);
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ 
+        error: errorMessage,
+        details: error instanceof Error ? error.stack : null
+      }),
       {
         headers: {
           ...corsHeaders,

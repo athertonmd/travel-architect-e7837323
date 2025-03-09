@@ -41,9 +41,14 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       const result = await Promise.race([
         generatePdfDocument(tripId, session.access_token),
         timeoutPromise
-      ]) as { pdfBase64: string };
+      ]);
       
-      const { pdfBase64 } = result;
+      // Check if result is error
+      if ('error' in result) {
+        throw new Error(`Error from server: ${result.error}`);
+      }
+      
+      const { pdfBase64 } = result as { pdfBase64: string };
       console.log("PDF document generated successfully, data length:", pdfBase64.length);
       
       if (!pdfBase64 || pdfBase64.length === 0) {
@@ -62,6 +67,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     } catch (error) {
       console.error('Error in PDF generation:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
+      console.error('Error details:', errorMessage);
       setError(errorMessage);
       setPdfData(null);
       toast.error(`PDF generation failed: ${errorMessage}`);

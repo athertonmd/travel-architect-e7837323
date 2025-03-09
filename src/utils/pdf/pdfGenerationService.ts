@@ -7,7 +7,7 @@ interface GeneratePdfResponse {
   pdfBase64: string;
 }
 
-export async function generatePdfDocument(tripId: string, sessionToken: string): Promise<GeneratePdfResponse> {
+export async function generatePdfDocument(tripId: string, sessionToken: string): Promise<GeneratePdfResponse | { error: string }> {
   console.log("Initiating PDF generation for trip:", tripId);
   
   if (!tripId) {
@@ -85,18 +85,29 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
 
     if (error) {
       console.error('Error from generate-pdf function:', error);
-      throw new Error(error.message || 'Failed to generate PDF');
+      return { error: error.message || 'Failed to generate PDF' };
     }
 
-    if (!data?.pdfBase64) {
+    if (!data) {
+      console.error('No data received from function');
+      return { error: 'No response data from server' };
+    }
+
+    if (data.error) {
+      console.error('Error returned in response data:', data.error);
+      return { error: data.error };
+    }
+
+    if (!data.pdfBase64) {
       console.error('No PDF data in response:', data);
-      throw new Error("No PDF data received from the server");
+      return { error: "No PDF data received from the server" };
     }
 
     console.log("Successfully generated PDF with data length:", data.pdfBase64.length);
     return data as GeneratePdfResponse;
   } catch (error) {
     console.error('Error in generatePdfDocument:', error);
-    throw error;
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return { error: errorMessage };
   }
 }

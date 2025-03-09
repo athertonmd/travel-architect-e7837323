@@ -10,12 +10,19 @@ interface PdfErrorStateProps {
 }
 
 export function PdfErrorState({ error, onRetry, isGenerating }: PdfErrorStateProps) {
+  // Extract more specific error message if available
+  const displayError = error.includes("PDF creation error:") 
+    ? error 
+    : error.includes("Edge Function") 
+      ? "Server error: The PDF service encountered an issue. Please try again later."
+      : error;
+  
   return (
     <div className="flex flex-col items-center justify-center h-full gap-6 p-6">
       <Alert variant="destructive" className="max-w-md">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>PDF Generation Failed</AlertTitle>
-        <AlertDescription className="mt-2 text-sm">{error}</AlertDescription>
+        <AlertDescription className="mt-2 text-sm whitespace-pre-wrap">{displayError}</AlertDescription>
       </Alert>
       
       <div className="text-sm text-gray-600 max-w-md text-center">
