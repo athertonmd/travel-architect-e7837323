@@ -15,15 +15,16 @@ export function PdfErrorState({ error, onRetry, isGenerating }: PdfErrorStatePro
       <Alert variant="destructive" className="max-w-md">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>PDF Generation Failed</AlertTitle>
-        <AlertDescription className="mt-2">{error}</AlertDescription>
+        <AlertDescription className="mt-2 text-sm">{error}</AlertDescription>
       </Alert>
       
       <div className="text-sm text-gray-600 max-w-md text-center">
         <p>This could be due to:</p>
         <ul className="list-disc pl-5 mt-2 text-left">
-          <li>Temporary server issues</li>
-          <li>Connection problems</li>
-          <li>Missing trip information</li>
+          <li>Authentication issues - try logging out and back in</li>
+          <li>Server timeout - the PDF may take too long to generate</li>
+          <li>Missing or incomplete trip information</li>
+          <li>Connection problems with the server</li>
         </ul>
       </div>
       
@@ -33,7 +34,7 @@ export function PdfErrorState({ error, onRetry, isGenerating }: PdfErrorStatePro
         variant="default"
         className="min-w-[120px] gap-2"
       >
-        <RefreshCw className="h-4 w-4" />
+        <RefreshCw className={`h-4 w-4 ${isGenerating ? "animate-spin" : ""}`} />
         {isGenerating ? "Retrying..." : "Try Again"}
       </Button>
     </div>

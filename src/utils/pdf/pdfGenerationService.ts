@@ -10,29 +10,50 @@ interface GeneratePdfResponse {
 export async function generatePdfDocument(tripId: string, sessionToken: string): Promise<GeneratePdfResponse> {
   console.log("Initiating PDF generation for trip:", tripId);
   
+  if (!tripId) {
+    throw new Error("Trip ID is required for PDF generation");
+  }
+  
+  if (!sessionToken) {
+    throw new Error("Authentication token is required for PDF generation");
+  }
+  
   try {
     // First, try to get the user's PDF design settings
+    console.log("Fetching user information using session token");
     const {
       data: { user },
+      error: userError
     } = await supabase.auth.getUser(sessionToken);
     
+    if (userError) {
+      console.error("Authentication error:", userError);
+      throw new Error(`Authentication error: ${userError.message}`);
+    }
+    
+    if (!user) {
+      console.error("No authenticated user found");
+      throw new Error("User authentication failed");
+    }
+    
+    console.log("User authenticated successfully:", user.id);
+    
     let pdfSettings = null;
-    if (user) {
-      console.log("Getting PDF settings for user:", user.id);
-      const { data: settingsData, error } = await supabase
-        .rpc('get_pdf_settings_for_user', { user_id_param: user.id });
-      
-      if (error) {
-        console.error("Error fetching PDF settings:", error);
-        toast.error("Could not fetch your PDF design settings");
-      }
-      
-      if (settingsData) {
-        console.log("Found custom PDF settings:", Object.keys(settingsData));
-        pdfSettings = settingsData;
-      } else {
-        console.log("No custom PDF settings found, using defaults");
-      }
+    
+    console.log("Getting PDF settings for user:", user.id);
+    const { data: settingsData, error: settingsError } = await supabase
+      .rpc('get_pdf_settings_for_user', { user_id_param: user.id });
+    
+    if (settingsError) {
+      console.error("Error fetching PDF settings:", settingsError);
+      toast.error("Could not fetch your PDF design settings");
+    }
+    
+    if (settingsData) {
+      console.log("Found custom PDF settings:", Object.keys(settingsData));
+      pdfSettings = settingsData;
+    } else {
+      console.log("No custom PDF settings found, using defaults");
     }
     
     console.log("Making request to generate-pdf function");
@@ -40,7 +61,8 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
       tripId,
       hasSessionToken: !!sessionToken,
       tokenLength: sessionToken?.length,
-      hasPdfSettings: !!pdfSettings
+      hasPdfSettings: !!pdfSettings,
+      settingsKeys: pdfSettings ? Object.keys(pdfSettings) : []
     });
 
     const { data, error } = await supabase.functions.invoke('generate-pdf', {

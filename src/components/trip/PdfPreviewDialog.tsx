@@ -32,6 +32,18 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     resetPdfState
   } = usePdfGeneration({ tripId, userEmail });
 
+  // Explicitly trigger PDF generation when dialog opens
+  useEffect(() => {
+    if (isOpen && !pdfData && !isGenerating && !generationAttempted && tripId) {
+      console.log("Auto-initiating PDF generation with tripId:", tripId);
+      setGenerationAttempted(true);
+      generatePdf().catch(err => {
+        console.error("Error initiating PDF generation:", err);
+        toast.error("Could not generate PDF");
+      });
+    }
+  }, [isOpen, pdfData, isGenerating, generationAttempted, tripId, generatePdf]);
+
   const handleOpenChange = (open: boolean) => {
     console.log("PDF Dialog open state changing to:", open);
     console.log("Current state - tripId:", tripId, "userEmail:", userEmail);
@@ -39,14 +51,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     
     setIsOpen(open);
     
-    if (open && !pdfData && !isGenerating && !generationAttempted) {
-      console.log("Initiating PDF generation");
-      setGenerationAttempted(true);
-      generatePdf().catch(err => {
-        console.error("Error initiating PDF generation:", err);
-        toast.error("Could not generate PDF");
-      });
-    }
+    // We won't trigger PDF generation here anymore, it's handled by the useEffect
     
     if (!open) {
       console.log("Closing dialog, resetting PDF state");
@@ -56,7 +61,8 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
   };
 
   const handleRetryGeneration = () => {
-    console.log("Retrying PDF generation");
+    console.log("Retrying PDF generation with tripId:", tripId);
+    setGenerationAttempted(true);
     generatePdf().catch(err => {
       console.error("Error retrying PDF generation:", err);
       toast.error("Could not generate PDF on retry");
@@ -70,9 +76,10 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       isGenerating,
       hasPdfData: !!pdfData,
       error,
-      generationAttempted
+      generationAttempted,
+      tripId
     });
-  }, [isOpen, isGenerating, pdfData, error, generationAttempted]);
+  }, [isOpen, isGenerating, pdfData, error, generationAttempted, tripId]);
 
   const renderContent = () => {
     if (error) {

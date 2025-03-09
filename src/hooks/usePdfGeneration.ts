@@ -19,7 +19,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     if (!tripId) {
       console.error("No trip ID provided for PDF generation");
       setError("Trip ID is required");
-      return;
+      return null;
     }
 
     console.log("Starting PDF generation for trip:", tripId);
@@ -30,19 +30,20 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     try {
       console.log("Getting authenticated session");
       const session = await getAuthenticatedSession();
-      console.log("Session obtained, generating PDF document");
+      console.log("Session obtained, token length:", session.access_token.length);
       
       // Set a timeout to prevent hanging indefinitely
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error("PDF generation timed out")), 30000); // 30 seconds timeout
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("PDF generation timed out after 30 seconds")), 30000);
       });
       
       // Race the PDF generation against the timeout
-      const { pdfBase64 } = await Promise.race([
+      const result = await Promise.race([
         generatePdfDocument(tripId, session.access_token),
         timeoutPromise
       ]) as { pdfBase64: string };
       
+      const { pdfBase64 } = result;
       console.log("PDF document generated successfully, data length:", pdfBase64.length);
       
       if (!pdfBase64 || pdfBase64.length === 0) {
@@ -56,12 +57,15 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
         await sendPdfViaEmail(tripId, userEmail, pdfBase64);
         console.log("PDF email sent successfully");
       }
+      
+      return pdfBase64;
     } catch (error) {
       console.error('Error in PDF generation:', error);
       const errorMessage = error instanceof Error ? error.message : "Failed to generate PDF";
       setError(errorMessage);
       setPdfData(null);
       toast.error(`PDF generation failed: ${errorMessage}`);
+      return null;
     } finally {
       console.log("PDF generation process completed");
       setIsGenerating(false);
