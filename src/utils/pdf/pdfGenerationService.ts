@@ -71,11 +71,12 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
     });
 
     try {
+      // The key problem was here: we're missing proper body structure when calling the edge function
       const { data, error } = await supabase.functions.invoke('generate-pdf', {
-        body: { 
-          tripId,
+        body: JSON.stringify({ 
+          tripId, 
           pdfSettings 
-        },
+        }),
         headers: {
           Authorization: `Bearer ${sessionToken}`,
           'Content-Type': 'application/json',

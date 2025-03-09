@@ -53,8 +53,9 @@ const handler = async (req: Request): Promise<Response> => {
     // Parse request body
     let requestBody;
     try {
+      // Fix: The request body is already parsed by the functions.invoke call when using JSON.stringify in the client
       requestBody = await req.json();
-      console.log("Request body parsed successfully");
+      console.log("Request body parsed successfully:", requestBody);
     } catch (e) {
       console.error("Error parsing request body:", e);
       throw new Error("Invalid request body format");
