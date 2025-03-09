@@ -28,6 +28,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
     isGenerating,
     pdfData,
     error,
+    errorDetails,
     generatePdf,
     resetPdfState
   } = usePdfGeneration({ tripId, userEmail });
@@ -76,10 +77,11 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       isGenerating,
       hasPdfData: !!pdfData,
       error,
+      errorDetails,
       generationAttempted,
       tripId
     });
-  }, [isOpen, isGenerating, pdfData, error, generationAttempted, tripId]);
+  }, [isOpen, isGenerating, pdfData, error, errorDetails, generationAttempted, tripId]);
 
   const renderContent = () => {
     if (error) {
@@ -87,6 +89,7 @@ export function PdfPreviewDialog({ tripId, title, userEmail }: PdfPreviewDialogP
       return (
         <PdfErrorState 
           error={error}
+          errorDetails={errorDetails}
           onRetry={handleRetryGeneration}
           isGenerating={isGenerating}
         />

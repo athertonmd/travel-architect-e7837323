@@ -119,8 +119,21 @@ const handler = async (req: Request): Promise<Response> => {
       console.error("Trip not found with ID:", tripId);
       throw new Error("Trip not found");
     }
+    
+    // Check if trip data is complete enough to generate a PDF
+    if (!trip.segments || !Array.isArray(trip.segments) || trip.segments.length === 0) {
+      console.error("Trip has no segments:", tripId);
+      throw new Error("Trip has no segments to include in the PDF");
+    }
 
-    console.log("Trip data fetched successfully. Generating PDF...");
+    console.log("Trip data fetched successfully, segments count:", trip.segments.length);
+    console.log("Trip details:", {
+      title: trip.title,
+      destination: trip.destination,
+      startDate: trip.start_date,
+      endDate: trip.end_date
+    });
+    console.log("Generating PDF...");
     
     try {
       // Generate PDF with optional custom settings
@@ -155,11 +168,18 @@ const handler = async (req: Request): Promise<Response> => {
   } catch (error) {
     console.error("Error in generate-pdf function:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorStack = error instanceof Error ? error.stack : null;
+    
+    console.error("Returning error response:", errorMessage);
+    if (errorStack) {
+      console.error("Error stack:", errorStack);
+    }
     
     return new Response(
       JSON.stringify({ 
         error: errorMessage,
-        details: error instanceof Error ? error.stack : null
+        details: errorStack,
+        timestamp: new Date().toISOString()
       }),
       {
         headers: {

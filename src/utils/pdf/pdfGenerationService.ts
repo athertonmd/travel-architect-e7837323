@@ -65,46 +65,68 @@ export async function generatePdfDocument(tripId: string, sessionToken: string):
       settingsKeys: pdfSettings ? Object.keys(pdfSettings) : []
     });
 
-    const { data, error } = await supabase.functions.invoke('generate-pdf', {
-      body: { 
-        tripId,
-        pdfSettings 
-      },
-      headers: {
-        Authorization: `Bearer ${sessionToken}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-pdf', {
+        body: { 
+          tripId,
+          pdfSettings 
+        },
+        headers: {
+          Authorization: `Bearer ${sessionToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
 
-    console.log("Response received from generate-pdf function:", {
-      hasData: !!data,
-      hasError: !!error,
-      errorDetails: error,
-      dataKeys: data ? Object.keys(data) : []
-    });
+      console.log("Response received from generate-pdf function:", {
+        hasData: !!data,
+        hasError: !!error,
+        errorDetails: error,
+        dataKeys: data ? Object.keys(data) : []
+      });
 
-    if (error) {
-      console.error('Error from generate-pdf function:', error);
-      return { error: error.message || 'Failed to generate PDF' };
+      if (error) {
+        console.error('Error from generate-pdf function:', error);
+        return { error: error.message || 'Failed to generate PDF' };
+      }
+
+      if (!data) {
+        console.error('No data received from function');
+        return { error: 'No response data from server' };
+      }
+
+      if (data.error) {
+        console.error('Error returned in response data:', data.error);
+        console.error('Error details:', data.details || 'No details available');
+        return { 
+          error: data.error,
+          details: data.details
+        };
+      }
+
+      if (!data.pdfBase64) {
+        console.error('No PDF data in response:', data);
+        return { error: "No PDF data received from the server" };
+      }
+
+      console.log("Successfully generated PDF with data length:", data.pdfBase64.length);
+      return data as GeneratePdfResponse;
+    } catch (invokeError) {
+      console.error('Error invoking generate-pdf function:', invokeError);
+      
+      // Try to extract the detailed error message if available
+      let errorMessage = 'Failed to generate PDF';
+      
+      if (invokeError instanceof Error) {
+        errorMessage = invokeError.message;
+        
+        // Check if it's an error response that contains JSON
+        if (invokeError.message.includes('non-2xx status code')) {
+          errorMessage = 'The PDF service encountered an error. Please check that your trip has data and try again.';
+        }
+      }
+      
+      return { error: errorMessage };
     }
-
-    if (!data) {
-      console.error('No data received from function');
-      return { error: 'No response data from server' };
-    }
-
-    if (data.error) {
-      console.error('Error returned in response data:', data.error);
-      return { error: data.error };
-    }
-
-    if (!data.pdfBase64) {
-      console.error('No PDF data in response:', data);
-      return { error: "No PDF data received from the server" };
-    }
-
-    console.log("Successfully generated PDF with data length:", data.pdfBase64.length);
-    return data as GeneratePdfResponse;
   } catch (error) {
     console.error('Error in generatePdfDocument:', error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";

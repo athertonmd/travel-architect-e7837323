@@ -14,6 +14,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [pdfData, setPdfData] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
 
   const generatePdf = async () => {
     if (!tripId) {
@@ -25,6 +26,7 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     console.log("Starting PDF generation for trip:", tripId);
     setIsGenerating(true);
     setError(null);
+    setErrorDetails(null);
     setPdfData(null);
     
     try {
@@ -45,7 +47,16 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
       
       // Check if result is error
       if ('error' in result) {
-        throw new Error(`Error from server: ${result.error}`);
+        const errorMessage = result.error || "Unknown error occurred";
+        const details = 'details' in result ? result.details : null;
+        
+        console.error('Error in PDF generation:', errorMessage);
+        if (details) {
+          console.error('Error details:', details);
+          setErrorDetails(details);
+        }
+        
+        throw new Error(`Error from server: ${errorMessage}`);
       }
       
       const { pdfBase64 } = result as { pdfBase64: string };
@@ -82,12 +93,14 @@ export function usePdfGeneration({ tripId, userEmail }: UsePdfGenerationProps) {
     console.log("Resetting PDF state");
     setPdfData(null);
     setError(null);
+    setErrorDetails(null);
   };
 
   return {
     isGenerating,
     pdfData,
     error,
+    errorDetails,
     generatePdf,
     resetPdfState
   };
