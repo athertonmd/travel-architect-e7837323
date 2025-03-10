@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Download } from "lucide-react";
@@ -11,8 +10,25 @@ interface PdfPreviewProps {
 
 export function PdfPreview({ settings }: PdfPreviewProps) {
   const [previewHtml, setPreviewHtml] = useState<string>("");
+  const [travelerNames, setTravelerNames] = useState<string[]>(["John Smith"]); // Default value
+
+  // Fetch traveler data if available - simulated for preview
+  useEffect(() => {
+    // In a real implementation, you would fetch this from your data source
+    // This is just for demonstration in the preview
+    const mockTravelerData = {
+      traveller_names: ["Jane Doe", "Richard Roe"]
+    };
+    
+    if (mockTravelerData.traveller_names && mockTravelerData.traveller_names.length > 0) {
+      setTravelerNames(mockTravelerData.traveller_names);
+    }
+  }, []);
 
   useEffect(() => {
+    // Format traveler names for display
+    const displayTravelerNames = travelerNames.join(", ");
+    
     // Generate a preview HTML based on current settings that resembles a professional travel itinerary
     const preview = `
       <div style="font-family: ${settings.bodyFont}, sans-serif; color: #333; max-width: 100%; padding: 0; background-color: white;">
@@ -37,7 +53,7 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
         
         <!-- Traveler info bar -->
         <div style="display: flex; justify-content: space-between; padding: 8px 15px; border-bottom: 1px solid #ccc; background-color: #f8f9fa; font-size: 12px;">
-          <div>Travel arrangements for: JOHN SMITH</div>
+          <div>Travel arrangements for: ${displayTravelerNames}</div>
           <div>Agency reference: TRV-12345</div>
         </div>
         
@@ -226,7 +242,7 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 15px; color: #666;">Name</td>
-              <td style="padding: 8px 15px;">JOHN SMITH</td>
+              <td style="padding: 8px 15px;">${displayTravelerNames}</td>
             </tr>
             <tr style="border-bottom: 1px solid #eee;">
               <td style="padding: 8px 15px; color: #666;">Room</td>
@@ -291,7 +307,7 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     `;
     
     setPreviewHtml(preview);
-  }, [settings]);
+  }, [settings, travelerNames]);
 
   const handleDownloadClick = async () => {
     try {
