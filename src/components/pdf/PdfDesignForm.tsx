@@ -50,13 +50,15 @@ export function PdfDesignForm() {
     <div className="flex flex-col space-y-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
-          <FormHeader 
-            saveProgress={saveProgress}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-          
-          <TabContent form={form} activeTab={activeTab} />
+          <Tabs value={activeTab} defaultValue="appearance" className="w-full">
+            <FormHeader 
+              saveProgress={saveProgress}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+            />
+            
+            <TabContent form={form} activeTab={activeTab} />
+          </Tabs>
           
           <FormSubmitButton 
             isLoading={isLoading} 
