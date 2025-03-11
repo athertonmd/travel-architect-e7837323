@@ -1,5 +1,6 @@
 
 import { Form } from "@/components/ui/form";
+import { Tabs } from "@/components/ui/tabs";
 import { usePdfDesignForm } from "./hooks/usePdfDesignForm";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
