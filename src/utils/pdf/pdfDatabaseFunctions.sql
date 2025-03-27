@@ -20,13 +20,15 @@ BEGIN
       'show_page_numbers', show_page_numbers,
       'include_notes', include_notes,
       'include_contact_info', include_contact_info,
+      'include_quick_links', include_quick_links,
       'date_format', date_format,
       'time_format', time_format,
       'company_name', company_name,
       'header_text', header_text,
       'footer_text', footer_text,
       'created_at', created_at,
-      'updated_at', updated_at
+      'updated_at', updated_at,
+      'quick_links', quick_links
     )
     FROM public.pdf_settings
     WHERE user_id = user_id_param

@@ -18,7 +18,7 @@ export interface PdfSettings {
   company_name: string | null;
   header_text: string | null;
   footer_text: string | null;
-  quickLinks?: { name: string; url: string }[];
+  quick_links?: { name: string; url: string }[];
   created_at?: string;
   updated_at?: string;
 }
@@ -68,7 +68,13 @@ export function mapDbSettingsToFormValues(settings: any): PdfDesignFormValues {
     companyName: settings.company_name || "",
     headerText: settings.header_text || "",
     footerText: settings.footer_text || "",
-    quickLinks: settings.quick_links || undefined
+    quickLinks: settings.quick_links || [
+      { name: "Company Portal", url: "#" },
+      { name: "Weather", url: "https://weather.com" },
+      { name: "Visa & Passport", url: "https://travel.state.gov" },
+      { name: "Currency Converter", url: "https://xe.com" },
+      { name: "World Clock", url: "https://worldtimebuddy.com" },
+    ]
   };
 }
 

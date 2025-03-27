@@ -4,6 +4,8 @@ import { Switch } from "@/components/ui/switch";
 import { UseFormReturn } from "react-hook-form";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { PdfDesignFormValues } from "@/types/pdf";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Info } from "lucide-react";
 
 interface ContentTabProps {
   form: UseFormReturn<PdfDesignFormValues>;
@@ -86,7 +88,7 @@ export function ContentTab({ form }: ContentTabProps) {
               <div className="space-y-0.5">
                 <FormLabel className="text-base">Include Quick Links</FormLabel>
                 <FormDescription>
-                  Display a section with customizable useful travel links
+                  Display a section with customizable useful travel links. Your links will be saved automatically when you click "Save Settings".
                 </FormDescription>
               </div>
               <FormControl>
@@ -98,6 +100,13 @@ export function ContentTab({ form }: ContentTabProps) {
             </FormItem>
           )}
         />
+
+        <Alert variant="default" className="mb-4 border border-gold/30 bg-navy-light/30">
+          <Info className="h-4 w-4 text-gold" />
+          <AlertDescription className="text-sm">
+            Changes to Quick Links in the preview section below will be saved when you click "Save Settings".
+          </AlertDescription>
+        </Alert>
       </div>
       
       <div className="space-y-4">

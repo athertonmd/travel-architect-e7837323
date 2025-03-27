@@ -36,7 +36,13 @@ const formSchema = z.object({
   quickLinks: z.array(z.object({
     name: z.string(),
     url: z.string()
-  })).optional(),
+  })).optional().default([
+    { name: "Company Portal", url: "#" },
+    { name: "Weather", url: "https://weather.com" },
+    { name: "Visa & Passport", url: "https://travel.state.gov" },
+    { name: "Currency Converter", url: "https://xe.com" },
+    { name: "World Clock", url: "https://worldtimebuddy.com" },
+  ]),
 });
 
 export function usePdfDesignForm() {

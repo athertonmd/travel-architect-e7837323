@@ -3,7 +3,7 @@ import { Form } from "@/components/ui/form";
 import { Tabs } from "@/components/ui/tabs";
 import { usePdfDesignForm } from "./hooks/usePdfDesignForm";
 import { useToast } from "@/hooks/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PdfDesignFormValues } from "@/types/pdf";
 import { FormHeader } from "./components/FormHeader";
 import { TabContent } from "./components/TabContent";
@@ -15,6 +15,24 @@ export function PdfDesignForm() {
   const { toast } = useToast();
   const [saveProgress, setSaveProgress] = useState(0);
   const [activeTab, setActiveTab] = useState("appearance");
+
+  // Listen for quick links changes from the PdfPreview component
+  useEffect(() => {
+    const handleQuickLinksChange = (event: any) => {
+      if (event.detail && event.detail.quickLinks) {
+        // Update the form's quickLinks value
+        form.setValue('quickLinks', event.detail.quickLinks);
+      }
+    };
+
+    // Add event listener
+    document.addEventListener('__INTERNAL_QUICK_LINKS_CHANGE', handleQuickLinksChange);
+
+    // Clean up
+    return () => {
+      document.removeEventListener('__INTERNAL_QUICK_LINKS_CHANGE', handleQuickLinksChange);
+    };
+  }, [form]);
 
   const handleSubmit = async (values: PdfDesignFormValues) => {
     try {

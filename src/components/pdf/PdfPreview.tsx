@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useForm } from "react-hook-form";
 
 interface PdfPreviewProps {
   settings: PdfDesignFormValues;
@@ -36,7 +37,7 @@ const DEFAULT_QUICK_LINKS: QuickLink[] = [
 export function PdfPreview({ settings }: PdfPreviewProps) {
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [travelerNames, setTravelerNames] = useState<string[]>(["John Smith"]); // Default value
-  const [quickLinks, setQuickLinks] = useState<QuickLink[]>(DEFAULT_QUICK_LINKS);
+  const [quickLinks, setQuickLinks] = useState<QuickLink[]>(settings.quickLinks || DEFAULT_QUICK_LINKS);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [currentEditingLink, setCurrentEditingLink] = useState<{index: number, link: QuickLink} | null>(null);
   const [editLinkName, setEditLinkName] = useState("");
@@ -44,6 +45,13 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [newLinkName, setNewLinkName] = useState("");
   const [newLinkUrl, setNewLinkUrl] = useState("");
+
+  // Sync quickLinks with settings when settings change
+  useEffect(() => {
+    if (settings.quickLinks && settings.quickLinks.length > 0) {
+      setQuickLinks(settings.quickLinks);
+    }
+  }, [settings.quickLinks]);
 
   // Fetch traveler data if available - simulated for preview
   useEffect(() => {
@@ -60,8 +68,24 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
 
   // Generate the preview HTML
   useEffect(() => {
-    const htmlContent = generatePreviewHtml(settings, travelerNames, quickLinks);
+    // Create a copy of settings with the current quickLinks
+    const settingsWithQuickLinks = {
+      ...settings,
+      quickLinks: quickLinks
+    };
+    
+    const htmlContent = generatePreviewHtml(settingsWithQuickLinks, travelerNames, quickLinks);
     setPreviewHtml(htmlContent);
+    
+    // Update the parent form with the updated quickLinks
+    if (settings.quickLinks !== quickLinks) {
+      // This is using the undocumented __INTERNAL_formValueChange event
+      // Ideally you should use the form's setValue method, but since we don't have direct access to it here
+      const event = new CustomEvent('__INTERNAL_QUICK_LINKS_CHANGE', { 
+        detail: { quickLinks } 
+      });
+      document.dispatchEvent(event);
+    }
   }, [settings, travelerNames, quickLinks]);
 
   const handleDownloadClick = async () => {
