@@ -3,7 +3,7 @@ import { rgb } from "https://esm.sh/pdf-lib@1.17.1";
 import { PdfSettings } from "../types/pdfTypes.ts";
 import { drawText, drawSectionHeader } from "../utils/pdfUtils.ts";
 
-const LINKS = [
+const DEFAULT_LINKS = [
   { name: "Company Portal", url: "#" },
   { name: "Weather", url: "#" },
   { name: "Visa & Passport", url: "#" },
@@ -32,8 +32,11 @@ export const addQuickLinksSection = (page: any, colors: any, yOffset: number, fo
   const columns = 2;
   const columnWidth = availableWidth / columns;
   
+  // Get custom links if provided, otherwise use defaults
+  const links = settings?.quickLinks || DEFAULT_LINKS;
+  
   // Draw quick links
-  LINKS.forEach((link, index) => {
+  links.forEach((link, index) => {
     const column = index % columns;
     const x = margin + (column * columnWidth);
     
@@ -57,7 +60,7 @@ export const addQuickLinksSection = (page: any, colors: any, yOffset: number, fo
   });
   
   // Ensure we move down if the last row wasn't complete
-  if (LINKS.length % columns !== 0) {
+  if (links.length % columns !== 0) {
     currentY -= 30;
   }
   

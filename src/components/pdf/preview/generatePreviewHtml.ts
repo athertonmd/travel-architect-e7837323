@@ -1,7 +1,8 @@
 
 import { PdfDesignFormValues } from "@/types/pdf";
+import { QuickLink } from "../PdfPreview";
 
-export function generatePreviewHtml(settings: PdfDesignFormValues, travelerNames: string[]): string {
+export function generatePreviewHtml(settings: PdfDesignFormValues, travelerNames: string[], quickLinks: QuickLink[] = []): string {
   const displayTravelerNames = travelerNames.join(", ");
   
   const formatDate = (dateStr: string) => {
@@ -255,26 +256,12 @@ export function generatePreviewHtml(settings: PdfDesignFormValues, travelerNames
           <div style="font-weight: bold;">QUICK LINKS</div>
         </div>
         <div style="padding: 15px; display: flex; flex-wrap: wrap; gap: 15px;">
-          <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
-            <span style="width: 24px; height: 24px; backgroundColor: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
-            Company Portal
-          </a>
-          <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
-            <span style="width: 24px; height: 24px; backgroundColor: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
-            Weather
-          </a>
-          <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
-            <span style="width: 24px; height: 24px; backgroundColor: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
-            Visa & Passport
-          </a>
-          <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
-            <span style="width: 24px; height: 24px; backgroundColor: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
-            Currency Converter
-          </a>
-          <a href="#" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;">
-            <span style="width: 24px; height: 24px; backgroundColor: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
-            World Clock
-          </a>
+          ${quickLinks.map(link => `
+            <a href="${link.url}" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;" target="_blank">
+              <span style="width: 24px; height: 24px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
+              ${link.name}
+            </a>
+          `).join('')}
         </div>
       </div>
       ` : ''}

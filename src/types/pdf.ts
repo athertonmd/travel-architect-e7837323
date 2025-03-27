@@ -18,6 +18,7 @@ export interface PdfSettings {
   company_name: string | null;
   header_text: string | null;
   footer_text: string | null;
+  quickLinks?: { name: string; url: string }[];
   created_at?: string;
   updated_at?: string;
 }
@@ -40,6 +41,7 @@ export type PdfDesignFormValues = {
   headerText: string;
   footerText: string;
   sectionOrder?: string[];
+  quickLinks?: { name: string; url: string }[];
 }
 
 export type PdfSection = {
@@ -65,7 +67,8 @@ export function mapDbSettingsToFormValues(settings: any): PdfDesignFormValues {
     timeFormat: (settings.time_format as "12h" | "24h") || "12h",
     companyName: settings.company_name || "",
     headerText: settings.header_text || "",
-    footerText: settings.footer_text || ""
+    footerText: settings.footer_text || "",
+    quickLinks: settings.quick_links || undefined
   };
 }
 
@@ -87,6 +90,7 @@ export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: s
   company_name: string | null;
   header_text: string | null;
   footer_text: string | null;
+  quick_links?: { name: string; url: string }[];
 } {
   return {
     user_id: userId,
@@ -105,6 +109,7 @@ export function mapFormValuesToDbSettings(values: PdfDesignFormValues, userId: s
     time_format: values.timeFormat,
     company_name: values.companyName || null,
     header_text: values.headerText || null,
-    footer_text: values.footerText || null
+    footer_text: values.footerText || null,
+    quick_links: values.quickLinks
   };
 }

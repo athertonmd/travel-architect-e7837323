@@ -1,18 +1,46 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Download } from "lucide-react";
+import { Download, Edit2 } from "lucide-react";
 import { PdfDesignFormValues } from "@/types/pdf";
 import { toast } from "sonner";
 import { generatePreviewHtml } from "./preview/generatePreviewHtml";
+import { 
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface PdfPreviewProps {
   settings: PdfDesignFormValues;
 }
 
+export type QuickLink = {
+  name: string;
+  url: string;
+}
+
+const DEFAULT_QUICK_LINKS: QuickLink[] = [
+  { name: "Company Portal", url: "#" },
+  { name: "Weather", url: "#" },
+  { name: "Visa & Passport", url: "#" },
+  { name: "Currency Converter", url: "#" },
+  { name: "World Clock", url: "#" },
+];
+
 export function PdfPreview({ settings }: PdfPreviewProps) {
   const [previewHtml, setPreviewHtml] = useState<string>("");
   const [travelerNames, setTravelerNames] = useState<string[]>(["John Smith"]); // Default value
+  const [quickLinks, setQuickLinks] = useState<QuickLink[]>(DEFAULT_QUICK_LINKS);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [currentEditingLink, setCurrentEditingLink] = useState<{index: number, link: QuickLink} | null>(null);
+  const [editLinkName, setEditLinkName] = useState("");
+  const [editLinkUrl, setEditLinkUrl] = useState("");
 
   // Fetch traveler data if available - simulated for preview
   useEffect(() => {
@@ -29,9 +57,9 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
 
   // Generate the preview HTML
   useEffect(() => {
-    const htmlContent = generatePreviewHtml(settings, travelerNames);
+    const htmlContent = generatePreviewHtml(settings, travelerNames, quickLinks);
     setPreviewHtml(htmlContent);
-  }, [settings, travelerNames]);
+  }, [settings, travelerNames, quickLinks]);
 
   const handleDownloadClick = async () => {
     try {
@@ -78,6 +106,28 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     }
   };
 
+  const handleEditLink = (index: number) => {
+    const link = quickLinks[index];
+    setCurrentEditingLink({ index, link });
+    setEditLinkName(link.name);
+    setEditLinkUrl(link.url);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveLink = () => {
+    if (!currentEditingLink) return;
+    
+    const updatedLinks = [...quickLinks];
+    updatedLinks[currentEditingLink.index] = {
+      name: editLinkName,
+      url: editLinkUrl
+    };
+    
+    setQuickLinks(updatedLinks);
+    setIsEditDialogOpen(false);
+    toast.success("Quick link updated successfully");
+  };
+
   return (
     <div className="border rounded-md overflow-hidden bg-white">
       <div className="p-4 bg-gray-100 border-b flex justify-between items-center">
@@ -95,6 +145,48 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
           sandbox="allow-same-origin"
         />
       </div>
+
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Edit Quick Link</DialogTitle>
+            <DialogDescription>
+              Customize the link title and URL. Click save when you're done.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="link-name" className="text-right">
+                Link Title
+              </Label>
+              <Input
+                id="link-name"
+                value={editLinkName}
+                onChange={(e) => setEditLinkName(e.target.value)}
+                className="col-span-3"
+              />
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="link-url" className="text-right">
+                URL
+              </Label>
+              <Input
+                id="link-url"
+                value={editLinkUrl}
+                onChange={(e) => setEditLinkUrl(e.target.value)}
+                className="col-span-3"
+                placeholder="https://example.com"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveLink}>Save changes</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
