@@ -1,38 +1,34 @@
 
 import { PdfDesignFormValues } from "@/types/pdf";
+import { QuickLink } from "../PdfPreview";
 
 interface QuickLinksSectionProps {
   settings: PdfDesignFormValues;
+  quickLinks?: QuickLink[];
 }
 
-export function QuickLinksSection({ settings }: QuickLinksSectionProps) {
-  return (
-    <div style={{ marginTop: "30px" }}>
-      <div style={{ backgroundColor: "#1a365d", color: "white", padding: "8px 15px", display: "flex", alignItems: "center" }}>
-        <div style={{ fontWeight: "bold" }}>QUICK LINKS</div>
+export function QuickLinksSection({ settings, quickLinks = [] }: QuickLinksSectionProps): string {
+  const links = quickLinks.length > 0 ? quickLinks : [
+    { name: "Company Portal", url: "#" },
+    { name: "Weather", url: "#" },
+    { name: "Visa & Passport", url: "#" },
+    { name: "Currency Converter", url: "#" },
+    { name: "World Clock", url: "#" },
+  ];
+
+  return `
+    <div style="margin-top: 30px;">
+      <div style="background-color: #1a365d; color: white; padding: 8px 15px; display: flex; align-items: center;">
+        <div style="font-weight: bold;">QUICK LINKS</div>
       </div>
-      <div style={{ padding: "15px", display: "flex", flexWrap: "wrap", gap: "15px" }}>
-        <a href="#" style={{ color: settings.primaryColor, textDecoration: "none", display: "flex", alignItems: "center", width: "calc(25% - 12px)", minWidth: "150px", marginBottom: "10px" }}>
-          <span style={{ width: "24px", height: "24px", backgroundColor: settings.primaryColor, display: "inline-block", marginRight: "10px", borderRadius: "4px" }}></span>
-          Company Portal
-        </a>
-        <a href="#" style={{ color: settings.primaryColor, textDecoration: "none", display: "flex", alignItems: "center", width: "calc(25% - 12px)", minWidth: "150px", marginBottom: "10px" }}>
-          <span style={{ width: "24px", height: "24px", backgroundColor: settings.primaryColor, display: "inline-block", marginRight: "10px", borderRadius: "4px" }}></span>
-          Weather
-        </a>
-        <a href="#" style={{ color: settings.primaryColor, textDecoration: "none", display: "flex", alignItems: "center", width: "calc(25% - 12px)", minWidth: "150px", marginBottom: "10px" }}>
-          <span style={{ width: "24px", height: "24px", backgroundColor: settings.primaryColor, display: "inline-block", marginRight: "10px", borderRadius: "4px" }}></span>
-          Visa & Passport
-        </a>
-        <a href="#" style={{ color: settings.primaryColor, textDecoration: "none", display: "flex", alignItems: "center", width: "calc(25% - 12px)", minWidth: "150px", marginBottom: "10px" }}>
-          <span style={{ width: "24px", height: "24px", backgroundColor: settings.primaryColor, display: "inline-block", marginRight: "10px", borderRadius: "4px" }}></span>
-          Currency Converter
-        </a>
-        <a href="#" style={{ color: settings.primaryColor, textDecoration: "none", display: "flex", alignItems: "center", width: "calc(25% - 12px)", minWidth: "150px", marginBottom: "10px" }}>
-          <span style={{ width: "24px", height: "24px", backgroundColor: settings.primaryColor, display: "inline-block", marginRight: "10px", borderRadius: "4px" }}></span>
-          World Clock
-        </a>
+      <div style="padding: 15px; display: flex; flex-wrap: wrap; gap: 15px;">
+        ${links.map(link => `
+          <a href="${link.url}" style="color: ${settings.primaryColor}; text-decoration: none; display: flex; align-items: center; width: calc(25% - 12px); min-width: 150px; margin-bottom: 10px;" target="_blank">
+            <span style="width: 24px; height: 24px; background-color: ${settings.primaryColor}; display: inline-block; margin-right: 10px; border-radius: 4px;"></span>
+            ${link.name}
+          </a>
+        `).join('')}
       </div>
     </div>
-  );
+  `;
 }
