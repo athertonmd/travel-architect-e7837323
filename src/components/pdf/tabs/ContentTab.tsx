@@ -86,7 +86,7 @@ export function ContentTab({ form }: ContentTabProps) {
               <div className="space-y-0.5">
                 <FormLabel className="text-base">Include Quick Links</FormLabel>
                 <FormDescription>
-                  Display a section with useful travel links
+                  Display a section with customizable useful travel links
                 </FormDescription>
               </div>
               <FormControl>

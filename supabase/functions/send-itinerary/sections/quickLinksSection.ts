@@ -5,10 +5,10 @@ import { drawText, drawSectionHeader } from "../utils/pdfUtils.ts";
 
 const DEFAULT_LINKS = [
   { name: "Company Portal", url: "#" },
-  { name: "Weather", url: "#" },
-  { name: "Visa & Passport", url: "#" },
-  { name: "Currency Converter", url: "#" },
-  { name: "World Clock", url: "#" },
+  { name: "Weather", url: "https://weather.com" },
+  { name: "Visa & Passport", url: "https://travel.state.gov" },
+  { name: "Currency Converter", url: "https://xe.com" },
+  { name: "World Clock", url: "https://worldtimebuddy.com" },
 ];
 
 export const addQuickLinksSection = (page: any, colors: any, yOffset: number, font: any, boldFont: any, settings?: PdfSettings) => {
@@ -50,8 +50,31 @@ export const addQuickLinksSection = (page: any, colors: any, yOffset: number, fo
       borderWidth: 0,
     });
     
-    // Link text
-    drawText(page, link.name, x + 25, currentY, font, 11, rgb(0.1, 0.1, 0.1));
+    // Link text - now ensure we use the actual URL
+    const linkName = link.name || "Link";
+    const linkUrl = link.url || "#";
+    
+    // Draw the link text
+    drawText(page, linkName, x + 25, currentY, font, 11, rgb(0.1, 0.1, 0.1));
+    
+    // Store annotation for the link (this may or may not work depending on the PDF reader)
+    try {
+      page.node.Annots = page.node.Annots || [];
+      const annot = {
+        Type: "Annot",
+        Subtype: "Link",
+        Rect: [x, currentY - 20, x + columnWidth - 10, currentY + 5],
+        Border: [0, 0, 0],
+        A: {
+          Type: "Action",
+          S: "URI",
+          URI: linkUrl
+        }
+      };
+      page.node.Annots.push(annot);
+    } catch (error) {
+      console.error("Error adding link annotation:", error);
+    }
     
     // Move to next row after every 2 items
     if (column === columns - 1) {

@@ -31,6 +31,12 @@ const formSchema = z.object({
   
   // Section order
   sectionOrder: z.array(z.string()).optional().default(["quick-links", "notes"]),
+  
+  // Quick links
+  quickLinks: z.array(z.object({
+    name: z.string(),
+    url: z.string()
+  })).optional(),
 });
 
 export function usePdfDesignForm() {
@@ -55,6 +61,13 @@ export function usePdfDesignForm() {
       headerText: "",
       footerText: "",
       sectionOrder: ["quick-links", "notes"],
+      quickLinks: [
+        { name: "Company Portal", url: "#" },
+        { name: "Weather", url: "https://weather.com" },
+        { name: "Visa & Passport", url: "https://travel.state.gov" },
+        { name: "Currency Converter", url: "https://xe.com" },
+        { name: "World Clock", url: "https://worldtimebuddy.com" },
+      ],
     },
     mode: "onChange" // Add this to ensure form state updates as changes are made
   });
