@@ -36,24 +36,29 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         if (data) {
           console.log("Found PDF settings:", data);
           
-          // Get quick links separately as they might not be included in the RPC response
-          const { data: quickLinksData, error: quickLinksError } = await supabase
-            .from('pdf_settings')
-            .select('quick_links')
-            .eq('user_id', userId)
-            .single();
-            
-          if (quickLinksError && quickLinksError.code !== 'PGRST116') {
-            console.error('Error loading quick links:', quickLinksError);
+          // Check if quick_links is missing in the data (this shouldn't happen after our SQL update)
+          if (!data.hasOwnProperty('quick_links')) {
+            console.log("quick_links not found in data, fetching separately");
+            try {
+              // Fallback for getting quick links separately if needed
+              const { data: quickLinksData, error: quickLinksError } = await supabase
+                .from('pdf_settings')
+                .select('quick_links')
+                .eq('user_id', userId)
+                .single();
+                
+              if (quickLinksError) {
+                console.error('Error loading quick links:', quickLinksError);
+              } else if (quickLinksData) {
+                // Merge the quick links with the other settings
+                data.quick_links = quickLinksData.quick_links || [];
+              }
+            } catch (err) {
+              console.error('Error in quick links fallback:', err);
+            }
           }
           
-          // Merge the quick links with the other settings
-          const mergedData = {
-            ...data,
-            quick_links: quickLinksData?.quick_links || []
-          };
-          
-          form.reset(mapDbSettingsToFormValues(mergedData));
+          form.reset(mapDbSettingsToFormValues(data));
         } else {
           console.log("No PDF settings found for user");
         }

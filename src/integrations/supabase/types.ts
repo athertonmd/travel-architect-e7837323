@@ -126,6 +126,7 @@ export type Database = {
           include_quick_links: boolean | null
           logo_url: string | null
           primary_color: string | null
+          quick_links: Json | null
           secondary_color: string | null
           show_page_numbers: boolean | null
           time_format: string | null
@@ -148,6 +149,7 @@ export type Database = {
           include_quick_links?: boolean | null
           logo_url?: string | null
           primary_color?: string | null
+          quick_links?: Json | null
           secondary_color?: string | null
           show_page_numbers?: boolean | null
           time_format?: string | null
@@ -170,6 +172,7 @@ export type Database = {
           include_quick_links?: boolean | null
           logo_url?: string | null
           primary_color?: string | null
+          quick_links?: Json | null
           secondary_color?: string | null
           show_page_numbers?: boolean | null
           time_format?: string | null
