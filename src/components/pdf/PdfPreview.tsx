@@ -6,8 +6,7 @@ import { generatePreviewHtml } from "./preview/generatePreviewHtml";
 import { PreviewHeader } from "./preview/PreviewHeader";
 import { PreviewIframe } from "./preview/PreviewIframe";
 import { QuickLinksManager } from "./preview/QuickLinksManager";
-import { usePdfSettings } from "./hooks/usePdfSettings";
-import { useForm } from "react-hook-form";
+import { supabase } from "@/integrations/supabase/client";
 
 interface PdfPreviewProps {
   settings: PdfDesignFormValues;
@@ -31,10 +30,6 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
   const [travelerNames, setTravelerNames] = useState<string[]>(["John Smith"]); // Default value
   const [quickLinks, setQuickLinks] = useState<QuickLink[]>(settings.quickLinks || DEFAULT_QUICK_LINKS);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  
-  // Create a temporary form instance for the usePdfSettings hook
-  const tempForm = useForm<PdfDesignFormValues>();
-  const { saveQuickLinks } = usePdfSettings(tempForm);
 
   // Sync quickLinks with settings when settings change
   useEffect(() => {
@@ -113,6 +108,34 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     }
   };
 
+  const saveQuickLinksToDatabase = async (links: QuickLink[]) => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      
+      if (!sessionData.session?.user?.id) {
+        console.error("No authenticated user found");
+        return;
+      }
+      
+      const userId = sessionData.session.user.id;
+      
+      const { error } = await supabase
+        .from('pdf_settings')
+        .update({ quick_links: links })
+        .eq('user_id', userId);
+        
+      if (error) {
+        console.error('Error saving quick links:', error);
+        throw error;
+      }
+      
+      console.log("Quick links saved successfully to database");
+    } catch (error) {
+      console.error('Error in saveQuickLinksToDatabase:', error);
+      throw error;
+    }
+  };
+
   const handleQuickLinksChange = async (newLinks: QuickLink[]) => {
     setQuickLinks(newLinks);
     
@@ -124,7 +147,7 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     
     // Save the changes to the database directly
     try {
-      await saveQuickLinks(newLinks);
+      await saveQuickLinksToDatabase(newLinks);
     } catch (error) {
       console.error("Error saving quick links:", error);
       toast.error("Failed to save quick links");
