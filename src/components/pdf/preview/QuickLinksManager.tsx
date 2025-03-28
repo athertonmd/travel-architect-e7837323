@@ -5,6 +5,8 @@ import { useState } from "react";
 import { EditLinkDialog } from "./EditLinkDialog";
 import { AddLinkDialog } from "./AddLinkDialog";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 interface QuickLinksManagerProps {
   quickLinks: QuickLink[];
@@ -84,7 +86,18 @@ export function QuickLinksManager({ quickLinks, onQuickLinksChange }: QuickLinks
 
   return (
     <div className="p-4 border-t">
-      <h5 className="font-medium text-gray-900 mb-2">Quick Links</h5>
+      <div className="flex justify-between items-center mb-4">
+        <h5 className="font-medium text-gray-900">Quick Links</h5>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setIsAddDialogOpen(true)} 
+          className="flex items-center gap-1"
+        >
+          <Plus className="h-4 w-4" />
+          Add Link
+        </Button>
+      </div>
       
       <QuickLinksList 
         quickLinks={quickLinks} 

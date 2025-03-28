@@ -6,6 +6,8 @@ import { generatePreviewHtml } from "./preview/generatePreviewHtml";
 import { PreviewHeader } from "./preview/PreviewHeader";
 import { PreviewIframe } from "./preview/PreviewIframe";
 import { QuickLinksManager } from "./preview/QuickLinksManager";
+import { usePdfSettings } from "./hooks/usePdfSettings";
+import { useForm } from "react-hook-form";
 
 interface PdfPreviewProps {
   settings: PdfDesignFormValues;
@@ -29,6 +31,10 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
   const [travelerNames, setTravelerNames] = useState<string[]>(["John Smith"]); // Default value
   const [quickLinks, setQuickLinks] = useState<QuickLink[]>(settings.quickLinks || DEFAULT_QUICK_LINKS);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  
+  // Create a temporary form instance for the usePdfSettings hook
+  const tempForm = useForm<PdfDesignFormValues>();
+  const { saveQuickLinks } = usePdfSettings(tempForm);
 
   // Sync quickLinks with settings when settings change
   useEffect(() => {
@@ -107,7 +113,7 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     }
   };
 
-  const handleQuickLinksChange = (newLinks: QuickLink[]) => {
+  const handleQuickLinksChange = async (newLinks: QuickLink[]) => {
     setQuickLinks(newLinks);
     
     // This event will be caught by the PdfDesignForm component
@@ -115,6 +121,14 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
       detail: { quickLinks: newLinks } 
     });
     document.dispatchEvent(event);
+    
+    // Save the changes to the database directly
+    try {
+      await saveQuickLinks(newLinks);
+    } catch (error) {
+      console.error("Error saving quick links:", error);
+      toast.error("Failed to save quick links");
+    }
   };
 
   return (

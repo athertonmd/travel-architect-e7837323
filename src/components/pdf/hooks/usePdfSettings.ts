@@ -9,6 +9,7 @@ import { getAuthenticatedSession } from "@/utils/pdf/sessionUtils";
 export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   useEffect(() => {
     const loadSettings = async () => {
@@ -23,6 +24,7 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         }
         
         const userId = sessionData.session.user.id;
+        setUserId(userId);
         console.log("Loading PDF settings for user:", userId);
         
         const { data, error } = await supabase
@@ -101,6 +103,32 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
     loadSettings();
   }, [form, toast]);
 
+  // This function is used to save quick links directly without a form submission
+  const saveQuickLinks = async (quickLinks: { name: string; url: string }[]) => {
+    if (!userId) {
+      console.log("No user ID available to save quick links");
+      return;
+    }
+    
+    console.log("Saving quick links directly:", quickLinks);
+    try {
+      const { error } = await supabase
+        .from('pdf_settings')
+        .update({ quick_links: quickLinks })
+        .eq('user_id', userId);
+        
+      if (error) {
+        console.error('Error saving quick links:', error);
+        throw error;
+      }
+      
+      console.log("Quick links saved successfully");
+    } catch (error) {
+      console.error('Error saving quick links:', error);
+      throw error;
+    }
+  };
+
   const saveSettings = async (values: PdfDesignFormValues) => {
     console.log("Starting saveSettings function with values:", values);
     setIsLoading(true);
@@ -118,6 +146,7 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
       }
       
       const userId = sessionData.session.user.id;
+      setUserId(userId);
       const dbValues = mapFormValuesToDbSettings(values, userId);
       
       console.log("Saving PDF settings:", dbValues);
@@ -153,6 +182,7 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
 
   return {
     isLoading,
-    saveSettings
+    saveSettings,
+    saveQuickLinks
   };
 }
