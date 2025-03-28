@@ -36,26 +36,38 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         if (data) {
           console.log("Found PDF settings:", data);
           
-          // Check if quick_links is missing in the data (this shouldn't happen after our SQL update)
-          if (!data.hasOwnProperty('quick_links')) {
-            console.log("quick_links not found in data, fetching separately");
-            try {
-              // Fallback for getting quick links separately if needed
-              const { data: quickLinksData, error: quickLinksError } = await supabase
-                .from('pdf_settings')
-                .select('quick_links')
-                .eq('user_id', userId)
-                .single();
-                
-              if (quickLinksError) {
-                console.error('Error loading quick links:', quickLinksError);
-              } else if (quickLinksData) {
-                // Merge the quick links with the other settings
-                data.quick_links = quickLinksData.quick_links || [];
+          // Ensure data is an object before checking properties
+          if (typeof data === 'object' && data !== null) {
+            // Check if quick_links is missing in the data
+            if (!('quick_links' in data) || data.quick_links === null) {
+              console.log("quick_links not found in data, fetching separately");
+              try {
+                // Fallback for getting quick links separately if needed
+                const { data: quickLinksData, error: quickLinksError } = await supabase
+                  .from('pdf_settings')
+                  .select('quick_links')
+                  .eq('user_id', userId)
+                  .single();
+                  
+                if (quickLinksError) {
+                  console.error('Error loading quick links:', quickLinksError);
+                } else if (quickLinksData && quickLinksData.quick_links) {
+                  // Merge the quick links with the other settings
+                  data.quick_links = quickLinksData.quick_links;
+                } else {
+                  // Provide default empty array if quick_links is still missing
+                  data.quick_links = [];
+                }
+              } catch (err) {
+                console.error('Error in quick links fallback:', err);
+                // Ensure we have a default value
+                data.quick_links = [];
               }
-            } catch (err) {
-              console.error('Error in quick links fallback:', err);
             }
+          } else {
+            console.error('Data returned from get_pdf_settings_for_user is not an object:', data);
+            // Handle unexpected data format by creating a new object
+            data = { quick_links: [] };
           }
           
           form.reset(mapDbSettingsToFormValues(data));
