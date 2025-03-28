@@ -17,6 +17,7 @@ BEGIN
       'header_font', header_font,
       'body_font', body_font,
       'logo_url', logo_url,
+      'banner_image_url', banner_image_url,
       'show_page_numbers', show_page_numbers,
       'include_notes', include_notes,
       'include_contact_info', include_contact_info,

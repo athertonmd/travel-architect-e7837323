@@ -33,6 +33,13 @@ export function QuickLinksManager({ quickLinks, onQuickLinksChange }: QuickLinks
     
     onQuickLinksChange(updatedLinks);
     setIsEditDialogOpen(false);
+    
+    // Trigger event to notify the form about the change
+    const event = new CustomEvent('__INTERNAL_QUICK_LINKS_CHANGE', { 
+      detail: { quickLinks: updatedLinks } 
+    });
+    document.dispatchEvent(event);
+    
     toast.success("Quick link updated successfully");
   };
 
@@ -43,11 +50,18 @@ export function QuickLinksManager({ quickLinks, onQuickLinksChange }: QuickLinks
     }
 
     const validUrl = linkUrl.trim() ? linkUrl : "#";
-    
-    onQuickLinksChange([...quickLinks, {
+    const newLinks = [...quickLinks, {
       name: linkName,
       url: validUrl
-    }]);
+    }];
+    
+    onQuickLinksChange(newLinks);
+    
+    // Trigger event to notify the form about the change
+    const event = new CustomEvent('__INTERNAL_QUICK_LINKS_CHANGE', { 
+      detail: { quickLinks: newLinks } 
+    });
+    document.dispatchEvent(event);
     
     setIsAddDialogOpen(false);
     toast.success("New quick link added");
@@ -56,7 +70,15 @@ export function QuickLinksManager({ quickLinks, onQuickLinksChange }: QuickLinks
   const handleRemoveLink = (index: number) => {
     const updatedLinks = [...quickLinks];
     updatedLinks.splice(index, 1);
+    
     onQuickLinksChange(updatedLinks);
+    
+    // Trigger event to notify the form about the change
+    const event = new CustomEvent('__INTERNAL_QUICK_LINKS_CHANGE', { 
+      detail: { quickLinks: updatedLinks } 
+    });
+    document.dispatchEvent(event);
+    
     toast.success("Quick link removed");
   };
 

@@ -35,7 +35,25 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
         
         if (data) {
           console.log("Found PDF settings:", data);
-          form.reset(mapDbSettingsToFormValues(data));
+          
+          // Get quick links separately as they might not be included in the RPC response
+          const { data: quickLinksData, error: quickLinksError } = await supabase
+            .from('pdf_settings')
+            .select('quick_links')
+            .eq('user_id', userId)
+            .single();
+            
+          if (quickLinksError && quickLinksError.code !== 'PGRST116') {
+            console.error('Error loading quick links:', quickLinksError);
+          }
+          
+          // Merge the quick links with the other settings
+          const mergedData = {
+            ...data,
+            quick_links: quickLinksData?.quick_links || []
+          };
+          
+          form.reset(mapDbSettingsToFormValues(mergedData));
         } else {
           console.log("No PDF settings found for user");
         }

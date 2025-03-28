@@ -60,16 +60,6 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
     
     const htmlContent = generatePreviewHtml(settingsWithQuickLinks, travelerNames, quickLinks);
     setPreviewHtml(htmlContent);
-    
-    // Update the parent form with the updated quickLinks
-    if (settings.quickLinks !== quickLinks) {
-      // This is using the undocumented __INTERNAL_formValueChange event
-      // Ideally you should use the form's setValue method, but since we don't have direct access to it here
-      const event = new CustomEvent('__INTERNAL_QUICK_LINKS_CHANGE', { 
-        detail: { quickLinks } 
-      });
-      document.dispatchEvent(event);
-    }
   }, [settings, travelerNames, quickLinks]);
 
   const handleDownloadClick = async () => {
@@ -119,6 +109,12 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
 
   const handleQuickLinksChange = (newLinks: QuickLink[]) => {
     setQuickLinks(newLinks);
+    
+    // This event will be caught by the PdfDesignForm component
+    const event = new CustomEvent('__INTERNAL_QUICK_LINKS_CHANGE', { 
+      detail: { quickLinks: newLinks } 
+    });
+    document.dispatchEvent(event);
   };
 
   return (
