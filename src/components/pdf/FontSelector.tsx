@@ -8,10 +8,10 @@ interface FontSelectorProps {
 
 // Fonts that are likely to be available in most PDF generators
 const availableFonts = [
+  "Arial",
   "Helvetica",
   "Times",
   "Courier",
-  "Arial",
   "Verdana",
   "Georgia",
   "Garamond",

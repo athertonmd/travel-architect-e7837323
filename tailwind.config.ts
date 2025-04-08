@@ -1,4 +1,3 @@
-
 import { fontFamily } from "tailwindcss/defaultTheme";
 import { type Config } from "tailwindcss";
 
@@ -21,6 +20,9 @@ const config: Config = {
       },
     },
     extend: {
+      fontFamily: {
+        sans: ["Arial", ...fontFamily.sans],
+      },
       colors: {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
@@ -70,9 +72,6 @@ const config: Config = {
         lg: "var(--radius)",
         md: "calc(var(--radius) - 2px)",
         sm: "calc(var(--radius) - 4px)",
-      },
-      fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
       },
       keyframes: {
         "accordion-down": {
