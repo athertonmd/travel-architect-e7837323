@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { TripsUpdate } from "@/integrations/supabase/types";
 
 export function useArchiveTrip() {
   const navigate = useNavigate();
@@ -10,9 +11,11 @@ export function useArchiveTrip() {
 
   const archiveTrip = async (id: string, currentlyArchived: boolean) => {
     try {
+      const updateData: TripsUpdate = { archived: !currentlyArchived };
+      
       const { error } = await supabase
         .from('trips')
-        .update({ archived: !currentlyArchived })
+        .update(updateData as any)
         .eq('id', id);
 
       if (error) throw error;

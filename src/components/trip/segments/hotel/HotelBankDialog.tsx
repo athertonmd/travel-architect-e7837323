@@ -1,9 +1,10 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { HotelSearch } from "@/components/hotels/HotelSearch";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { HotelsRow } from "@/integrations/supabase/types/hotels";
+import { HotelsRow } from "@/integrations/supabase/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface HotelBankDialogProps {
@@ -24,11 +25,13 @@ export function HotelBankDialog({ open, onOpenChange, onHotelSelect }: HotelBank
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data;
+      return data as HotelsRow[];
     },
   });
 
   const filteredHotels = hotels.filter((hotel) => {
+    if (!hotel) return false;
+    
     const searchLower = searchQuery.toLowerCase();
     return (
       hotel.name?.toLowerCase().includes(searchLower) ||

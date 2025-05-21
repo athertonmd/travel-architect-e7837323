@@ -1,3 +1,4 @@
+
 export type TripsRow = {
   id: string;
   user_id: string;
@@ -10,6 +11,7 @@ export type TripsRow = {
   segments: any | null;
   created_at: string;
   updated_at: string;
+  archived: boolean | null;
 };
 
 export type TripsInsert = Omit<TripsRow, 'id' | 'created_at' | 'updated_at'>;

@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { PdfDesignFormValues } from "@/types/pdf";
 import { toast } from "sonner";
@@ -119,10 +118,12 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
       
       const userId = sessionData.session.user.id;
       
-      // Use type assertion to fix TypeScript error
+      // Use explicit typing for the update operation
+      const updateData = { quick_links: links };
+      
       const { error } = await supabase
         .from('pdf_settings')
-        .update({ quick_links: links as any })
+        .update(updateData as any)
         .eq('user_id', userId);
         
       if (error) {

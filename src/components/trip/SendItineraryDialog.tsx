@@ -57,14 +57,16 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
 
       if (updateError) throw updateError;
 
-      // Record the notification with explicit type assertion
+      // Record the notification
+      const notificationData = {
+        trip_id: tripId,
+        sent_by: session.user.id,
+        recipients: selectedEmails
+      };
+      
       const { error: notificationError } = await supabase
         .from('sent_notifications')
-        .insert({
-          trip_id: tripId,
-          sent_by: session.user.id,
-          recipients: selectedEmails
-        } as any);
+        .insert(notificationData as any);
 
       if (notificationError) throw notificationError;
 

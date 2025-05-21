@@ -1,7 +1,7 @@
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-import { HotelsRow } from "@/integrations/supabase/types/hotels";
+import { HotelsRow, HotelsInsert, HotelsUpdate } from "@/integrations/supabase/types";
 import { toast } from "sonner";
 import { useSession } from "@supabase/auth-helpers-react";
 
@@ -23,7 +23,7 @@ export function useHotelMutations() {
       console.log('Adding hotel with values:', values);
       const { data, error } = await supabase
         .from('hotels')
-        .insert([{ ...values, user_id: session.user.id }])
+        .insert([{ ...values, user_id: session.user.id } as unknown as HotelsInsert])
         .select()
         .single();
 
@@ -55,7 +55,7 @@ export function useHotelMutations() {
       console.log('Updating hotel with values:', values);
       const { data, error } = await supabase
         .from('hotels')
-        .update(values)
+        .update(values as unknown as HotelsUpdate)
         .eq('id', values.id)
         .select()
         .single();

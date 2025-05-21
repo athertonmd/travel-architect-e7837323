@@ -1,4 +1,3 @@
-
 import {
   createBrowserRouter,
   RouterProvider,
@@ -7,7 +6,7 @@ import {
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ThemeProvider } from "@/components/ThemeProvider";
 import { Toaster } from "@/components/ui/toaster";
-import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { SessionContextProvider, Session } from '@supabase/auth-helpers-react';
 import { supabase } from "@/integrations/supabase/client";
 import Auth from "@/pages/Auth";
 import Index from "@/pages/Index";
@@ -23,7 +22,6 @@ import TravelportCredentials from "@/pages/TravelportCredentials";
 import PdfDesignSettings from "@/pages/PdfDesignSettings";
 import { useEffect, useState } from "react";
 import { LoadingSkeleton } from "@/components/LoadingSkeleton";
-import { Session } from '@supabase/supabase-js';
 import { toast } from "sonner";
 
 const queryClient = new QueryClient({

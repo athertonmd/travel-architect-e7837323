@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@supabase/auth-helpers-react";
 import { SabreCredentialsFormValues } from "@/types/sabre";
+import { SabreCredentialsRow } from "@/integrations/supabase/types/sabre-credentials";
 
 export function useSabreCredentials() {
   const [isSaving, setIsSaving] = useState(false);
@@ -41,14 +42,17 @@ export function useSabreCredentials() {
           console.error("Error fetching Sabre credentials:", error);
           toast.error("Failed to load your Sabre credentials");
         } else if (data) {
+          // Type guard to check if data is a valid SabreCredentialsRow
+          const credentials = data as SabreCredentialsRow;
+          
           // Pre-populate form with existing data
           form.reset({
-            pcc_p4uh: data.pcc_p4uh || "",
-            pcc_p4sh: data.pcc_p4sh || "",
-            queue_assignment: data.queue_assignment || "",
-            queue_number: data.queue_number || "",
-            fnbts_entry: data.fnbts_entry || "FNBTS-P4UH/xxx/11-MANTIC POINT",
-            additional_notes: data.additional_notes || "",
+            pcc_p4uh: credentials.pcc_p4uh || "",
+            pcc_p4sh: credentials.pcc_p4sh || "",
+            queue_assignment: credentials.queue_assignment || "",
+            queue_number: credentials.queue_number || "",
+            fnbts_entry: credentials.fnbts_entry || "FNBTS-P4UH/xxx/11-MANTIC POINT",
+            additional_notes: credentials.additional_notes || "",
           });
           toast.info("Loaded your existing Sabre credentials");
         }
@@ -85,7 +89,7 @@ export function useSabreCredentials() {
         // Update existing record
         result = await supabase
           .from('sabre_credentials')
-          .update(values)
+          .update(values as any)
           .eq('id', data.id);
       } else {
         // Insert new record
@@ -94,7 +98,7 @@ export function useSabreCredentials() {
           .insert({
             ...values,
             user_id: session.user.id
-          });
+          } as any);
       }
       
       if (result.error) {
