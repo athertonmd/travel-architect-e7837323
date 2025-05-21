@@ -9,7 +9,7 @@ interface FlightDetailsSectionProps {
 
 export function FlightDetailsSection({ details, onDetailsChange }: FlightDetailsSectionProps) {
   return (
-    <>
+    <div className="bg-white rounded-md">
       <div className="grid gap-2">
         <Label htmlFor="departureAirport" className="text-blue-500">Departure Airport</Label>
         <Input
@@ -17,7 +17,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           value={details.departureAirport as string || ""}
           onChange={(e) => onDetailsChange("departureAirport", e.target.value)}
           placeholder="e.g., LAX"
-          className="text-gray-700"
+          className="text-gray-700 bg-white"
         />
       </div>
 
@@ -97,6 +97,6 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
           className="text-gray-700"
         />
       </div>
-    </>
+    </div>
   );
 }

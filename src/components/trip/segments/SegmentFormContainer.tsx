@@ -1,3 +1,4 @@
+
 import { ReactNode } from "react";
 
 interface SegmentFormContainerProps {
@@ -11,7 +12,7 @@ export function SegmentFormContainer({ children, onInteraction }: SegmentFormCon
       onClick={onInteraction} 
       onMouseDown={onInteraction}
       onPointerDown={onInteraction}
-      className="segment-form-container"
+      className="segment-form-container bg-white p-4 rounded-md"
     >
       {children}
     </div>

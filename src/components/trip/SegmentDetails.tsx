@@ -68,12 +68,12 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   return (
     <div 
       ref={panelRef}
-      className="h-full flex flex-col bg-white rounded-lg" 
+      className="h-full flex flex-col bg-white rounded-lg shadow-sm" 
       onClick={stopPropagation}
       onMouseDown={stopPropagation}
       onPointerDown={stopPropagation}
     >
-      <div className="p-4">
+      <div className="p-4 bg-white border-b">
         <SegmentHeader 
           icon={selectedNode.data.icon}
           label={selectedNode.data.label}
@@ -81,7 +81,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
         />
       </div>
       
-      <ScrollArea className="flex-1 px-4">
+      <ScrollArea className="flex-1 px-4 bg-white">
         <SegmentFormSelector
           selectedNode={selectedNode}
           details={localDetails}
