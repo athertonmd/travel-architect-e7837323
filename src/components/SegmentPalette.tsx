@@ -29,15 +29,15 @@ export function SegmentPalette() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <h3 className="font-semibold mb-4">Segment Types</h3>
+    <div className="h-full flex flex-col bg-white rounded-lg p-4">
+      <h3 className="font-semibold mb-4 text-gray-800">Segment Types</h3>
       <ScrollArea className="flex-1">
         <div className="space-y-2 pr-4">
           {segmentTypes.map((segment) => (
             <Button
               key={segment.id}
               variant="outline"
-              className="w-full justify-start gap-2 text-blue-500"
+              className="w-full justify-start gap-2 text-blue-600 bg-white hover:bg-gray-50 border border-gray-200"
               draggable
               onDragStart={(e) => onDragStart(e, segment.type)}
             >

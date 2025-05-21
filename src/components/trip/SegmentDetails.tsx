@@ -1,3 +1,4 @@
+
 import { Node } from "@xyflow/react";
 import { SegmentNodeData, SegmentDetails as ISegmentDetails } from "@/types/segment";
 import { toast } from "sonner";
@@ -58,7 +59,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
 
   if (!selectedNode) {
     return (
-      <div className="h-full p-4 bg-white">
+      <div className="h-full p-4 bg-white text-gray-500">
         <p className="text-muted-foreground">Select a segment to view and edit its details</p>
       </div>
     );
@@ -67,7 +68,7 @@ export function SegmentDetails({ selectedNode, onDetailsChange }: SegmentDetails
   return (
     <div 
       ref={panelRef}
-      className="h-full flex flex-col bg-white" 
+      className="h-full flex flex-col bg-white rounded-lg" 
       onClick={stopPropagation}
       onMouseDown={stopPropagation}
       onPointerDown={stopPropagation}
