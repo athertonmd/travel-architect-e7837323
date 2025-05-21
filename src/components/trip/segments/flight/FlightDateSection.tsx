@@ -90,7 +90,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               id="date-picker-button"
               variant="outline"
               className={cn(
-                "w-[240px] justify-start text-left font-normal",
+                "w-[240px] justify-start text-left font-normal bg-white",
                 !date && "text-muted-foreground"
               )}
             >
@@ -100,7 +100,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-0" align="start">
+          <PopoverContent className="w-auto p-0 bg-white" align="start">
             <Calendar
               mode="single"
               selected={date}
@@ -117,7 +117,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
             <Button
               variant="outline"
               className={cn(
-                "w-[120px] justify-start text-left font-normal",
+                "w-[120px] justify-start text-left font-normal bg-white",
                 !date && "text-muted-foreground"
               )}
             >
@@ -127,7 +127,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
               </div>
             </Button>
           </PopoverTrigger>
-          <PopoverContent className="w-auto p-4" align="start">
+          <PopoverContent className="w-auto p-4 bg-white" align="start">
             <div className="flex flex-col gap-4">
               <div className="grid gap-2">
                 <Label className="text-xs text-muted-foreground">Hours</Label>
@@ -135,7 +135,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
                   <SelectTrigger className="w-[100px]">
                     <SelectValue placeholder="HH" />
                   </SelectTrigger>
-                  <SelectContent className="h-[200px]">
+                  <SelectContent className="h-[200px] bg-white">
                     {hoursArray.map((hour) => (
                       <SelectItem key={hour} value={hour}>
                         {hour}
@@ -151,7 +151,7 @@ export function FlightDateSection({ details, onDetailsChange }: FlightDateSectio
                   <SelectTrigger className="w-[100px]">
                     <SelectValue placeholder="MM" />
                   </SelectTrigger>
-                  <SelectContent className="h-[200px]">
+                  <SelectContent className="h-[200px] bg-white">
                     {minutesArray.map((minute) => (
                       <SelectItem key={minute} value={minute}>
                         {minute}
