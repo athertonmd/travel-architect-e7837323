@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { TripsUpdate } from "@/integrations/supabase/types";
+import { TripsUpdate } from "@/integrations/supabase/types/trips";
 
 export function useArchiveTrip() {
   const navigate = useNavigate();
@@ -15,7 +15,7 @@ export function useArchiveTrip() {
       
       const { error } = await supabase
         .from('trips')
-        .update(updateData as any)
+        .update(updateData)
         .eq('id', id);
 
       if (error) throw error;

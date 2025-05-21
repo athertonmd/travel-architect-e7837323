@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession } from "@supabase/auth-helpers-react";
 import { TravelportCredentialsFormValues } from "@/types/travelport";
+import { TravelportCredentialsRow } from "@/integrations/supabase/types/travelport-credentials";
 
 export function useTravelportCredentials() {
   const [isSaving, setIsSaving] = useState(false);
@@ -42,13 +43,14 @@ export function useTravelportCredentials() {
           toast.error("Failed to load your Travelport credentials");
         } else if (data) {
           // Pre-populate form with existing data
+          const credentials = data as TravelportCredentialsRow;
           form.reset({
-            pcc: data.pcc || "",
-            profile_name: data.profile_name || "",
-            branch_id: data.branch_id || "",
-            queue_number: data.queue_number || "",
-            signatory: data.signatory || "",
-            additional_notes: data.additional_notes || "",
+            pcc: credentials.pcc || "",
+            profile_name: credentials.profile_name || "",
+            branch_id: credentials.branch_id || "",
+            queue_number: credentials.queue_number || "",
+            signatory: credentials.signatory || "",
+            additional_notes: credentials.additional_notes || "",
           });
           toast.info("Loaded your existing Travelport credentials");
         }
@@ -82,19 +84,19 @@ export function useTravelportCredentials() {
       let result;
       
       if (data) {
-        // Update existing record
+        // Update existing record with type casting
         result = await supabase
           .from('travelport_credentials')
-          .update(values)
+          .update(values as any)
           .eq('id', data.id);
       } else {
-        // Insert new record
+        // Insert new record with type casting
         result = await supabase
           .from('travelport_credentials')
           .insert({
             ...values,
             user_id: session.user.id
-          });
+          } as any);
       }
       
       if (result.error) {

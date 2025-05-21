@@ -18,7 +18,7 @@ export function useSabreCredentials() {
       pcc_p4sh: "",
       queue_assignment: "",
       queue_number: "",
-      fnbts_entry: "FNBTS-P4UH/xxx/11-MANTIC POINT",
+      fnbts_entry: "",
       additional_notes: "",
     },
   });
@@ -42,16 +42,14 @@ export function useSabreCredentials() {
           console.error("Error fetching Sabre credentials:", error);
           toast.error("Failed to load your Sabre credentials");
         } else if (data) {
-          // Type guard to check if data is a valid SabreCredentialsRow
-          const credentials = data as SabreCredentialsRow;
-          
           // Pre-populate form with existing data
+          const credentials = data as SabreCredentialsRow;
           form.reset({
             pcc_p4uh: credentials.pcc_p4uh || "",
             pcc_p4sh: credentials.pcc_p4sh || "",
             queue_assignment: credentials.queue_assignment || "",
             queue_number: credentials.queue_number || "",
-            fnbts_entry: credentials.fnbts_entry || "FNBTS-P4UH/xxx/11-MANTIC POINT",
+            fnbts_entry: credentials.fnbts_entry || "",
             additional_notes: credentials.additional_notes || "",
           });
           toast.info("Loaded your existing Sabre credentials");
@@ -85,7 +83,7 @@ export function useSabreCredentials() {
       
       let result;
       
-      if (data) {
+      if (data && data.id) {
         // Update existing record
         result = await supabase
           .from('sabre_credentials')

@@ -1,3 +1,4 @@
+
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { TravellersRow } from "@/integrations/supabase/types/travellers";
@@ -30,7 +31,7 @@ export const useTravellerSearch = () => {
 
       if (searchError) throw searchError;
 
-      setTravellers(Array.isArray(data) ? data : []);
+      setTravellers(data as TravellersRow[] || []);
     } catch (err) {
       console.error('Search error:', err);
       setError('Failed to search travellers');

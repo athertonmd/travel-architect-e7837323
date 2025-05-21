@@ -21,32 +21,7 @@ export const supabase = createClient<Database>(
       flowType: 'pkce',
       debug: import.meta.env.DEV,
       // Prevent session data loss during page refreshes
-      storageKey: 'supabase-auth',
-      // Set a longer expiry time for the local session
-      localStorage: {
-        getItem: (key) => {
-          try {
-            return window.localStorage.getItem(key);
-          } catch (error) {
-            console.error('Error accessing localStorage:', error);
-            return null;
-          }
-        },
-        setItem: (key, value) => {
-          try {
-            window.localStorage.setItem(key, value);
-          } catch (error) {
-            console.error('Error writing to localStorage:', error);
-          }
-        },
-        removeItem: (key) => {
-          try {
-            window.localStorage.removeItem(key);
-          } catch (error) {
-            console.error('Error removing from localStorage:', error);
-          }
-        }
-      }
+      storageKey: 'supabase-auth'
     }
   }
 );

@@ -4,21 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Node } from "@xyflow/react";
 import { SegmentNodeData } from "@/types/segment";
 import { toast } from "sonner";
-
-interface TripData {
-  id: string;
-  title: string;
-  destination: string;
-  start_date: string;
-  end_date: string;
-  travelers: number;
-  status: string;
-  segments: any;
-  archived: boolean;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-}
+import { TripsRow } from "@/integrations/supabase/types/trips";
 
 // Helper function to transform database segments to React Flow nodes
 const transformSegmentsToNodes = (segments: any[]): Node<SegmentNodeData>[] => {
@@ -67,22 +53,23 @@ export function useTripData(
       }
 
       console.log('Fetched trip data:', trip);
+      const typedTrip = trip as TripsRow;
 
       // Update nodes if segments exist
-      if (trip.segments && Array.isArray(trip.segments)) {
-        console.log('Setting nodes from segments:', trip.segments);
-        const nodes = transformSegmentsToNodes(trip.segments);
+      if (typedTrip.segments && Array.isArray(typedTrip.segments)) {
+        console.log('Setting nodes from segments:', typedTrip.segments);
+        const nodes = transformSegmentsToNodes(typedTrip.segments);
         console.log('Transformed nodes:', nodes);
         setNodes(nodes);
       }
 
       // Update title
-      if (trip.title) {
-        console.log('Setting title:', trip.title);
-        setTitle(trip.title);
+      if (typedTrip.title) {
+        console.log('Setting title:', typedTrip.title);
+        setTitle(typedTrip.title);
       }
 
-      return trip as TripData;
+      return typedTrip;
     },
     enabled: !!tripId,
     gcTime: 0,
