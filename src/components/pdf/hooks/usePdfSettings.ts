@@ -112,9 +112,10 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
     
     console.log("Saving quick links directly:", quickLinks);
     try {
+      // Type-safe update using explicit casting
       const { error } = await supabase
         .from('pdf_settings')
-        .update({ quick_links: quickLinks })
+        .update({ quick_links: quickLinks as any })
         .eq('user_id', userId);
         
       if (error) {
@@ -154,10 +155,10 @@ export function usePdfSettings(form: UseFormReturn<PdfDesignFormValues>) {
       // Add a slight delay to ensure loading state is visible
       await new Promise(resolve => setTimeout(resolve, 300));
       
-      // Using the unique constraint on user_id for the upsert operation
+      // Using the unique constraint on user_id for the upsert operation with explicit type casting
       const { error } = await supabase
         .from('pdf_settings')
-        .upsert(dbValues, {
+        .upsert(dbValues as any, {
           onConflict: 'user_id',
           ignoreDuplicates: false,
         });

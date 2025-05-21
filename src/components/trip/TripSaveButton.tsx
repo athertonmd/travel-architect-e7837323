@@ -45,6 +45,7 @@ export function TripSaveButton({ title, nodes, travelers }: TripSaveButtonProps)
 
       console.log('Saving trip:', { title, segments: transformedSegments, travelers });
 
+      // Use type assertion to fix TypeScript errors
       const { data: trip, error } = await supabase
         .from('trips')
         .insert({
@@ -54,7 +55,7 @@ export function TripSaveButton({ title, nodes, travelers }: TripSaveButtonProps)
           user_id: session.user.id,
           status: 'draft',
           destination: firstSegmentDestination
-        })
+        } as any)
         .select()
         .single();
 

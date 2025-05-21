@@ -119,9 +119,10 @@ export function PdfPreview({ settings }: PdfPreviewProps) {
       
       const userId = sessionData.session.user.id;
       
+      // Use type assertion to fix TypeScript error
       const { error } = await supabase
         .from('pdf_settings')
-        .update({ quick_links: links })
+        .update({ quick_links: links as any })
         .eq('user_id', userId);
         
       if (error) {

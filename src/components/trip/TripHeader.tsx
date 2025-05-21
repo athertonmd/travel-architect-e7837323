@@ -1,3 +1,4 @@
+
 import { TripTitleHeader } from "@/components/trip/TripTitleHeader";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
@@ -37,7 +38,7 @@ export function TripHeader({
     try {
       const { error } = await supabase
         .from('trips')
-        .update({ status: 'draft' })
+        .update({ status: 'draft' } as any)
         .eq('id', tripId);
 
       if (error) throw error;

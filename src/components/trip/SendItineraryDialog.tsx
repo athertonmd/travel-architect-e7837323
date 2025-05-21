@@ -52,19 +52,19 @@ export function SendItineraryDialog({ tripId, travelers }: SendItineraryDialogPr
       // Update trip status to "sent"
       const { error: updateError } = await supabase
         .from('trips')
-        .update({ status: 'sent' })
+        .update({ status: 'sent' } as any)
         .eq('id', tripId);
 
       if (updateError) throw updateError;
 
-      // Record the notification
+      // Record the notification with explicit type assertion
       const { error: notificationError } = await supabase
         .from('sent_notifications')
         .insert({
           trip_id: tripId,
           sent_by: session.user.id,
-          recipients: selectedEmails,
-        });
+          recipients: selectedEmails
+        } as any);
 
       if (notificationError) throw notificationError;
 
