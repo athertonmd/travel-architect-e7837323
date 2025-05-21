@@ -32,7 +32,7 @@ function FlightSegmentFormComponent({ details, onDetailsChange }: FlightSegmentF
       onClick={stopPropagation}
       onFocus={stopPropagation}
     >
-      <div className="flex items-center space-x-2 mb-4 bg-white p-2 rounded">
+      <div className="flex items-center space-x-2 mb-4 bg-white p-2 rounded-md border border-gray-200 shadow-sm">
         <Label htmlFor="gds-mode" className="text-blue-500">GDS</Label>
         <Switch
           id="gds-mode"
@@ -42,14 +42,14 @@ function FlightSegmentFormComponent({ details, onDetailsChange }: FlightSegmentF
       </div>
 
       {details.gdsEnabled && (
-        <div className="grid gap-2 mb-4 bg-white p-2 rounded">
+        <div className="grid gap-2 mb-4 bg-white p-2 rounded-md border border-gray-200 shadow-sm">
           <Label htmlFor="recordLocator" className="text-blue-500">Find Record Locator</Label>
           <Input
             id="recordLocator"
             value={details.recordLocator as string || ""}
             onChange={(e) => handleChange("recordLocator", e.target.value)}
             placeholder="Enter record locator"
-            className="bg-white"
+            className="bg-white border-gray-200"
           />
         </div>
       )}

@@ -3,7 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
-import { TripsUpdate } from "@/integrations/supabase/types/trips";
+import { Database } from "@/integrations/supabase/types";
+
+type TripsUpdate = {
+  archived?: boolean;
+  [key: string]: any;
+};
 
 export function useArchiveTrip() {
   const navigate = useNavigate();

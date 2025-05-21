@@ -1,5 +1,5 @@
 
-import { Database } from './types';
+import { Database } from './database.types';
 
 export * from './profiles';
 export * from './trips';

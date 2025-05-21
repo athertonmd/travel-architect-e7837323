@@ -1,3 +1,4 @@
+
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { SegmentDetails } from "@/types/segment";
@@ -14,69 +15,69 @@ export function HotelBasicInfoSection({ details, onDetailsChange }: HotelBasicIn
 
   return (
     <div className="space-y-4">
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="hotelName" className="text-blue-500">Hotel Name</Label>
         <Input
           id="hotelName"
           value={details.hotelName as string || ""}
           onChange={(e) => handleChange("hotelName", e.target.value)}
           placeholder="Enter hotel name"
-          className="text-gray-700"
+          className="text-gray-700 bg-white border border-gray-200"
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="addressLine1" className="text-blue-500">Hotel Address (Line 1)</Label>
         <Input
           id="addressLine1"
           value={details.addressLine1 as string || ""}
           onChange={(e) => handleChange("addressLine1", e.target.value)}
           placeholder="Enter address line 1"
-          className="text-gray-700"
+          className="text-gray-700 bg-white border border-gray-200"
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="addressLine2" className="text-blue-500">Hotel Address (Line 2)</Label>
         <Input
           id="addressLine2"
           value={details.addressLine2 as string || ""}
           onChange={(e) => handleChange("addressLine2", e.target.value)}
           placeholder="Enter address line 2"
-          className="text-gray-700"
+          className="text-gray-700 bg-white border border-gray-200"
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="stateProvince" className="text-blue-500">State/Province</Label>
         <Input
           id="stateProvince"
           value={details.stateProvince as string || ""}
           onChange={(e) => handleChange("stateProvince", e.target.value)}
           placeholder="Enter state or province"
-          className="text-gray-700"
+          className="text-gray-700 bg-white border border-gray-200"
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="zipCode" className="text-blue-500">Zip Code</Label>
         <Input
           id="zipCode"
           value={details.zipCode as string || ""}
           onChange={(e) => handleChange("zipCode", e.target.value)}
           placeholder="Enter zip code"
-          className="text-gray-700"
+          className="text-gray-700 bg-white border border-gray-200"
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="country" className="text-blue-500">Country</Label>
         <Input
           id="country"
           value={details.country as string || ""}
           onChange={(e) => handleChange("country", e.target.value)}
           placeholder="Enter country"
-          className="text-gray-700"
+          className="text-gray-700 bg-white border border-gray-200"
         />
       </div>
     </div>

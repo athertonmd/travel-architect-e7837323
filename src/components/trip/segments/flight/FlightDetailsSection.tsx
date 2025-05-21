@@ -10,8 +10,8 @@ interface FlightDetailsSectionProps {
 
 export function FlightDetailsSection({ details, onDetailsChange }: FlightDetailsSectionProps) {
   return (
-    <div className="bg-white rounded-md">
-      <div className="grid gap-2">
+    <div className="space-y-4">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="departureAirport" className="text-blue-500">Departure Airport</Label>
         <Input
           id="departureAirport"
@@ -22,7 +22,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="destinationAirport" className="text-blue-500">Destination Airport</Label>
         <Input
           id="destinationAirport"
@@ -33,7 +33,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="flightNumber" className="text-blue-500">Flight Number</Label>
         <Input
           id="flightNumber"
@@ -44,7 +44,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="cabinClass" className="text-blue-500">Cabin Class</Label>
         <Input
           id="cabinClass"
@@ -55,7 +55,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="loyaltyNumber" className="text-blue-500">Loyalty Number</Label>
         <Input
           id="loyaltyNumber"
@@ -66,7 +66,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="seatNumber" className="text-blue-500">Seat Number</Label>
         <Input
           id="seatNumber"
@@ -77,7 +77,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="meal" className="text-blue-500">Meal Preference</Label>
         <Input
           id="meal"
@@ -88,7 +88,7 @@ export function FlightDetailsSection({ details, onDetailsChange }: FlightDetails
         />
       </div>
 
-      <div className="grid gap-2">
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <Label htmlFor="notes" className="text-blue-500">Notes</Label>
         <Input
           id="notes"

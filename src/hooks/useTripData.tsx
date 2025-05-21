@@ -4,7 +4,22 @@ import { supabase } from "@/integrations/supabase/client";
 import { Node } from "@xyflow/react";
 import { SegmentNodeData } from "@/types/segment";
 import { toast } from "sonner";
-import { TripsRow } from "@/integrations/supabase/types/trips";
+
+// Define trip row structure based on your database schema
+interface TripsRow {
+  id: string;
+  user_id: string;
+  title: string;
+  segments: any[];
+  start_date?: string;
+  end_date?: string;
+  travelers?: number;
+  created_at: string;
+  updated_at: string;
+  archived?: boolean;
+  destination?: string;
+  status?: string;
+}
 
 // Helper function to transform database segments to React Flow nodes
 const transformSegmentsToNodes = (segments: any[]): Node<SegmentNodeData>[] => {

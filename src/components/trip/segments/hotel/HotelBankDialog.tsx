@@ -1,11 +1,12 @@
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { HotelSearch } from "@/components/hotels/HotelSearch";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { HotelsRow } from "@/integrations/supabase/types";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { HotelsRow } from "@/integrations/supabase/types/hotels";
+import { useHotels } from "@/hooks/useHotels";
+import { useCallback } from "react";
 
 interface HotelBankDialogProps {
   open: boolean;
@@ -15,66 +16,72 @@ interface HotelBankDialogProps {
 
 export function HotelBankDialog({ open, onOpenChange, onHotelSelect }: HotelBankDialogProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const { hotels, isLoading } = useHotels();
 
-  const { data: hotels = [], isLoading } = useQuery({
-    queryKey: ['hotels'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('hotels')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data as HotelsRow[];
-    },
-  });
-
-  const filteredHotels = hotels.filter((hotel) => {
-    if (!hotel) return false;
+  const filteredHotels = useCallback(() => {
+    if (!searchQuery.trim()) return hotels;
     
-    const searchLower = searchQuery.toLowerCase();
-    return (
-      hotel.name?.toLowerCase().includes(searchLower) ||
-      hotel.address?.toLowerCase().includes(searchLower) ||
-      hotel.city?.toLowerCase().includes(searchLower) ||
-      hotel.country?.toLowerCase().includes(searchLower)
+    const query = searchQuery.toLowerCase();
+    return hotels.filter(hotel => 
+      hotel.name.toLowerCase().includes(query) || 
+      hotel.location?.toLowerCase().includes(query) || 
+      hotel.country?.toLowerCase().includes(query)
     );
-  });
+  }, [searchQuery, hotels]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[80vh] flex flex-col">
+      <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Select Hotel from Bank</DialogTitle>
+          <DialogTitle>Hotel Bank</DialogTitle>
         </DialogHeader>
         
-        <div className="mb-4">
-          <HotelSearch value={searchQuery} onChange={setSearchQuery} />
-        </div>
-
-        <ScrollArea className="flex-1">
+        <div className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="search" className="text-blue-500">Search Hotels</Label>
+            <Input 
+              id="search"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search by name, location, or country"
+              className="bg-white border-gray-200"
+            />
+          </div>
+          
           {isLoading ? (
-            <p className="text-center py-4">Loading hotels...</p>
+            <div className="flex items-center justify-center p-4">
+              <span>Loading hotels...</span>
+            </div>
           ) : (
             <div className="space-y-2">
-              {filteredHotels.map((hotel) => (
-                <button
-                  key={hotel.id}
-                  onClick={() => {
-                    onHotelSelect(hotel);
-                    onOpenChange(false);
-                  }}
-                  className="w-full p-4 text-left hover:bg-gray-100 rounded-lg transition-colors"
-                >
-                  <h3 className="font-medium">{hotel.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    {[hotel.address, hotel.city, hotel.country].filter(Boolean).join(", ")}
-                  </p>
-                </button>
-              ))}
+              {filteredHotels().length > 0 ? (
+                <div className="space-y-2">
+                  {filteredHotels().map((hotel) => (
+                    <div 
+                      key={hotel.id} 
+                      className="bg-white p-3 rounded-md border border-gray-200 shadow-sm hover:bg-gray-50 cursor-pointer"
+                      onClick={() => {
+                        onHotelSelect(hotel);
+                        onOpenChange(false);
+                      }}
+                    >
+                      <p className="font-medium text-blue-500">{hotel.name}</p>
+                      <p className="text-sm text-gray-600">
+                        {[hotel.address, hotel.city, hotel.country]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center p-4 bg-white rounded-md border border-gray-200">
+                  <p className="text-gray-500">No hotels found</p>
+                </div>
+              )}
             </div>
           )}
-        </ScrollArea>
+        </div>
       </DialogContent>
     </Dialog>
   );

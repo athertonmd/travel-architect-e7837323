@@ -1,15 +1,16 @@
 
+import { format } from "date-fns";
+import { Calendar as CalendarIcon, Clock } from "lucide-react";
+import { useState } from "react";
+
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { format, parse } from "date-fns";
-import { SegmentDetails } from "@/types/segment";
-import { Calendar } from "@/components/ui/calendar";
-import { Button } from "@/components/ui/button";
-import { CalendarIcon, Clock } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { SegmentDetails } from "@/types/segment";
 
 interface FlightDateSectionProps {
   details: SegmentDetails;
@@ -17,153 +18,144 @@ interface FlightDateSectionProps {
 }
 
 export function FlightDateSection({ details, onDetailsChange }: FlightDateSectionProps) {
-  const [date, setDate] = useState<Date | undefined>(
-    details.departureDate ? new Date(details.departureDate) : undefined
+  const [departureDate, setDepartureDate] = useState<Date | undefined>(
+    details.departureDate ? new Date(details.departureDate as string) : undefined
   );
-  const [hours, setHours] = useState<string>(
-    details.departureDate ? format(new Date(details.departureDate), "HH") : "00"
-  );
-  const [minutes, setMinutes] = useState<string>(
-    details.departureDate ? format(new Date(details.departureDate), "mm") : "00"
+  const [returnDate, setReturnDate] = useState<Date | undefined>(
+    details.returnDate ? new Date(details.returnDate as string) : undefined
   );
 
-  useEffect(() => {
-    if (details.departureDate) {
-      const newDate = new Date(details.departureDate);
-      setDate(newDate);
-      setHours(format(newDate, "HH"));
-      setMinutes(format(newDate, "mm"));
-    }
-  }, [details.departureDate]);
-
-  useEffect(() => {
-    console.log('Current date state:', date);
-    console.log('Current details:', details);
-  }, [date, details]);
-
-  const today = new Date();
-
-  const handleDateSelect = (selectedDate: Date | undefined) => {
-    if (selectedDate) {
-      const newDate = new Date(selectedDate);
-      newDate.setHours(parseInt(hours), parseInt(minutes));
-      
-      console.log('Selected new date:', newDate);
-      setDate(newDate);
-      onDetailsChange("departureDate", newDate.toISOString());
-    }
-  };
-
-  const handleTimeChange = (type: 'hours' | 'minutes', value: string) => {
-    if (type === 'hours') {
-      setHours(value);
-    } else {
-      setMinutes(value);
-    }
-
-    if (date) {
-      const newDate = new Date(date);
-      newDate.setHours(
-        type === 'hours' ? parseInt(value) : parseInt(hours),
-        type === 'minutes' ? parseInt(value) : parseInt(minutes)
+  const handleDateChange = (field: "departureDate" | "returnDate", date: Date | undefined) => {
+    if (field === "departureDate") {
+      setDepartureDate(date);
+      onDetailsChange(
+        field,
+        date ? format(date, "yyyy-MM-dd") : ""
       );
-      onDetailsChange("departureDate", newDate.toISOString());
+    } else {
+      setReturnDate(date);
+      onDetailsChange(
+        field,
+        date ? format(date, "yyyy-MM-dd") : ""
+      );
     }
   };
 
-  const formattedDate = date ? format(date, "MMMM d, yyyy") : "Pick a date";
-  const formattedTime = `${hours}:${minutes}`;
+  const handleTimeChange = (field: "departureTime" | "returnTime", value: string) => {
+    onDetailsChange(field, value);
+  };
 
-  // Generate hours and minutes arrays for the selectors
-  const hoursArray = Array.from({ length: 24 }, (_, i) => i.toString().padStart(2, '0'));
-  const minutesArray = Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, '0'));
+  const handleOneWayChange = (checked: boolean) => {
+    onDetailsChange("isOneWay", checked);
+    if (checked) {
+      setReturnDate(undefined);
+      onDetailsChange("returnDate", "");
+      onDetailsChange("returnTime", "");
+    }
+  };
+
+  const formatDate = (date: Date | undefined) => {
+    return date ? format(date, "PP") : "Pick a date";
+  };
 
   return (
-    <div className="grid gap-2">
-      <Label htmlFor="departureDate" className="text-blue-500">
-        Departure Date and Time
-      </Label>
-      <div className="flex gap-2">
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              id="date-picker-button"
-              variant="outline"
-              className={cn(
-                "w-[240px] justify-start text-left font-normal bg-white",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <div className="flex items-center w-full">
-                <CalendarIcon className="mr-2 h-4 w-4 text-gray-500" />
-                <span className="flex-grow text-foreground">{formattedDate}</span>
-              </div>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0 bg-white" align="start">
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={handleDateSelect}
-              disabled={(date) => date < today}
-              defaultMonth={date}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-        
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant="outline"
-              className={cn(
-                "w-[120px] justify-start text-left font-normal bg-white",
-                !date && "text-muted-foreground"
-              )}
-            >
-              <div className="flex items-center w-full">
-                <Clock className="mr-2 h-4 w-4 text-gray-500" />
-                <span className="flex-grow text-foreground">{formattedTime}</span>
-              </div>
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-4 bg-white" align="start">
-            <div className="flex flex-col gap-4">
-              <div className="grid gap-2">
-                <Label className="text-xs text-muted-foreground">Hours</Label>
-                <Select value={hours} onValueChange={(value) => handleTimeChange('hours', value)}>
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder="HH" />
-                  </SelectTrigger>
-                  <SelectContent className="h-[200px] bg-white">
-                    {hoursArray.map((hour) => (
-                      <SelectItem key={hour} value={hour}>
-                        {hour}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="grid gap-2">
-                <Label className="text-xs text-muted-foreground">Minutes</Label>
-                <Select value={minutes} onValueChange={(value) => handleTimeChange('minutes', value)}>
-                  <SelectTrigger className="w-[100px]">
-                    <SelectValue placeholder="MM" />
-                  </SelectTrigger>
-                  <SelectContent className="h-[200px] bg-white">
-                    {minutesArray.map((minute) => (
-                      <SelectItem key={minute} value={minute}>
-                        {minute}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </PopoverContent>
-        </Popover>
+    <div className="space-y-4 bg-white rounded-md p-3 border border-gray-200 shadow-sm mb-4">
+      <div className="flex items-center space-x-2 mb-4">
+        <Label htmlFor="one-way" className="font-medium text-blue-500">
+          One way
+        </Label>
+        <Switch
+          id="one-way"
+          checked={details.isOneWay as boolean}
+          onCheckedChange={handleOneWayChange}
+        />
       </div>
+
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
+        <Label htmlFor="departureDate" className="text-blue-500">
+          Departure Date & Time
+        </Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button
+                id="departureDate"
+                variant="outline"
+                className={cn(
+                  "justify-start text-left font-normal bg-white border-gray-200",
+                  !departureDate && "text-muted-foreground"
+                )}
+              >
+                <CalendarIcon className="mr-2 h-4 w-4" />
+                {formatDate(departureDate)}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0 pointer-events-auto">
+              <Calendar
+                mode="single"
+                selected={departureDate}
+                onSelect={(date) => handleDateChange("departureDate", date)}
+                initialFocus
+                className="bg-white pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+
+          <div className="flex items-center border rounded-md border-gray-200 bg-white px-3">
+            <Clock className="mr-2 h-4 w-4 text-gray-500" />
+            <Input
+              type="time"
+              value={details.departureTime as string || ""}
+              onChange={(e) => handleTimeChange("departureTime", e.target.value)}
+              className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-white"
+            />
+          </div>
+        </div>
+      </div>
+
+      {!details.isOneWay && (
+        <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
+          <Label htmlFor="returnDate" className="text-blue-500">
+            Return Date & Time
+          </Label>
+          <div className="grid grid-cols-2 gap-2">
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  id="returnDate"
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal bg-white border-gray-200",
+                    !returnDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {formatDate(returnDate)}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 pointer-events-auto">
+                <Calendar
+                  mode="single"
+                  selected={returnDate}
+                  onSelect={(date) => handleDateChange("returnDate", date)}
+                  initialFocus
+                  className="bg-white pointer-events-auto"
+                />
+              </PopoverContent>
+            </Popover>
+
+            <div className="flex items-center border rounded-md border-gray-200 bg-white px-3">
+              <Clock className="mr-2 h-4 w-4 text-gray-500" />
+              <Input
+                type="time"
+                value={details.returnTime as string || ""}
+                onChange={(e) => handleTimeChange("returnTime", e.target.value)}
+                className="border-none focus-visible:ring-0 focus-visible:ring-offset-0 p-0 bg-white"
+              />
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

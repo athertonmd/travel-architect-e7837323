@@ -1,8 +1,19 @@
 
 import { useState, useCallback, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { TravellersRow } from "@/integrations/supabase/types/travellers";
 import { toast } from "sonner";
+
+// Define TravellersRow interface based on the database schema
+interface TravellersRow {
+  id: string;
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  email?: string | null;
+  mobile_number?: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
 export const useTravellerSearch = () => {
   const [travellers, setTravellers] = useState<TravellersRow[]>([]);
@@ -31,7 +42,8 @@ export const useTravellerSearch = () => {
 
       if (searchError) throw searchError;
 
-      setTravellers(data as TravellersRow[] || []);
+      // Cast the data to ensure type safety
+      setTravellers((data || []) as TravellersRow[]);
     } catch (err) {
       console.error('Search error:', err);
       setError('Failed to search travellers');

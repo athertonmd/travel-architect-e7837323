@@ -1,3 +1,4 @@
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -38,7 +39,7 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between mb-4 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
         <div className="flex items-center space-x-2">
           <Label htmlFor="gds-toggle" className="text-blue-500">GDS</Label>
           <Switch
@@ -59,14 +60,14 @@ export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionPro
       </div>
 
       {details.useGDS && (
-        <div className="grid gap-2">
+        <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
           <Label htmlFor="gdsCode" className="text-blue-500">Record Locator</Label>
           <Input
             id="gdsCode"
             value={details.gdsCode as string || ""}
             onChange={(e) => handleGDSCodeChange(e.target.value)}
             placeholder="Enter Record Locator"
-            className="text-gray-700"
+            className="text-gray-700 bg-white border border-gray-200"
           />
         </div>
       )}
