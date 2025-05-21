@@ -25,6 +25,17 @@ export function HotelContactSection({ details, onDetailsChange }: HotelContactSe
           className="text-gray-700 bg-white border border-gray-200"
         />
       </div>
+      
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
+        <Label htmlFor="website" className="text-blue-500">Website</Label>
+        <Input
+          id="website"
+          value={details.website as string || ""}
+          onChange={(e) => handleChange("website", e.target.value)}
+          placeholder="Enter hotel website"
+          className="text-gray-700 bg-white border border-gray-200"
+        />
+      </div>
     </div>
   );
 }

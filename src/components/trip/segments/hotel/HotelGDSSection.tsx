@@ -1,12 +1,7 @@
 
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
 import { SegmentDetails } from "@/types/segment";
-import { useState } from "react";
-import { HotelBankDialog } from "./HotelBankDialog";
-import { HotelsRow } from "@/integrations/supabase/types/hotels";
 
 interface HotelGDSSectionProps {
   details: SegmentDetails;
@@ -14,69 +9,33 @@ interface HotelGDSSectionProps {
 }
 
 export function HotelGDSSection({ details, onDetailsChange }: HotelGDSSectionProps) {
-  const [isHotelBankOpen, setIsHotelBankOpen] = useState(false);
-
-  const handleGDSChange = (checked: boolean) => {
-    onDetailsChange({ ...details, useGDS: checked });
-  };
-
-  const handleGDSCodeChange = (value: string) => {
-    onDetailsChange({ ...details, gdsCode: value });
-  };
-
-  const handleHotelSelect = (hotel: HotelsRow) => {
-    onDetailsChange({
-      ...details,
-      hotelName: hotel.name,
-      addressLine1: hotel.address || "",
-      stateProvince: hotel.city || "", // Map city to stateProvince
-      country: hotel.country || "",
-      telephone: hotel.telephone || "",
-      website: hotel.website || "",
-      zipCode: hotel.zip_code || "", // Add zip code mapping
-    });
+  const handleChange = (field: keyof SegmentDetails, value: string) => {
+    onDetailsChange({ ...details, [field]: value });
   };
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-4 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
-        <div className="flex items-center space-x-2">
-          <Label htmlFor="gds-toggle" className="text-blue-500">GDS</Label>
-          <Switch
-            id="gds-toggle"
-            checked={details.useGDS as boolean || false}
-            onCheckedChange={handleGDSChange}
-          />
-        </div>
-        <Button
-          type="button"
-          variant="outline"
-          onClick={() => setIsHotelBankOpen(true)}
-          className="bg-navy hover:bg-navy/90 text-white"
-          disabled={details.useGDS as boolean}
-        >
-          Hotel Bank
-        </Button>
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
+        <Label htmlFor="gdsProvider" className="text-blue-500">GDS Provider</Label>
+        <Input
+          id="gdsProvider"
+          value={details.gdsProvider as string || ""}
+          onChange={(e) => handleChange("gdsProvider", e.target.value)}
+          placeholder="Enter GDS provider"
+          className="text-gray-700 bg-white border border-gray-200"
+        />
       </div>
 
-      {details.useGDS && (
-        <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
-          <Label htmlFor="gdsCode" className="text-blue-500">Record Locator</Label>
-          <Input
-            id="gdsCode"
-            value={details.gdsCode as string || ""}
-            onChange={(e) => handleGDSCodeChange(e.target.value)}
-            placeholder="Enter Record Locator"
-            className="text-gray-700 bg-white border border-gray-200"
-          />
-        </div>
-      )}
-
-      <HotelBankDialog
-        open={isHotelBankOpen}
-        onOpenChange={setIsHotelBankOpen}
-        onHotelSelect={handleHotelSelect}
-      />
+      <div className="grid gap-2 bg-white rounded-md p-3 border border-gray-200 shadow-sm">
+        <Label htmlFor="gdsReference" className="text-blue-500">GDS Reference</Label>
+        <Input
+          id="gdsReference"
+          value={details.gdsReference as string || ""}
+          onChange={(e) => handleChange("gdsReference", e.target.value)}
+          placeholder="Enter GDS reference"
+          className="text-gray-700 bg-white border border-gray-200"
+        />
+      </div>
     </div>
   );
 }

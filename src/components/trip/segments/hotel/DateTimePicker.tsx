@@ -8,26 +8,20 @@ import { format } from "date-fns";
 import { TimeSelector } from "./TimeSelector";
 
 interface DateTimePickerProps {
-  label: string;
   date: Date | undefined;
-  hours: string;
-  minutes: string;
-  onDateSelect: (date: Date | undefined) => void;
-  onTimeChange: (type: 'hours' | 'minutes', value: string) => void;
-  minDate?: Date;
+  setDate: (date: Date | undefined) => void;
+  time: string | undefined;
+  setTime: (time: string) => void;
 }
 
 export function DateTimePicker({
-  label,
   date,
-  hours,
-  minutes,
-  onDateSelect,
-  onTimeChange,
-  minDate
+  setDate,
+  time,
+  setTime
 }: DateTimePickerProps) {
   const formattedDate = date ? format(date, "MMMM d, yyyy") : "Pick a date";
-  const formattedTime = `${hours}:${minutes}`;
+  const formattedTime = time || "00:00";
 
   return (
     <div className="flex gap-2">
@@ -36,7 +30,7 @@ export function DateTimePicker({
           <Button
             variant="outline"
             className={cn(
-              "w-[240px] justify-start text-left font-normal",
+              "w-[240px] justify-start text-left font-normal bg-white",
               !date && "text-muted-foreground"
             )}
           >
@@ -46,13 +40,11 @@ export function DateTimePicker({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-0" align="start">
+        <PopoverContent className="w-auto p-0 bg-white" align="start">
           <Calendar
             mode="single"
             selected={date}
-            onSelect={onDateSelect}
-            disabled={(date) => minDate ? date < minDate : false}
-            defaultMonth={date}
+            onSelect={setDate}
             initialFocus
           />
         </PopoverContent>
@@ -63,8 +55,8 @@ export function DateTimePicker({
           <Button
             variant="outline"
             className={cn(
-              "w-[120px] justify-start text-left font-normal",
-              !date && "text-muted-foreground"
+              "w-[120px] justify-start text-left font-normal bg-white",
+              !time && "text-muted-foreground"
             )}
           >
             <div className="flex items-center w-full">
@@ -73,12 +65,12 @@ export function DateTimePicker({
             </div>
           </Button>
         </PopoverTrigger>
-        <PopoverContent className="w-auto p-4" align="start">
+        <PopoverContent className="w-auto p-4 bg-white" align="start">
           <TimeSelector
-            hours={hours}
-            minutes={minutes}
-            onHoursChange={(value) => onTimeChange('hours', value)}
-            onMinutesChange={(value) => onTimeChange('minutes', value)}
+            hours={formattedTime.split(":")[0] || "00"}
+            minutes={formattedTime.split(":")[1] || "00"}
+            onHoursChange={(hours) => setTime(`${hours}:${formattedTime.split(":")[1] || "00"}`)}
+            onMinutesChange={(minutes) => setTime(`${formattedTime.split(":")[0] || "00"}:${minutes}`)}
           />
         </PopoverContent>
       </Popover>

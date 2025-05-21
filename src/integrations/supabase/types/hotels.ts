@@ -16,5 +16,5 @@ export interface HotelsRow {
   zip_code?: string | null;
 }
 
-export interface HotelsInsert Omit<HotelsRow, 'id' | 'created_at' | 'updated_at'>;
-export interface HotelsUpdate Partial<HotelsInsert>;
+export interface HotelsInsert extends Omit<HotelsRow, 'id' | 'created_at' | 'updated_at'> {}
+export interface HotelsUpdate extends Partial<HotelsInsert> {}
